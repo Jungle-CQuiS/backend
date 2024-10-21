@@ -4,11 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import meowKai.CQuiS_backend.dto.MultiRoomListDto;
 
-@Builder
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResponseDuplicateCheckEmailDto {
-    private Boolean emailIsDuplicate;
+@Builder
+public class ResponseGetMultiRoomListDto {
+
+    private List<MultiRoomListDto> rooms;
 }

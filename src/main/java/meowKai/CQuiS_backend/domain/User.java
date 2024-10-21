@@ -2,10 +2,12 @@ package meowKai.CQuiS_backend.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import meowKai.CQuiS_backend.global.base.BaseEntity;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
@@ -15,11 +17,14 @@ import static lombok.AccessLevel.*;
 @Table(name = "quiz_user")
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
+
+    @OneToOne(fetch = LAZY, mappedBy = "user")
+    private RoomUser roomUser;
 
     // 유저의 email
     @Column

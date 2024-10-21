@@ -1,14 +1,12 @@
 package meowKai.CQuiS_backend.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class RequestSignUpDto {
 
     // TODO: NOT NULL 추가해주기.
