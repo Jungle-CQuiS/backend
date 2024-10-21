@@ -23,18 +23,18 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public void signUp(RequestSignUpDto requestSignUpDto) {
         log.info("회원가입 요청 : {}", requestSignUpDto);
-        userRepository.save(
-                User.createUser(
-                        requestSignUpDto.getEmail(),
-                        requestSignUpDto.getUsername(),
-                        requestSignUpDto.getPassword()
-                )
+        User createdUser = User.createUser(
+                requestSignUpDto.getEmail(),
+                requestSignUpDto.getUsername(),
+                requestSignUpDto.getPassword()
         );
+        userRepository.save(createdUser);
     }
 
     // 이메일 중복 체크
     @Override
     public ResponseDuplicateCheckEmailDto duplicateCheckEmail(String email) {
+        log.info("이메일 중복 체크 요청 : {}", email);
         Boolean exists = userRepository.existsUserByEmail(email);
         return ResponseDuplicateCheckEmailDto.builder().emailIsDuplicate(exists).build();
     }
@@ -42,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     // 유저네임 중복 체크
     @Override
     public ResponseDuplicateCheckUsernameDto duplicateCheckUsername(String username) {
+        log.info("유저네임 중복 체크 요청 : {}", username);
         Boolean exists = userRepository.existsUserByUsername(username);
         return ResponseDuplicateCheckUsernameDto.builder().usernameIsDuplicate(exists).build();
     }
