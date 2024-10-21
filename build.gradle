@@ -28,6 +28,7 @@ repositories {
 ext {
 	set('snippetsDir', file("build/generated-snippets"))
 	set('springAiVersion', "1.0.0-M3")
+	querydslVersion = '5.0.0'
 }
 
 dependencies {
@@ -35,14 +36,24 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+//	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.batch:spring-batch-test'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	runtimeOnly 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.0.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2' // Swagger
+
+	// QueryDSL
+	implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
+	annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 }
 
 dependencyManagement {
