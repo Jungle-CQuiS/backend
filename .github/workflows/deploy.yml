@@ -44,7 +44,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: project.jar
-          target: /home/ubuntu/{{저장할 경로}}/tobe
+          target: /home/ubuntu/backend/tobe
 
       # connect to ec2 instance
       - name: SSH로 EC2에 접속하기
@@ -55,10 +55,10 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           scripts_stop: true
           script: |
-            rm -rf /home/ubuntu/{{이동할 경로}}/current
-            mkdir /home/ubuntu/{{이동할 경로}}/current
-            mv /home/ubuntu/{{이동할 경로}}/tobe/project.jar /home/ubuntu/{{이동할 경로}}/current/project.jar
-            cd /home/ubuntu/{{이동할 경로}}/current
+            rm -rf /home/ubuntu/backend/current
+            mkdir /home/ubuntu/backend/current
+            mv /home/ubuntu/backend/tobe/project.jar /home/ubuntu/backend/current/project.jar
+            cd /home/ubuntu/backend/current
             sudo fuser -k -n tcp 8080 || true
             nohup java -jar project.jar > ./output.log 2>&1 &
-            rm -rf /home/ubuntu/{{이동할 경로}}/tobe
+            rm -rf /home/ubuntu/backend/tobe
