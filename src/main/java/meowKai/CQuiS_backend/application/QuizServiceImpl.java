@@ -20,7 +20,7 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
-public class GradeServiceImpl implements GradeService{
+public class QuizServiceImpl implements QuizService {
 
     private PythonInterpreter interpreter; // 파이썬 인터프리터, 파이썬 코드 실행하고 결과 확인
     //private final QuizRepository quizRepository; // TODO: 문제 정보를 가져오기 위한 문제 관련 repository
@@ -80,7 +80,10 @@ public class GradeServiceImpl implements GradeService{
                 similarity = calculateGrade(correctAnswer, userInput, weights);
             }
         }
-        return similarity >= 0.9 ? ResponseGradeDto.builder().isCorrect(true).build() : ResponseGradeDto.builder().isCorrect(false).build();
+
+        ResponseGradeDto responseDto = similarity >= 0.9 ? ResponseGradeDto.builder().isCorrect(true).build() : ResponseGradeDto.builder().isCorrect(false).build();
+        log.info("채점 완료 : {}", responseDto);
+        return responseDto;
     }
 
     // Python 함수를 호출하고 유사도를 반환받는 함수
