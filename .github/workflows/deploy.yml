@@ -1,0 +1,64 @@
+# workflow name
+name: Github Actions CI/CD
+
+# Event: when the workflow will run
+# workflow runs on push events to the main branch
+on:
+  push:
+    branches:
+      - develop
+
+# workflow consists of more than one job
+# multiple jobs run in parallel
+jobs:
+  # id to identify job
+  Deploy:
+    # type of runner(lastest version of ubuntu)
+    runs-on: ubuntu-latest
+
+    # step: a task that can run commands
+    # steps to run in the job
+    steps:
+      - name: Github Repository에 올린 파일들을 불러오기
+        uses: actions/checkout@v4
+
+      - name: JDK 17 버전 설치
+        uses: actions/setup-java@v4
+        with:
+          distribution: openjdk
+          java-version: 17
+
+      - name: application.yml 파일 만들기
+        run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.yml
+
+      - name: 테스트 및 빌드하기
+        run: ./gradlew clean build
+
+      - name: 빌드된 파일 이름 변경하기
+        run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
+
+      - name: SCP로 EC2에 빌드된 파일 전송하기
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: project.jar
+          target: /home/ubuntu/{{저장할 경로}}/tobe
+
+      # connect to ec2 instance
+      - name: SSH로 EC2에 접속하기
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          scripts_stop: true
+          script: |
+            rm -rf /home/ubuntu/{{이동할 경로}}/current
+            mkdir /home/ubuntu/{{이동할 경로}}/current
+            mv /home/ubuntu/{{이동할 경로}}/tobe/project.jar /home/ubuntu/{{이동할 경로}}/current/project.jar
+            cd /home/ubuntu/{{이동할 경로}}/current
+            sudo fuser -k -n tcp 8080 || true
+            nohup java -jar project.jar > ./output.log 2>&1 &
+            rm -rf /home/ubuntu/{{이동할 경로}}/tobe
