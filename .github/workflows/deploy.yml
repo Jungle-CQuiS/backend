@@ -34,14 +34,11 @@ jobs:
       - name: application.yml 파일 만들기
         run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.yml
 
-      - name: Jython 설정 및 테스트 및 빌드하기
-        uses: actions/checkout@v2
-        with:
-          python-version: '2.7.0'
-      - run: ./gradlew clean build
+      - name: 테스트 및 빌드하기
+        run: ./gradlew clean build
 
       - name: 빌드된 파일 이름 변경하기
-        run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
+        run: mv ./backend/build/libs/*SNAPSHOT.jar ./project.jar
 
       - name: SCP로 EC2에 빌드된 파일 전송하기
         uses: appleboy/scp-action@v0.1.7
@@ -64,6 +61,6 @@ jobs:
             mkdir /home/ubuntu/backend/current
             mv /home/ubuntu/backend/tobe/project.jar /home/ubuntu/backend/current/project.jar
             cd /home/ubuntu/backend/current
-            sudo fuser -k -n tcp 8080 || true
+            sudo fuser -k -n tcp 80 || true
             nohup java -jar project.jar > ./output.log 2>&1 &
             rm -rf /home/ubuntu/backend/tobe
