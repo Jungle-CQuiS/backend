@@ -38,7 +38,7 @@ jobs:
         run: ./gradlew clean build
 
       - name: 빌드된 파일 이름 변경하기
-        run: mv ./build/libs/*SNAPSHOT.jar ./CQuiS_backend-SNAPSHOT.jar
+        run: mv ./build/libs/*SNAPSHOT.jar ./CQuiS_backend-0.0.1-SNAPSHOT.jar
 
       - name: SCP로 EC2에 빌드된 파일 전송하기
         uses: appleboy/scp-action@v0.1.7
@@ -46,7 +46,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: CQuiS_backend-SNAPSHOT.jar
+          source: CQuiS_backend-0.0.1-SNAPSHOT.jar
           target: /home/ubuntu/backend/tobe
 
       # connect to ec2 instance
@@ -59,8 +59,8 @@ jobs:
           script: |
             rm -rf /home/ubuntu/backend/current
             mkdir /home/ubuntu/backend/current
-            mv /home/ubuntu/backend/tobe/CQuiS_backend-SNAPSHOT.jar /home/ubuntu/backend/current/CQuiS_backend-SNAPSHOT.jar
+            mv /home/ubuntu/backend/tobe/CQuiS_backend-0.0.1-SNAPSHOT.jar /home/ubuntu/backend/current/CQuiS_backend-0.0.1-SNAPSHOT.jar
             cd /home/ubuntu/backend/current
             sudo fuser -k -n tcp 80 || true
-            nohup java -jar CQuiS_backend-SNAPSHOT.jar > ./output.log 2>&1 &
+            nohup java -jar CQuiS_backend-0.0.1-SNAPSHOT.jar > ./output.log 2>&1 &
             rm -rf /home/ubuntu/backend/tobe
