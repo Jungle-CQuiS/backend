@@ -9,5 +9,4 @@ import java.util.List;
 @Repository
 public interface GameRoomRepository extends JpaRepository<GameRoom, Long> {
     void removeGameRoomById(Long id);
-    List<GameRoom> findAll();
 }

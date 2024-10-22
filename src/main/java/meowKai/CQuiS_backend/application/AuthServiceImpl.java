@@ -28,6 +28,7 @@ public class AuthServiceImpl implements AuthService {
                 requestSignUpDto.getUsername(),
                 requestSignUpDto.getPassword()
         );
+        log.info("생성된 유저 : {}", createdUser);
         userRepository.save(createdUser);
     }
 
@@ -36,7 +37,10 @@ public class AuthServiceImpl implements AuthService {
     public ResponseDuplicateCheckEmailDto duplicateCheckEmail(String email) {
         log.info("이메일 중복 체크 요청 : {}", email);
         Boolean exists = userRepository.existsUserByEmail(email);
-        return ResponseDuplicateCheckEmailDto.builder().emailIsDuplicate(exists).build();
+        ResponseDuplicateCheckEmailDto responseDto =
+                ResponseDuplicateCheckEmailDto.builder().emailIsDuplicate(exists).build();
+        log.info("이메일 중복 체크 결과 : {}", responseDto);
+        return responseDto;
     }
 
     // 유저네임 중복 체크
@@ -44,7 +48,10 @@ public class AuthServiceImpl implements AuthService {
     public ResponseDuplicateCheckUsernameDto duplicateCheckUsername(String username) {
         log.info("유저네임 중복 체크 요청 : {}", username);
         Boolean exists = userRepository.existsUserByUsername(username);
-        return ResponseDuplicateCheckUsernameDto.builder().usernameIsDuplicate(exists).build();
+        ResponseDuplicateCheckUsernameDto responseDto =
+                ResponseDuplicateCheckUsernameDto.builder().usernameIsDuplicate(exists).build();
+        log.info("유저네임 중복 체크 결과 : {}", responseDto);
+        return responseDto;
     }
 
 
