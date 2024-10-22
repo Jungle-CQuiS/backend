@@ -34,8 +34,11 @@ jobs:
       - name: application.yml 파일 만들기
         run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.yml
 
-      - name: 테스트 및 빌드하기
-        run: ./gradlew clean build
+      - name: Jython 설정 및 테스트 및 빌드하기
+        uses: actions/checkout@v2
+        with:
+          python-version: '2.7.0'
+      - run: ./gradlew clean build
 
       - name: 빌드된 파일 이름 변경하기
         run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
