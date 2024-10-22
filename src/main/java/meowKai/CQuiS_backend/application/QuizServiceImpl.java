@@ -31,6 +31,7 @@ public class QuizServiceImpl implements QuizService {
     @PostConstruct
     public void init() {
         System.setProperty("python.import.site", "false");
+        System.setProperty("file.encoding", "UTF-8");
         interpreter = new PythonInterpreter(); // Python 인터프리터 생성
 
         // 인코딩 설정
