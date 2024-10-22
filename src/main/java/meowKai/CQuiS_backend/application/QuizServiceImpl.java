@@ -12,6 +12,7 @@ import org.python.core.PyUnicode;
 import org.python.util.PythonInterpreter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.python.core.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +34,8 @@ public class QuizServiceImpl implements QuizService {
     public void init() {
         System.setProperty("python.import.site", "false");
         interpreter = new PythonInterpreter(); // Python 인터프리터 생성
+
+        codecs.setDefaultEncoding("utf-8");
 
         // 인코딩 설정
         interpreter.exec("import sys");
