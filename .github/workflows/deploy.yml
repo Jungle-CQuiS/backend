@@ -38,9 +38,7 @@ jobs:
         run: ./gradlew clean build
 
       - name: 빌드된 파일 이름 변경하기
-        run: |
-          cp ./build/libs/*SNAPSHOT.jar ./project.jar
-          rm ./build/libs/*SNAPSHOT.jar
+        run: vm ./build/libs/*SNAPSHOT.jar ./project.jar
 
       - name: SCP로 EC2에 빌드된 파일 전송하기
         uses: appleboy/scp-action@v0.1.7
@@ -48,9 +46,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: |
-            project.jar
-            src/main/resources/python
+          source: project.jar, src/main/resources/python
           target: /home/ubuntu/backend/tobe, /home/ubuntu/backend/src/main/resources
 
       # connect to ec2 instance
@@ -68,4 +64,3 @@ jobs:
             sudo fuser -k -n tcp 80 || true
             nohup java -jar project.jar > ./output.log 2>&1 &
             rm -rf /home/ubuntu/backend/tobe
-            rm -rf /home/ubuntu/backend/src/main/resources/python
