@@ -1,9 +1,6 @@
 package meowKai.CQuiS_backend.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import meowKai.CQuiS_backend.dto.MultiRoomListDto;
 
 import java.util.List;
@@ -12,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class ResponseGetMultiRoomListDto {
 
     private List<MultiRoomListDto> rooms;
