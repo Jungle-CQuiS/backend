@@ -49,7 +49,7 @@ dependencies {
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.0.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2' // Swagger
 
-	implementation 'org.python:jython-standalone:2.7.3' // Jython
+	implementation 'org.python:jython-standalone:2.7.3' // Jython(python on java)
 
 	// QueryDSL
 	implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"

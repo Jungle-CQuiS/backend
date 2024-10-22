@@ -56,7 +56,6 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          scripts_stop: true
           script: |
             rm -rf /home/ubuntu/backend/current
             mkdir /home/ubuntu/backend/current
