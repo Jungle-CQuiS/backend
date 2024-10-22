@@ -12,7 +12,6 @@ import org.python.core.PyUnicode;
 import org.python.util.PythonInterpreter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.python.core.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,12 +34,10 @@ public class QuizServiceImpl implements QuizService {
         System.setProperty("python.import.site", "false");
         interpreter = new PythonInterpreter(); // Python 인터프리터 생성
 
-//        codecs.setDefaultEncoding("utf-8");
-
         // 인코딩 설정
-//        interpreter.exec("import sys");
-//        interpreter.exec("reload(sys)");
-//        interpreter.exec("sys.setdefaultencoding('utf-8')");
+        interpreter.exec("import sys");
+        interpreter.exec("reload(sys)");
+        interpreter.exec("sys.setdefaultencoding('utf-8')");
 
         // Python 스크립트 로드
         try (InputStream is = getClass().getResourceAsStream("/python/grading.py")) {
