@@ -55,7 +55,7 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: /backend/src/main/resources/python/grading.py
+          source: ./src/main/resources/python/grading.py
           target: /home/ubuntu/backend/src/main/resources/python
 
       # connect to ec2 instance
