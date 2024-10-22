@@ -46,8 +46,17 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: project.jar, src/main/resources/python
-          target: /home/ubuntu/backend/tobe, /home/ubuntu/backend/src/main/resources
+          source: project.jar
+          target: /home/ubuntu/backend/tobe
+
+      - name: grading.py 전송하기
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: ./main/resources/python/grading.py
+          target: /home/ubuntu/backend/src/main/resources/python
 
       # connect to ec2 instance
       - name: SSH로 EC2에 접속하기
