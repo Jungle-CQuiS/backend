@@ -57,7 +57,7 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: ./src/main/resources/python/grading.py
           target: /home/ubuntu/backend/src/main/resources/python
-          strip_components: 3
+          strip_components: 5
 
       # connect to ec2 instance
       - name: SSH로 EC2에 접속하기
