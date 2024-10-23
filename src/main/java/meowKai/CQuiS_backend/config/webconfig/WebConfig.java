@@ -17,17 +17,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowCredentials(true);
 
         // Swagger UI 경로에 대한 CORS 설정 추가
-        registry.addMapping("/v3/api-docs/**")
-                .allowedOrigins("*")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*")
-        ;
-
         registry.addMapping("/swagger-ui/**")
                 .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
     }
-
-
 }
