@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://cquis.net", "http://dev.cquis.net", "http://localhost:3000", )
+                .allowedOrigins("http://cquis.net", "http://dev.cquis.net", "http://localhost:3000")
                 .allowedOriginPatterns("http://cquis.net/*", "http://dev.cquis.net/*", "http://localhost:*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
