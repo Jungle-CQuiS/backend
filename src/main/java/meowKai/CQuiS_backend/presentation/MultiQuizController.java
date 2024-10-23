@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/quiz/multi")
+@RequestMapping("/api/quiz/multi")
 public class MultiQuizController {
 
     private final GameRoomService gameRoomService;
