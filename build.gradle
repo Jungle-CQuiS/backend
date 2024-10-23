@@ -43,13 +43,13 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.batch:spring-batch-test'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-	runtimeOnly 'com.h2database:h2'
+//	runtimeOnly 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.0.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2' // Swagger
 
-	implementation 'org.python:jython-standalone:2.7.3' // Jython(python on java)
+//	implementation 'org.python:jython-standalone:2.7.3' // Jython(python on java)
 
 	// QueryDSL
 	implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
