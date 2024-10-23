@@ -11,16 +11,14 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("*")
-//                .allowedOriginPatterns("http://cquis.net/*", "http://dev.cquis.net/*", "http://localhost:*")
+                .allowedOriginPatterns("http://cquis.net/*", "http://dev.cquis.net/*", "http://localhost:*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
 
         // Swagger UI 경로에 대한 CORS 설정 추가
         registry.addMapping("/swagger-ui/**")
-                .allowedOriginPatterns("*")
-//                .allowedOrigins("*")
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*");
     }
