@@ -7,10 +7,7 @@ import meowKai.CQuiS_backend.domain.RoomUser;
 import meowKai.CQuiS_backend.domain.RoomUserRole;
 import meowKai.CQuiS_backend.domain.User;
 import meowKai.CQuiS_backend.dto.MultiRoomListDto;
-import meowKai.CQuiS_backend.dto.request.RequestCreateMultiRoomDto;
-import meowKai.CQuiS_backend.dto.request.RequestKickUserDto;
-import meowKai.CQuiS_backend.dto.request.RequestReadyDto;
-import meowKai.CQuiS_backend.dto.request.RequestSwitchTeamDto;
+import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
@@ -168,5 +165,96 @@ public class GameRoomServiceImpl implements GameRoomService {
         log.info("유저 강퇴 결과: {}", responseDto);
 
         return responseDto;
+    }
+
+    // 방장을 변경
+    @Override
+    public ResponseYieldDto changeHost(RequestYieldDto requestDto) {
+        log.info("방장 위임 요청: {}", requestDto);
+
+        GameRoom gameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+        RoomUser hostUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+        RoomUser nextHostUser = roomUserRepository.findById(requestDto.getYieldUserId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+
+        if(hostUser.getRole() != RoomUserRole.HOST) {
+            throw new IllegalStateException("방장 권한이 없는 유저입니다.");
+        }
+
+        hostUser.changeRole();
+        nextHostUser.changeRole();
+
+        ResponseYieldDto responseDto = ResponseYieldDto.builder()
+                .yieldedUserId(nextHostUser.getId())
+                .build();
+        log.info("방장 위임 결과: {}", responseDto);
+        return responseDto;
+    }
+
+    // 리더를 변경
+    @Override
+    public ResponseYieldDto changeLeader(RequestYieldDto requestDto) {
+        log.info("리더 위임 요청: {}", requestDto);
+
+        GameRoom gameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+        RoomUser leaderUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+        RoomUser nextLeaderUser = roomUserRepository.findById(requestDto.getYieldUserId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+
+        if(!leaderUser.getIsLeader()) {
+            throw new IllegalStateException("리더 권한이 없는 유저입니다.");
+        }
+
+        leaderUser.changeLeader();
+        nextLeaderUser.changeLeader();
+
+        ResponseYieldDto responseDto = ResponseYieldDto.builder()
+                .yieldedUserId(nextLeaderUser.getId())
+                .build();
+        log.info("리더 위임 결과: {}", responseDto);
+        return responseDto;
+    }
+
+    @Override
+    @Transactional
+    public void exit(RequestExitDto requestDto) {
+        log.info("방 나가기 요청: {}", requestDto);
+
+        GameRoom gameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+        RoomUser roomUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+
+        if (roomUser.getRole() == RoomUserRole.HOST) {
+            hostTransfer(gameRoom, roomUser);
+        }
+        if (roomUser.getIsLeader()) {
+            leaderTransfer(gameRoom, roomUser);
+        }
+
+        gameRoom.removeUser();
+
+        roomUserRepository.delete(roomUser);
+
+        if(gameRoom.getCurrentUsers() == 0) {
+            gameRoomRepository.delete(gameRoom);
+            log.info("방 삭제: {}", gameRoom.getId());
+        }
+
+        log.info("방 나가기 완료: {}", gameRoom.getId()); // responseDto 생각해볼것
+    }
+
+
+    private void hostTransfer(GameRoom gameRoom, RoomUser hostUser) {
+        // HOST 양도 로직 -> 누구한테 양도해야하지??
+
+    }
+
+    private void leaderTransfer(GameRoom gameRoom, RoomUser leaderUser) {
+        // Leader 양도 로직 -> 누구한테 양도해야하지??
     }
 }

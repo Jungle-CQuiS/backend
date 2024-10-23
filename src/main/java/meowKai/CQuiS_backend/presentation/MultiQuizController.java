@@ -6,10 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.application.GameRoomService;
 import meowKai.CQuiS_backend.dto.MultiRoomListDto;
-import meowKai.CQuiS_backend.dto.request.RequestCreateMultiRoomDto;
-import meowKai.CQuiS_backend.dto.request.RequestKickUserDto;
-import meowKai.CQuiS_backend.dto.request.RequestReadyDto;
-import meowKai.CQuiS_backend.dto.request.RequestSwitchTeamDto;
+import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
 import org.springframework.web.bind.annotation.*;
@@ -61,5 +58,29 @@ public class MultiQuizController {
     public ApiResponse<Object> kickUser(@Valid @RequestBody RequestKickUserDto requestDto) {
         ResponseKickUserDto responseDto = gameRoomService.kickUser(requestDto);
         return ApiResponse.ofSuccess(responseDto);
+    }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "방장 위임")
+    @PostMapping("/yield-host")
+    public ApiResponse<Object> changeHost(@Valid @RequestBody RequestYieldDto requestDto) {
+        ResponseYieldDto responseDto = gameRoomService.changeHost(requestDto);
+        return ApiResponse.ofSuccess(responseDto);
+    }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "리더 위임")
+    @PostMapping("/yield-leader")
+    public ApiResponse<Object> changeLeader(@Valid @RequestBody RequestYieldDto requestDto) {
+        ResponseYieldDto responseDto = gameRoomService.changeLeader(requestDto);
+        return ApiResponse.ofSuccess(responseDto);
+    }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "방 퇴장")
+    @PostMapping("/exit")
+    public ApiResponse<Object> exitRoom(@Valid @RequestBody RequestExitDto requestDto) {
+        gameRoomService.exit(requestDto); // responseDto로 무엇을 돌려줘야 할까요? RoomUser나 GameRoom의 id를 돌려줬다가 그게 없어졌는데 조회해버리면 어떡하죠?
+        return ApiResponse.ofSuccess();
     }
 }
