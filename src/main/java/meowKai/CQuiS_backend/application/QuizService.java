@@ -5,4 +5,5 @@ import meowKai.CQuiS_backend.dto.response.ResponseGradeDto;
 
 public interface QuizService {
     ResponseGradeDto checkGrade(RequestGradeDto requestGradeDto); // 채점
+
 }
