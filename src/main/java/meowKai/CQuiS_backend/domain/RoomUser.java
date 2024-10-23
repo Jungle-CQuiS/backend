@@ -48,14 +48,14 @@ public class RoomUser {
      * 엔티티 비즈니스 로직
      */
 
-    // 방 생성하기(방을 생성한 사람이 방장이 됨)
-    public static RoomUser createRoomUser(GameRoom gameRoom, User user) {
+    // 방 참가하기
+    public static RoomUser createRoomUser(GameRoom gameRoom, User user, RoomUserRole userRole, RoomUserTeam userTeam) {
         return RoomUser.builder()
                 .gameRoom(gameRoom)
                 .user(user)
-                .role(RoomUserRole.HOST)
-                .team(RoomUserTeam.RED)
-                .isLeader(true)
+                .role(userRole)
+                .team(userTeam)
+                .isLeader(false)
                 .isReady(false)
                 .build();
     }
