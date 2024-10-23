@@ -2,11 +2,11 @@ package meowKai.CQuiS_backend.dto.response;
 
 import lombok.*;
 
-@Builder
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ResponseDuplicateCheckEmailDto {
-    private Boolean emailIsDuplicate;
+public class ResponseReadyDto {
+    private Boolean isReady;
 }

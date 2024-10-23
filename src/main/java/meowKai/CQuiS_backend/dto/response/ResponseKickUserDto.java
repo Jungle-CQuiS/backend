@@ -4,9 +4,10 @@ import lombok.*;
 
 @Builder
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @ToString
-public class ResponseDuplicateCheckEmailDto {
-    private Boolean emailIsDuplicate;
+public class ResponseKickUserDto {
+
+    private Long kickedRoomUserId;
 }

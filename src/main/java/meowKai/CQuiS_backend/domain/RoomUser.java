@@ -32,11 +32,17 @@ public class RoomUser {
     @Column
     private RoomUserRole role;
 
+    // 유저의 리더 여부
+    @Column
+    private Boolean isLeader;
+
     // 게임에 참가한 유저가 속한 팀(레드팀, 블루팀)
     @Column
     private RoomUserTeam team;
 
-    // TODO: 리더 필드도 추가해야함.
+    // 현재 유저의 레디 여부
+    @Column
+    private Boolean isReady;
 
     /**
      * 엔티티 비즈니스 로직
@@ -49,16 +55,31 @@ public class RoomUser {
                 .user(user)
                 .role(RoomUserRole.HOST)
                 .team(RoomUserTeam.RED)
+                .isLeader(true)
+                .isReady(false)
                 .build();
     }
 
     // team 바꾸기
     public void changeTeam() {
+        if (isLeader) {
+            throw new IllegalStateException("팀을 바꾸기 위해서는 리더 권한을 타인에게 위임해야 합니다.");
+        }
         this.team = (this.team == RoomUserTeam.RED) ? RoomUserTeam.BLUE : RoomUserTeam.RED;
     }
 
     // role 바꾸기
     public void changeRole() {
         this.role = (this.role == RoomUserRole.HOST) ? RoomUserRole.GUEST : RoomUserRole.HOST;
+    }
+
+    // 리더 여부 바꾸기
+    public void changeLeader() {
+        this.isLeader = !this.isLeader;
+    }
+
+    // 레디하기/레디 취소하기
+    public void changeReady() {
+        this.isReady = !this.isReady;
     }
 }
