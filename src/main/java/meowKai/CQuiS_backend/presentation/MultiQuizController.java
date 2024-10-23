@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.application.GameRoomService;
-import meowKai.CQuiS_backend.dto.MultiRoomListDto;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
