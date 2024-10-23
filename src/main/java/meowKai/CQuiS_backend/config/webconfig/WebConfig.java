@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    // CORS 에러 처리를 위한 메서드
+    // CORS 에러 처리를 위한 설정
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("**")
