@@ -83,4 +83,20 @@ public class MultiQuizController {
         gameRoomService.exit(requestDto); // responseDto로 무엇을 돌려줘야 할까요? RoomUser나 GameRoom의 id를 돌려줬다가 그게 없어졌는데 조회해버리면 어떡하죠?
         return ApiResponse.ofSuccess();
     }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "방 입장하기")
+    @PostMapping("/rooms/join")
+    public ApiResponse<Object> joinRoom(@Valid @RequestBody RequestJoinRoomDto requestDto) {
+        ResponseJoinRoomDto responseDto = gameRoomService.joinRoom(requestDto);
+        return ApiResponse.ofSuccess(responseDto);
+    }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "방 입장 후 방의 정보 가져오기")
+    @GetMapping("/rooms/{roomId}")
+    public ApiResponse<Object> getRoomInfo(@PathVariable Long roomId) {
+        ResponseGetRoomInfoDto responseDto = gameRoomService.getRoomInfo(roomId);
+        return ApiResponse.ofSuccess(responseDto);
+    }
 }

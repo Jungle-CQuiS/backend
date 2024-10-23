@@ -2,11 +2,9 @@ package meowKai.CQuiS_backend.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import meowKai.CQuiS_backend.domain.GameRoom;
-import meowKai.CQuiS_backend.domain.RoomUser;
-import meowKai.CQuiS_backend.domain.RoomUserRole;
-import meowKai.CQuiS_backend.domain.User;
+import meowKai.CQuiS_backend.domain.*;
 import meowKai.CQuiS_backend.dto.MultiRoomListDto;
+import meowKai.CQuiS_backend.dto.MultiRoomUserDto;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
@@ -67,7 +65,8 @@ public class GameRoomServiceImpl implements GameRoomService {
 
         RoomUser roomUser = RoomUser.createRoomUser(createdRoom,
                 userRepository.findByUuid(requestDto.getUuid()).orElseThrow(
-                        () -> new NoSuchElementException("존재하지 않는 유저입니다.")));
+                        () -> new NoSuchElementException("존재하지 않는 유저입니다."))
+                , RoomUserRole.HOST, RoomUserTeam.RED);
 
         roomUserRepository.save(roomUser);
         gameRoomRepository.save(createdRoom);
@@ -219,6 +218,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         return responseDto;
     }
 
+    // 방 퇴장
     @Override
     @Transactional
     public void exit(RequestExitDto requestDto) {
@@ -246,6 +246,60 @@ public class GameRoomServiceImpl implements GameRoomService {
         }
 
         log.info("방 나가기 완료: {}", gameRoom.getId()); // responseDto 생각해볼것
+    }
+
+    // 방 입장
+    @Override
+    public ResponseJoinRoomDto joinRoom(RequestJoinRoomDto requestJoinRoomDto) {
+        log.info("방 입장 요청: {}", requestJoinRoomDto);
+
+        GameRoom gameRoom = gameRoomRepository.findById(requestJoinRoomDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+        User joinUser = userRepository.findByUuid(requestJoinRoomDto.getUuid()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+
+        if (gameRoom.getCurrentUsers().equals(gameRoom.getMaxUsers())) {
+            throw new IllegalStateException("방이 꽉 찼습니다.");
+        }
+
+        // TODO: 추후에 랜덤으로 팀 배정하는 로직 및 방에 들어온 유저의 역할을 정해주는 로직 추가하기
+        RoomUser joinedRoomUser = RoomUser.createRoomUser(gameRoom, joinUser, RoomUserRole.GUEST, RoomUserTeam.RED);
+        roomUserRepository.save(joinedRoomUser);
+
+        // TODO: ResponseJoinRoomDto 수정하기(지금 텅 비었음)
+        ResponseJoinRoomDto responseJoinRoomDto = ResponseJoinRoomDto.builder().build();
+        log.info("방 입장 결과: {}", responseJoinRoomDto);
+        return responseJoinRoomDto;
+    }
+
+    // 방 입장하고 방에 대한 정보 가져오기
+    @Override
+    public ResponseGetRoomInfoDto getRoomInfo(Long roomId) {
+        log.info("방 정보 조회 요청: {}", roomId);
+
+        GameRoom gameRoom = gameRoomRepository.findById(roomId).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+
+        List<RoomUser> roomUsers = roomUserRepository.findAllByGameRoom(gameRoom);
+        List<MultiRoomUserDto> roomUserInfoList = roomUsers.stream()
+                .map(roomUser -> MultiRoomUserDto.builder()
+                        .roomUserId(roomUser.getId())
+                        .username(roomUser.getUser().getUsername())
+                        // TODO: 유저 데이터 통계 테이블 나오면 추가하기 이건. 일단은 임시값 100 넘겨줌
+                        .honorCount(100)
+                        .role(roomUser.getRole())
+                        .team(roomUser.getTeam())
+                        .isLeader(roomUser.getIsLeader())
+                        .isReady(roomUser.getIsReady())
+                        .build())
+                .toList();
+
+        ResponseGetRoomInfoDto responseDto = ResponseGetRoomInfoDto.builder()
+                .usersData(roomUserInfoList)
+                .build();
+
+        log.info("방 정보 조회 결과: {}", responseDto);
+        return responseDto;
     }
 
 
