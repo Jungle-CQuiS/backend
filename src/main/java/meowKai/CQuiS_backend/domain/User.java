@@ -5,6 +5,7 @@ import lombok.*;
 import meowKai.CQuiS_backend.global.base.BaseEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static jakarta.persistence.FetchType.*;
@@ -25,6 +26,18 @@ public class User extends BaseEntity {
 
     @OneToOne(fetch = LAZY, mappedBy = "user")
     private RoomUser roomUser;
+
+    @OneToMany(fetch = LAZY, mappedBy = "user")
+    private List<UserQuizLog> userQuizLogs;
+
+    @OneToMany(fetch = LAZY, mappedBy = "user")
+    private List<UserStatistics> userStatistics;
+
+    @OneToMany(fetch = LAZY, mappedBy = "user")
+    private List<UserCategoryLevel> userCategoryLevels;
+
+    @OneToMany(fetch = LAZY, mappedBy = "user")
+    private List<QuizWrong> quizWrongs;
 
     // 유저의 email
     @Column
