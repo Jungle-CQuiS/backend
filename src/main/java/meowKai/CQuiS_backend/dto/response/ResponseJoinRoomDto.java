@@ -1,6 +1,8 @@
 package meowKai.CQuiS_backend.dto.response;
 
 import lombok.*;
+import meowKai.CQuiS_backend.domain.RoomUserRole;
+import meowKai.CQuiS_backend.domain.RoomUserTeam;
 
 @Getter
 @Builder
@@ -9,6 +11,11 @@ import lombok.*;
 @AllArgsConstructor
 public class ResponseJoinRoomDto {
 
-    // TODO: authToken(방 인증 토큰) 반환해줘야 함. 나중에 추가하기
-    private String authToken;
+    private Long roomUserId;
+    private String username;
+    private Integer honorCount;
+    private RoomUserRole role;
+    private RoomUserTeam team;
+    private Boolean isLeader;
+    private Boolean isReady;
 }

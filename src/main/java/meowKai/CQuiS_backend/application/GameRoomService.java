@@ -15,4 +15,5 @@ public interface GameRoomService {
     ResponseExitDto exit(RequestExitDto requestExitDto); // 현재 들어와 있는 방에서 퇴장
     ResponseJoinRoomDto joinRoom(RequestJoinRoomDto requestJoinRoomDto); // 방 입장
     ResponseGetRoomInfoDto getRoomInfo(Long roomId); // 방 정보 조회
+    ResponsePasswordDto checkPassword(RequestPasswordDto requestPasswordDto); // 방 비밀번호 조회
 }

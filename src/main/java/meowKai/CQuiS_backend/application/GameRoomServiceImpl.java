@@ -13,10 +13,7 @@ import meowKai.CQuiS_backend.infrastructure.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -100,6 +97,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         foundRoomUser.changeTeam();
         ResponseSwitchTeamDto responseDto = ResponseSwitchTeamDto
                 .builder()
+                .roomUserId(foundRoomUser.getId())
                 .team(foundRoomUser.getTeam())
                 .build();
         log.info("유저의 팀 바꾸기 결과: {}", responseDto);
@@ -122,6 +120,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         foundRoomUser.changeReady();
         ResponseReadyDto responseDto = ResponseReadyDto
                 .builder()
+                .roomUserId(foundRoomUser.getId())
                 .isReady(foundRoomUser.getIsReady())
                 .build();
         log.info("준비하기 결과: {}", responseDto);
@@ -267,6 +266,7 @@ public class GameRoomServiceImpl implements GameRoomService {
 
     // 방 입장
     @Override
+    @Transactional
     public ResponseJoinRoomDto joinRoom(RequestJoinRoomDto requestJoinRoomDto) {
         log.info("방 입장 요청: {}", requestJoinRoomDto);
 
@@ -295,9 +295,17 @@ public class GameRoomServiceImpl implements GameRoomService {
         }
 
         roomUserRepository.save(joinedRoomUser);
+        gameRoom.addUser();
 
-        // TODO: ResponseJoinRoomDto 수정하기(지금 텅 비었음)
-        ResponseJoinRoomDto responseJoinRoomDto = ResponseJoinRoomDto.builder().build();
+        ResponseJoinRoomDto responseJoinRoomDto = ResponseJoinRoomDto.builder()
+                .roomUserId(joinedRoomUser.getId())
+                .username(joinedRoomUser.getUser().getUsername())
+                .honorCount(100)
+                .role(joinedRoomUser.getRole())
+                .team(joinedRoomUser.getTeam())
+                .isLeader(joinedRoomUser.getIsLeader())
+                .isReady(joinedRoomUser.getIsReady())
+                .build();
         log.info("방 입장 결과: {}", responseJoinRoomDto);
         return responseJoinRoomDto;
     }
@@ -332,6 +340,19 @@ public class GameRoomServiceImpl implements GameRoomService {
         return responseDto;
     }
 
+    @Override
+    public ResponsePasswordDto checkPassword(RequestPasswordDto requestDto) {
+        log.info("비밀 방 비밀번호 입력: {}", requestDto);
+        GameRoom gameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+
+        ResponsePasswordDto responseDto = ResponsePasswordDto.builder()
+                .isCorrect(Objects.equals(gameRoom.getPassword(), requestDto.getPassword()))
+                .build();
+
+        log.info("비밀 방 비밀번호 입력 결과: {}", responseDto);
+        return responseDto;
+    }
 
     private void hostTransfer(GameRoom gameRoom, RoomUser hostUser) {
         if(!isRoomEmpty(gameRoom, hostUser)) {
