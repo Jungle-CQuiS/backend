@@ -82,4 +82,10 @@ public class RoomUser {
     public void changeReady() {
         this.isReady = !this.isReady;
     }
+
+    // 팀이 비어있을 때 팀과 리더 여부를 바꿈
+    public void assignTeamLeader(RoomUserTeam team) {
+        this.team = team;
+        this.isLeader = true;
+    }
 }

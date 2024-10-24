@@ -13,8 +13,10 @@ import meowKai.CQuiS_backend.infrastructure.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -153,6 +155,11 @@ public class GameRoomServiceImpl implements GameRoomService {
         RoomUser roomUserToKick = roomUserRepository.findByGameRoomAndUser(foundRoom, userToKick).orElseThrow(
                 () -> new NoSuchElementException("강퇴하려는 유저가 해당 방에 존재하지 않습니다."));
 
+        // 강퇴하려는 유저가 리더라면 리더를 양도
+        if(roomUserToKick.getIsLeader()) {
+            leaderTransfer(foundRoom, roomUserToKick);
+        }
+
         roomUserRepository.delete(roomUserToKick);
         foundRoom.removeUser();
 
@@ -208,6 +215,10 @@ public class GameRoomServiceImpl implements GameRoomService {
             throw new IllegalStateException("리더 권한이 없는 유저입니다.");
         }
 
+        if(leaderUser.getTeam() != nextLeaderUser.getTeam()) {
+            throw new IllegalStateException("리더를 양도하려는 유저와 같은 팀이 아닙니다.");
+        }
+
         leaderUser.changeLeader();
         nextLeaderUser.changeLeader();
 
@@ -221,7 +232,7 @@ public class GameRoomServiceImpl implements GameRoomService {
     // 방 퇴장
     @Override
     @Transactional
-    public void exit(RequestExitDto requestDto) {
+    public ResponseExitDto exit(RequestExitDto requestDto) {
         log.info("방 나가기 요청: {}", requestDto);
 
         GameRoom gameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
@@ -229,23 +240,29 @@ public class GameRoomServiceImpl implements GameRoomService {
         RoomUser roomUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
                 () -> new NoSuchElementException("존재하지 않는 유저입니다."));
 
-        if (roomUser.getRole() == RoomUserRole.HOST) {
-            hostTransfer(gameRoom, roomUser);
-        }
-        if (roomUser.getIsLeader()) {
-            leaderTransfer(gameRoom, roomUser);
+        // 방이 비게되면 방을 삭제, 나가는 유저가 권한이 있다면 권한을 양도
+        if(isRoomEmpty(gameRoom, roomUser)) {
+            gameRoomRepository.delete(gameRoom);
+            log.info("방 삭제: {}", gameRoom.getId());
+        } else {
+            if (roomUser.getRole() == RoomUserRole.HOST) {
+                hostTransfer(gameRoom, roomUser);
+            }
+            if (roomUser.getIsLeader()) {
+                leaderTransfer(gameRoom, roomUser);
+            }
         }
 
         gameRoom.removeUser();
 
+        ResponseExitDto responseDto = ResponseExitDto.builder()
+                .roomUserId(roomUser.getId())
+                .build();
+        log.info("방 나가기 완료: {}", responseDto);
+
         roomUserRepository.delete(roomUser);
 
-        if(gameRoom.getCurrentUsers() == 0) {
-            gameRoomRepository.delete(gameRoom);
-            log.info("방 삭제: {}", gameRoom.getId());
-        }
-
-        log.info("방 나가기 완료: {}", gameRoom.getId()); // responseDto 생각해볼것
+        return responseDto;
     }
 
     // 방 입장
@@ -262,8 +279,21 @@ public class GameRoomServiceImpl implements GameRoomService {
             throw new IllegalStateException("방이 꽉 찼습니다.");
         }
 
-        // TODO: 추후에 랜덤으로 팀 배정하는 로직 및 방에 들어온 유저의 역할을 정해주는 로직 추가하기
+        // TODO: 추후에 팀 랜덤 배정 구현
         RoomUser joinedRoomUser = RoomUser.createRoomUser(gameRoom, joinUser, RoomUserRole.GUEST, RoomUserTeam.RED);
+
+        // 방이 비어있으면 joinedRoomUser를 host, leader로
+        if(countRoomUser(gameRoom) == 0) {
+            joinedRoomUser.changeRole();
+            joinedRoomUser.changeLeader();
+        } else {
+            // 비어있는 팀이 있으면 joinedRoomUser를 해당 팀으로 보내고 리더로 설정
+            Arrays.stream(RoomUserTeam.values())
+                    .filter(team -> isTeamEmpty(gameRoom, team))
+                    .findFirst()
+                    .ifPresent(joinedRoomUser::assignTeamLeader);
+        }
+
         roomUserRepository.save(joinedRoomUser);
 
         // TODO: ResponseJoinRoomDto 수정하기(지금 텅 비었음)
@@ -304,11 +334,52 @@ public class GameRoomServiceImpl implements GameRoomService {
 
 
     private void hostTransfer(GameRoom gameRoom, RoomUser hostUser) {
-        // HOST 양도 로직 -> 누구한테 양도해야하지??
+        if(!isRoomEmpty(gameRoom, hostUser)) {
+            RoomUser nextHostUser = gameRoom.getRoomUsers().stream()
+                    .filter(user -> !Objects.equals(user.getId(), hostUser.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException("방에 다른 유저가 없습니다."));
 
+            hostUser.changeRole();
+            nextHostUser.changeRole();
+        }
     }
 
     private void leaderTransfer(GameRoom gameRoom, RoomUser leaderUser) {
-        // Leader 양도 로직 -> 누구한테 양도해야하지??
+        if(!isTeamEmpty(gameRoom, leaderUser.getTeam(), leaderUser)) {
+            RoomUser nextLeaderUser = gameRoom.getRoomUsers().stream()
+                    .filter(user -> user.getTeam() == leaderUser.getTeam() &&
+                            !Objects.equals(user.getId(), leaderUser.getId()))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException("팀에 다른 팀원이 없습니다."));
+
+            leaderUser.changeLeader();
+            nextLeaderUser.changeLeader();
+
+        }
+    }
+
+    // 현재 방에 몇 명이 있는지 확인
+    private long countRoomUser(GameRoom gameRoom) {
+        return (long) gameRoom.getRoomUsers().size();
+    }
+
+    // 유저가 나가는 상황에서 방이 비게 되는지 확인
+    private boolean isRoomEmpty(GameRoom gameRoom, RoomUser leavingUser) {
+        return gameRoom.getRoomUsers().stream()
+                .noneMatch(user -> user != leavingUser);
+    }
+
+    // 유저가 나가는 상황에서 팀이 비게 되는지 확인
+    private boolean isTeamEmpty(GameRoom gameRoom, RoomUserTeam teamColor, RoomUser leavingUser) {
+        return gameRoom.getRoomUsers().stream()
+                .filter(user -> user != leavingUser)
+                .noneMatch(user -> user.getTeam() == teamColor);
+    }
+
+    // 유저가 들어오는 상황에서 팀이 비어있는지 확인
+    private boolean isTeamEmpty(GameRoom gameRoom, RoomUserTeam teamColor) {
+        return gameRoom.getRoomUsers().stream()
+                .noneMatch(user -> user.getTeam() == teamColor);
     }
 }
