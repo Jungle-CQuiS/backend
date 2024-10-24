@@ -360,8 +360,8 @@ public class GameRoomServiceImpl implements GameRoomService {
     }
 
     // 현재 방에 몇 명이 있는지 확인
-    private long countRoomUser(GameRoom gameRoom) {
-        return (long) gameRoom.getRoomUsers().size();
+    private int countRoomUser(GameRoom gameRoom) {
+        return (int) gameRoom.getRoomUsers().size();
     }
 
     // 유저가 나가는 상황에서 방이 비게 되는지 확인
