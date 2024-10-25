@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.application.GameRoomService;
 import meowKai.CQuiS_backend.application.GameRoomWebSocketService;
 import meowKai.CQuiS_backend.application.GameRoomWebSocketServiceImpl;
-import meowKai.CQuiS_backend.dto.request.RequestExitDto;
-import meowKai.CQuiS_backend.dto.request.RequestJoinRoomDto;
-import meowKai.CQuiS_backend.dto.request.RequestReadyDto;
-import meowKai.CQuiS_backend.dto.request.RequestSwitchTeamDto;
+import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,7 +19,7 @@ public class MultiQuizWebSocketController {
     private final GameRoomWebSocketService gameRoomWebSocketService;
     private final SimpMessagingTemplate messagingTemplate;
 
-    // (PUB)방 입장 - (SUB)유저 입장 알림
+    // (PUB)방 입장 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/join")
     public void joinRoom(RequestJoinRoomDto requestDto) {
         ResponseGetRoomInfoDto responseDto = gameRoomWebSocketService.joinRoom(requestDto);
@@ -32,7 +29,7 @@ public class MultiQuizWebSocketController {
         );
     }
 
-    // (PUB)팀 변경 - (SUB)팀 변경 내역 알림
+    // (PUB)팀 변경 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/team-switch")
     public void switchTeam(RequestSwitchTeamDto requestDto) {
         ResponseGetRoomInfoDto responseDto = gameRoomWebSocketService.switchTeam(requestDto);
@@ -42,7 +39,7 @@ public class MultiQuizWebSocketController {
         );
     }
 
-    // (PUB)준비/준비 취소 - (SUB)준비 상태 변경 알림
+    // (PUB)준비/준비 취소 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/ready")
     public void ready(RequestReadyDto requestDto) {
         ResponseGetRoomInfoDto responseDto = gameRoomWebSocketService.ready(requestDto);
@@ -52,10 +49,40 @@ public class MultiQuizWebSocketController {
         );
     }
 
-    // (PUB)퇴장 - (SUB)유저 퇴장 알림
+    // (PUB)퇴장 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/exit")
     public void exit(RequestExitDto requestDto) {
         ResponseGetRoomInfoDto responseDto = gameRoomWebSocketService.exit(requestDto);
+        messagingTemplate.convertAndSend(
+                "/topic/rooms/" + requestDto.getRoomId() + "/info",
+                responseDto
+        );
+    }
+
+    // (PUB)강퇴 - (SUB)유저 변경 알림
+    @MessageMapping("/rooms/kick")
+    public void kickUser(RequestKickUserDto requestDto) {
+        ResponseGetRoomInfoDto responseDto = gameRoomWebSocketService.kickUser(requestDto);
+        messagingTemplate.convertAndSend(
+                "/topic/rooms/" + requestDto.getRoomId() + "/info",
+                responseDto
+        );
+    }
+
+    // (PUB)방장 위임 - (SUB)유저 변경 알림
+    @MessageMapping("/rooms/yield-host")
+    public void changeHost(RequestYieldDto requestDto) {
+        ResponseGetRoomInfoDto responseDto = gameRoomWebSocketService.changeHost(requestDto);
+        messagingTemplate.convertAndSend(
+                "/topic/rooms/" + requestDto.getRoomId() + "/info",
+                responseDto
+        );
+    }
+
+    // (PUB)리더 위임 - (SUB)유저 변경 알림
+    @MessageMapping("/rooms/yield-leader")
+    public void changeLeader(RequestYieldDto requestDto) {
+        ResponseGetRoomInfoDto responseDto = gameRoomWebSocketService.changeLeader(requestDto);
         messagingTemplate.convertAndSend(
                 "/topic/rooms/" + requestDto.getRoomId() + "/info",
                 responseDto
