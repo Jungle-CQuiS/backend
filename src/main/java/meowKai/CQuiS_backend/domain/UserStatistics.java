@@ -38,4 +38,8 @@ public class UserStatistics {
     // 멀티 모드 받은 명예 수
     @Column
     private Integer honorCount;
+
+    public void addHonorCount() {
+        this.honorCount++;
+    }
 }
