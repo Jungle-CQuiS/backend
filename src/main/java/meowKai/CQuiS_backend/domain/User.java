@@ -27,11 +27,11 @@ public class User extends BaseEntity {
     @OneToOne(fetch = LAZY, mappedBy = "user")
     private RoomUser roomUser;
 
-    @OneToMany(fetch = LAZY, mappedBy = "user")
-    private List<UserQuizLog> userQuizLogs;
+    @OneToOne(fetch = LAZY, mappedBy = "user")
+    private UserStatistics userStatistics;
 
     @OneToMany(fetch = LAZY, mappedBy = "user")
-    private List<UserStatistics> userStatistics;
+    private List<UserQuizLog> userQuizLogs;
 
     @OneToMany(fetch = LAZY, mappedBy = "user")
     private List<UserCategoryLevel> userCategoryLevels;

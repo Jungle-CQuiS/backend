@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ResponsePasswordDto {
+public class ResposeCheckPasswordDto {
 
     private Boolean isCorrect;
 }

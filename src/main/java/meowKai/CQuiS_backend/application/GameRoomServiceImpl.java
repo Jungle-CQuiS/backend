@@ -300,7 +300,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         ResponseJoinRoomDto responseJoinRoomDto = ResponseJoinRoomDto.builder()
                 .roomUserId(joinedRoomUser.getId())
                 .username(joinedRoomUser.getUser().getUsername())
-                .honorCount(100)
+                .honorCount(joinedRoomUser.getUser().getUserStatistics().getHonorCount())
                 .role(joinedRoomUser.getRole())
                 .team(joinedRoomUser.getTeam())
                 .isLeader(joinedRoomUser.getIsLeader())
@@ -341,12 +341,12 @@ public class GameRoomServiceImpl implements GameRoomService {
     }
 
     @Override
-    public ResponsePasswordDto checkPassword(RequestPasswordDto requestDto) {
+    public ResposeCheckPasswordDto checkPassword(RequestCheckPasswordDto requestDto) {
         log.info("비밀 방 비밀번호 입력: {}", requestDto);
         GameRoom gameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
                 () -> new NoSuchElementException("존재하지 않는 방입니다."));
 
-        ResponsePasswordDto responseDto = ResponsePasswordDto.builder()
+        ResposeCheckPasswordDto responseDto = ResposeCheckPasswordDto.builder()
                 .isCorrect(Objects.equals(gameRoom.getPassword(), requestDto.getPassword()))
                 .build();
 

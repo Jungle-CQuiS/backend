@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class RequestPasswordDto {
+public class RequestCheckPasswordDto {
 
     private Long roomId;
     private Integer password;
