@@ -12,7 +12,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker(
-                "/topic/rooms",       // 방 전체 관련 구독
+                "/topic",       // 방 전체 관련 구독
                 "/queue/errors"       // 개인 에러 메시지
         );
         registry.setApplicationDestinationPrefixes("/app");
