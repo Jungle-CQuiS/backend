@@ -10,5 +10,6 @@ import meowKai.CQuiS_backend.domain.RoomUserTeam;
 @Builder
 public class ResponseSwitchTeamDto {
 
+    private Long roomUserId;
     private RoomUserTeam team;
 }

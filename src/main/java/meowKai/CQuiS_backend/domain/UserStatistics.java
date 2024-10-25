@@ -19,7 +19,7 @@ public class UserStatistics {
     private Long id;
 
     // user와 매핑
-    @ManyToOne(fetch = LAZY)
+    @OneToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 

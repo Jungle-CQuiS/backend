@@ -10,8 +10,6 @@ import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/quiz/multi")
@@ -106,4 +104,12 @@ public class MultiQuizController {
 //    public ApiResponse<Object> giveHonor(@Valid @RequestBody RequestHonorDto requestDto) {
 //
 //    }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "비밀번호 확인")
+    @PostMapping("/rooms/check")
+    public ApiResponse<Object> checkPassword(@RequestBody RequestCheckPasswordDto requestDto) {
+        ResposeCheckPasswordDto responseDto = gameRoomService.checkPassword(requestDto);
+        return ApiResponse.ofSuccess(responseDto);
+    }
 }
