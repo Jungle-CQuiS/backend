@@ -174,6 +174,7 @@ public class GameRoomServiceImpl implements GameRoomService {
 
     // 방장을 변경
     @Override
+    @Transactional
     public ResponseYieldDto changeHost(RequestYieldDto requestDto) {
         log.info("방장 위임 요청: {}", requestDto);
 
@@ -200,6 +201,7 @@ public class GameRoomServiceImpl implements GameRoomService {
 
     // 리더를 변경
     @Override
+    @Transactional
     public ResponseYieldDto changeLeader(RequestYieldDto requestDto) {
         log.info("리더 위임 요청: {}", requestDto);
 
@@ -351,6 +353,24 @@ public class GameRoomServiceImpl implements GameRoomService {
                 .build();
 
         log.info("비밀 방 비밀번호 입력 결과: {}", responseDto);
+        return responseDto;
+    }
+
+    @Override
+    @Transactional
+    public ResponseGiveHonorDto giveHonor(RequestGiveHonorDto requestDto) {
+        log.info("명예 주기: {}", requestDto);
+
+        RoomUser roomUser = roomUserRepository.findById(requestDto.getHonorRoomUserId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+
+        roomUser.getUser().getUserStatistics().addHonorCount();
+
+        ResponseGiveHonorDto responseDto = ResponseGiveHonorDto.builder()
+                .roomUserId(roomUser.getId())
+                .build();
+
+        log.info("명예 주기 결과: {}", responseDto);
         return responseDto;
     }
 

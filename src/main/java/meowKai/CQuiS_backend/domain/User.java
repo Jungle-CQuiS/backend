@@ -27,7 +27,7 @@ public class User extends BaseEntity {
     @OneToOne(fetch = LAZY, mappedBy = "user")
     private RoomUser roomUser;
 
-    @OneToOne(fetch = LAZY, mappedBy = "user")
+    @OneToOne(fetch = LAZY, mappedBy = "user", cascade = CascadeType.ALL)
     private UserStatistics userStatistics;
 
     @OneToMany(fetch = LAZY, mappedBy = "user")
@@ -66,13 +66,18 @@ public class User extends BaseEntity {
 
     // 유저 생성
     public static User createUser(String email, String username, String password) {
-        return User.builder()
+        User user = User.builder()
                 .email(email)
                 .username(username)
                 .password(password)
                 .uuid(java.util.UUID.randomUUID())
                 .lastAccessed(LocalDateTime.now())
                 .build();
+
+        // UserStatistics 생성 및 연관관계 설정
+        user.userStatistics = UserStatistics.createUserStatistics(user);
+
+        return user;
     }
 
     // 유저의 마지막 접속시간 업데이트

@@ -21,7 +21,7 @@ public class GameRoom extends BaseEntity {
     private Long id;
 
     // 방에 참가한 유저 목록
-    @OneToMany(mappedBy = "gameRoom")
+    @OneToMany(mappedBy = "gameRoom", cascade = CascadeType.ALL)
     private List<RoomUser> roomUsers;
 
     // 방 제목
@@ -63,4 +63,5 @@ public class GameRoom extends BaseEntity {
     public void removeUser() {
         this.currentUsers--;
     }
+
 }

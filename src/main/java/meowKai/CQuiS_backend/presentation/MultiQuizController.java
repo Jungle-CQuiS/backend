@@ -97,13 +97,14 @@ public class MultiQuizController {
         return ApiResponse.ofSuccess(responseDto);
     }
 
-//    // TODO: UserStatistics 엔티티 구현 후 추가
-//    @Tag(name = "멀티모드 퀴즈")
-//    @Operation(summary = "명예 주기")
-//    @PostMapping("/honor")
-//    public ApiResponse<Object> giveHonor(@Valid @RequestBody RequestHonorDto requestDto) {
-//
-//    }
+    // TODO: UserStatistics 엔티티 구현 후 추가
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "명예 주기")
+    @PostMapping("/honor")
+    public ApiResponse<Object> giveHonor(@Valid @RequestBody RequestGiveHonorDto requestDto) {
+        ResponseGiveHonorDto responseDto = gameRoomService.giveHonor(requestDto);
+        return ApiResponse.ofSuccess(responseDto);
+    }
 
     @Tag(name = "멀티모드 퀴즈")
     @Operation(summary = "비밀번호 확인")
