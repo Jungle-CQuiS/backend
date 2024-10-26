@@ -24,10 +24,10 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(fetch = LAZY, mappedBy = "user")
     private RoomUser roomUser;
 
-    @OneToOne(fetch = LAZY, mappedBy = "user")
+    @OneToOne(fetch = LAZY, mappedBy = "user", cascade = CascadeType.ALL)
     private UserStatistics userStatistics;
 
     @OneToMany(fetch = LAZY, mappedBy = "user")
