@@ -39,6 +39,15 @@ public class UserStatistics {
     @Column
     private Integer honorCount;
 
+    public static UserStatistics createUserStatistics(User user) {
+        return UserStatistics.builder()
+                .user(user)
+                .solvedCount(0)
+                .wrongCount(0)
+                .honorCount(0)
+                .build();
+    }
+
     public void addHonorCount() {
         this.honorCount++;
     }
