@@ -1,6 +1,7 @@
 package meowKai.CQuiS_backend.application;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.domain.*;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class GameRoomServiceImpl implements GameRoomService {
 
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
 
     private final GameRoomRepository gameRoomRepository;
@@ -60,7 +61,7 @@ public class GameRoomServiceImpl implements GameRoomService {
     @Override
     @Transactional
     public ResponseCreateMultiRoomDto createMultiRoom(RequestCreateMultiRoomDto requestDto) {
-        log.info("멀티 게임 방 생성 요청: {}", requestDto);
+        log.info("멀티 게임 방 생성 - 멀티 게임 방 생성 요청: {}", requestDto);
         GameRoom createdRoom = GameRoom.createGameRoom(
                 requestDto.getName(),
                 requestDto.getMaxUser(),
@@ -69,7 +70,7 @@ public class GameRoomServiceImpl implements GameRoomService {
 
         RoomUser roomUser = RoomUser.createRoomUser(createdRoom,
                 userRepository.findByUuid(requestDto.getUuid()).orElseThrow(
-                        () -> new NoSuchElementException("존재하지 않는 유저입니다."))
+                        () -> new NoSuchElementException("멀티 게임 방 생성 - 존재하지 않는 유저입니다."))
                 , RoomUserRole.HOST, RoomUserTeam.BLUE);
         roomUser.assignTeamLeader(RoomUserTeam.BLUE);
 
@@ -82,96 +83,88 @@ public class GameRoomServiceImpl implements GameRoomService {
                 .isLeader(roomUser.getIsLeader())
                 .team(roomUser.getTeam())
                 .build();
-        log.info("멀티 게임 방 생성 한 유저의 정보: {}", responseDto);
+        log.info("멀티 게임 방 생성 - 멀티 게임 방 생성 한 유저의 정보: {}", responseDto);
         return responseDto;
     }
 
     // 유저의 팀 바꾸기
     @Override
     @Transactional
-    public ResponseGetRoomInfoDto switchTeam(RequestSwitchTeamDto requestDto) {
-        log.info("유저의 팀 바꾸기 요청: {}", requestDto);
+    public ResponseSwitchTeamDto switchTeam(RequestSwitchTeamDto requestDto) {
+        log.info("팀 변경 - 유저의 팀 바꾸기 요청: {}", requestDto);
 
         // TODO: 메서드화 해보기 나중에...
         RoomUser foundRoomUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("팀 변경 - 존재하지 않는 유저입니다."));
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("팀 변경 - 존재하지 않는 방입니다."));
         if(!foundRoomUser.getGameRoom().getId().equals(foundRoom.getId())) {
-            throw new IllegalStateException("방에 해당 유저가 존재하지 않습니다.");
+            throw new IllegalStateException("팀 변경 - 방에 해당 유저가 존재하지 않습니다.");
         }
 
         foundRoomUser.changeTeam();
         roomUserRepository.save(foundRoomUser);
 
-        // 영속성 컨텍스트를 비워서 변경사항 DB에 반영
-        entityManager.flush();
-        entityManager.clear();
-
-        // 변경사항을 DB에 반영하고 새로 데이터를 받아 옴
-        GameRoom updatedGameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
-        ResponseGetRoomInfoDto responseDto = getResponseGetRoomInfoDto(updatedGameRoom);
-        log.info("유저의 팀 바꾸기 결과: {}", responseDto);
+        ResponseSwitchTeamDto responseDto = ResponseSwitchTeamDto.builder()
+                .roomUserId(foundRoomUser.getId())
+                .team(foundRoomUser.getTeam())
+                .build();
+        log.info("팀 변경 - 유저의 팀 바꾸기 결과: {}", responseDto);
         return responseDto;
     }
 
     // 준비하기
     @Override
     @Transactional
-    public ResponseGetRoomInfoDto ready(RequestReadyDto requestDto) {
-        log.info("준비하기 요청: {}", requestDto);
+    public ResponseReadyDto ready(RequestReadyDto requestDto) {
+        log.info("레디 - 레디/레디 취소 요청: {}", requestDto);
 
         RoomUser foundRoomUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("레디 - 존재하지 않는 유저입니다."));
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("레디 - 존재하지 않는 방입니다."));
         if(!foundRoomUser.getGameRoom().getId().equals(foundRoom.getId())) {
-            throw new IllegalStateException("방에 해당 유저가 존재하지 않습니다.");
+            throw new IllegalStateException("레디 - 방에 해당 유저가 존재하지 않습니다.");
         }
 
         foundRoomUser.changeReady();
         roomUserRepository.save(foundRoomUser);
 
-        // 영속성 컨텍스트를 비워서 변경사항 DB에 반영
-        entityManager.flush();
-        entityManager.clear();
-
-        // 변경사항을 DB에 반영하고 새로 데이터를 받아 옴
-        GameRoom updatedGameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
-        ResponseGetRoomInfoDto responseDto = getResponseGetRoomInfoDto(updatedGameRoom);
-        log.info("레디/레디 취소 결과: {}", responseDto);
+        ResponseReadyDto responseDto = ResponseReadyDto.builder()
+                .roomUserId(foundRoomUser.getId())
+                .isReady(foundRoomUser.getIsReady())
+                .build();
+        log.info("레디 - 레디/레디 취소 결과: {}", responseDto);
         return responseDto;
     }
 
     // 유저 강퇴(방장 권한 필요)
     @Override
     @Transactional
-    public ResponseGetRoomInfoDto kickUser(RequestKickUserDto requestDto) {
+    public ResponseKickUserDto kickUser(RequestKickUserDto requestDto) {
 
-        log.info("유저 강퇴 요청: {}", requestDto);
+        log.info("강퇴 - 유저 강퇴 요청: {}", requestDto);
 
         // 방장 권한을 가진 유저가 방에 존재하는지 검토
         RoomUser foundRoomUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("강퇴 - 존재하지 않는 유저입니다."));
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("강퇴 - 존재하지 않는 방입니다."));
         if(!foundRoomUser.getGameRoom().getId().equals(foundRoom.getId())) {
-            throw new IllegalStateException("방에 해당 유저가 존재하지 않습니다.");
+            throw new IllegalStateException("강퇴 - 방에 해당 유저가 존재하지 않습니다.");
         }
 
         // 해당 유저에게 방장 권한이 있는지 체크
         boolean isHost = foundRoomUser.getRole() == RoomUserRole.HOST;
         if (!isHost) {
-            throw new IllegalArgumentException("방장만 유저를 강퇴할 수 있습니다.");
+            throw new IllegalArgumentException("강퇴 - 방장만 유저를 강퇴할 수 있습니다.");
         }
 
         // 강퇴하려는 유저가 방에 존재하는지 검토
         RoomUser roomUserToKick = roomUserRepository.findById(requestDto.getKickRoomUserId()).orElseThrow(
-                () -> new NoSuchElementException("강퇴하려는 유저가 존재하지 않습니다."));
+                () -> new NoSuchElementException("강퇴 - 강퇴하려는 유저가 존재하지 않습니다."));
         if(!roomUserToKick.getGameRoom().getId().equals(foundRoom.getId())) {
-            throw new IllegalStateException("강퇴하려는 유저가 해당 방에 존재하지 않습니다.");
+            throw new IllegalStateException("강퇴 - 강퇴하려는 유저가 해당 방에 존재하지 않습니다.");
         }
 
         // 강퇴하려는 유저가 리더라면 리더를 양도
@@ -183,15 +176,10 @@ public class GameRoomServiceImpl implements GameRoomService {
         foundRoom.removeUser();
         gameRoomRepository.save(foundRoom);
 
-        // 영속성 컨텍스트를 비워서 변경사항 DB에 반영
-        entityManager.flush();
-        entityManager.clear();
-
-        // 변경사항을 DB에 반영하고 새로 데이터를 받아 옴
-        GameRoom updatedGameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
-        ResponseGetRoomInfoDto responseDto = getResponseGetRoomInfoDto(updatedGameRoom);
-        log.info("ws - 유저 강퇴 결과: {}", responseDto);
+        ResponseKickUserDto responseDto = ResponseKickUserDto.builder()
+                .kickedRoomUserId(roomUserToKick.getId())
+                .build();
+        log.info("강퇴 - 유저 강퇴 결과: {}", responseDto);
         return responseDto;
     }
 
@@ -199,25 +187,25 @@ public class GameRoomServiceImpl implements GameRoomService {
     // 방장을 변경
     @Override
     @Transactional
-    public ResponseGetRoomInfoDto changeHost(RequestYieldDto requestDto) {
-        log.info("방장 위임 요청: {}", requestDto);
+    public ResponseYieldDto changeHost(RequestYieldDto requestDto) {
+        log.info("방장 위임 - 방장 위임 요청: {}", requestDto);
 
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("방장 위임 - 존재하지 않는 방입니다."));
         RoomUser hostUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("방장 위임 - 방장이 존재하지 않습니다."));
         RoomUser nextHostUser = roomUserRepository.findById(requestDto.getYieldUserId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("방장 위임 - 방장을 위임받을 유저가 존재하지 않습니다."));
 
         if(!hostUser.getGameRoom().getId().equals(foundRoom.getId())) {
-            throw new IllegalStateException("방에 해당 유저가 존재하지 않습니다.");
+            throw new IllegalStateException("방장 위임 - 방장이 해당 방에 존재하지 않습니다.");
         }
         if(!nextHostUser.getGameRoom().getId().equals(foundRoom.getId())) {
-            throw new IllegalStateException("방에 해당 유저가 존재하지 않습니다.");
+            throw new IllegalStateException("방장 위임 - 방장을 위임받을 유저가 해당 방에 존재하지 않습니다.");
         }
 
         if(hostUser.getRole() != RoomUserRole.HOST) {
-            throw new IllegalStateException("방장 권한이 없는 유저입니다.");
+            throw new IllegalStateException("방장 위임 - 방장 권한이 없는 유저입니다.");
         }
 
         hostUser.changeRole();
@@ -225,44 +213,39 @@ public class GameRoomServiceImpl implements GameRoomService {
         roomUserRepository.save(hostUser);
         roomUserRepository.save(nextHostUser);
 
-        // 영속성 컨텍스트를 비워서 변경사항 DB에 반영
-        entityManager.flush();
-        entityManager.clear();
-
-        // 변경사항을 DB에 반영하고 새로 데이터를 받아 옴
-        GameRoom updatedGameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
-        ResponseGetRoomInfoDto responseDto = getResponseGetRoomInfoDto(updatedGameRoom);
-        log.info("ws - 방장 위임 결과: {}", responseDto);
+        ResponseYieldDto responseDto = ResponseYieldDto.builder()
+                .yieldedUserId(nextHostUser.getId())
+                .build();
+        log.info("방장 위임 - 방장 위임 결과: {}", responseDto);
         return responseDto;
     }
 
     // 리더를 변경
     @Override
     @Transactional
-    public ResponseGetRoomInfoDto changeLeader(RequestYieldDto requestDto) {
-        log.info("리더 위임 요청: {}", requestDto);
+    public ResponseYieldDto changeLeader(RequestYieldDto requestDto) {
+        log.info("리더 위임 - 리더 위임 요청: {}", requestDto);
 
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("리더 위임 - 존재하지 않는 방입니다."));
         RoomUser leaderUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("리더 위임 - 리더가 존재하지 않습니다."));
         RoomUser nextLeaderUser = roomUserRepository.findById(requestDto.getYieldUserId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("리더 위임 - 리더를 위임받을 유저가 존재하지 않습니다."));
 
         if(!leaderUser.getGameRoom().getId().equals(foundRoom.getId())) {
-            throw new IllegalStateException("방에 해당 유저가 존재하지 않습니다.");
+            throw new IllegalStateException("리더 위임 - 리더가 해당 방에 존재하지 않습니다.");
         }
         if(!nextLeaderUser.getGameRoom().getId().equals(foundRoom.getId())) {
-            throw new IllegalStateException("방에 해당 유저가 존재하지 않습니다.");
+            throw new IllegalStateException("리더 위임 - 리더를 위임받을 유저가 해당 방에 존재하지 않습니다.");
         }
 
         if(!leaderUser.getIsLeader()) {
-            throw new IllegalStateException("리더 권한이 없는 유저입니다.");
+            throw new IllegalStateException("리더 위임 - 리더 권한이 없는 유저입니다.");
         }
 
         if(leaderUser.getTeam() != nextLeaderUser.getTeam()) {
-            throw new IllegalStateException("리더를 양도하려는 유저와 같은 팀이 아닙니다.");
+            throw new IllegalStateException("리더 위임 - 리더를 양도하려는 유저와 같은 팀이 아닙니다.");
         }
 
         leaderUser.changeLeader();
@@ -270,30 +253,25 @@ public class GameRoomServiceImpl implements GameRoomService {
         roomUserRepository.save(leaderUser);
         roomUserRepository.save(nextLeaderUser);
 
-        // 영속성 컨텍스트를 비워서 변경사항 DB에 반영
-        entityManager.flush();
-        entityManager.clear();
-
-        // 변경사항을 DB에 반영하고 새로 데이터를 받아 옴
-        GameRoom updatedGameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
-        ResponseGetRoomInfoDto responseDto = getResponseGetRoomInfoDto(updatedGameRoom);
-        log.info("ws - 리더 위임 결과: {}", responseDto);
+        ResponseYieldDto responseDto = ResponseYieldDto.builder()
+                .yieldedUserId(nextLeaderUser.getId())
+                .build();
+        log.info("리더 위임 - 리더 위임 결과: {}", responseDto);
         return responseDto;
     }
 
     // 방 퇴장
     @Override
     @Transactional
-    public ResponseGetRoomInfoDto exit(RequestExitDto requestDto) {
-        log.info("방 나가기 요청: {}", requestDto);
+    public ResponseExitDto exit(RequestExitDto requestDto) {
+        log.info("퇴장 - 방 나가기 요청: {}", requestDto);
 
         RoomUser foundRoomUser = roomUserRepository.findById(requestDto.getRoomUserId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("퇴장 - 존재하지 않는 유저입니다."));
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("퇴장 - 존재하지 않는 방입니다."));
         if(!foundRoomUser.getGameRoom().getId().equals(foundRoom.getId())) {
-            throw new IllegalStateException("방에 해당 유저가 존재하지 않습니다.");
+            throw new IllegalStateException("퇴장 - 방에 해당 유저가 존재하지 않습니다.");
         }
 
         boolean shouldDeleteRoom = countRoomUser(foundRoom) <= 1;
@@ -313,43 +291,35 @@ public class GameRoomServiceImpl implements GameRoomService {
 
         if(shouldDeleteRoom) {
             gameRoomRepository.delete(foundRoom);
-            log.info("방 삭제: {}", foundRoom.getId());
+            log.info("퇴장 - 방 삭제: {}", foundRoom.getId());
         }
 
-        // 영속성 컨텍스트를 비워서 변경사항 DB에 반영
-        entityManager.flush();
-        entityManager.clear();
-
-        // 변경사항을 DB에 반영하고 새로 데이터를 받아 옴
-        return gameRoomRepository.findById(requestDto.getRoomId())
-                .map(room -> {
-                    ResponseGetRoomInfoDto responseDto = getResponseGetRoomInfoDto(room);
-                    log.info("ws - 방 나가기 완료: {}", responseDto);
-                    return responseDto;
-                })
-                .orElse(null);
+        ResponseExitDto responseDto = ResponseExitDto.builder()
+                .roomUserId(foundRoomUser.getId())
+                .build();
+        log.info("퇴장 - 방 나가기 완료: {}", responseDto);
+        return responseDto;
     }
 
     // 방 입장
     @Override
     @Transactional
-    public ResponseGetRoomInfoDto joinRoom(RequestJoinRoomDto requestDto) {
-        log.info("방 입장 요청: {}", requestDto);
+    public ResponseJoinRoomDto joinRoom(RequestJoinRoomDto requestDto) {
+        log.info("입장 - 방 입장 요청: {}", requestDto);
 
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("입장 - 존재하지 않는 방입니다."));
         User joinUser = userRepository.findByUuid(requestDto.getUuid()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("입장 - 존재하지 않는 유저입니다."));
 
         if (countRoomUser(foundRoom).equals(foundRoom.getMaxUsers())) {
-            throw new IllegalStateException("방이 꽉 찼습니다.");
+            throw new IllegalStateException("입장 - 방이 꽉 찼습니다.");
         }
 
         // TODO: 추후에 팀 랜덤 배정 구현
         RoomUser joinedRoomUser = RoomUser.createRoomUser(foundRoom, joinUser, RoomUserRole.GUEST, RoomUserTeam.BLUE);
 
         // 방이 비어있으면 joinedRoomUser를 host, leader로 <- 이런 일이 있을 수 있나?
-        System.out.println(countRoomUser(foundRoom));
         if(countRoomUser(foundRoom) <= 0) {
             joinedRoomUser.changeRole();
             joinedRoomUser.changeLeader();
@@ -365,23 +335,26 @@ public class GameRoomServiceImpl implements GameRoomService {
         foundRoom.addUser();
         gameRoomRepository.save(foundRoom);
 
-        entityManager.flush();
-        entityManager.clear();
-
-        GameRoom updatedGameRoom = gameRoomRepository.findById(foundRoom.getId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
-        ResponseGetRoomInfoDto responseDto = getResponseGetRoomInfoDto(updatedGameRoom);
-        log.info("ws - 방 입장 결과: {}", responseDto);
+        ResponseJoinRoomDto responseDto = ResponseJoinRoomDto.builder()
+                .roomUserId(joinedRoomUser.getId())
+                .username(joinUser.getUsername())
+                .honorCount(joinUser.getUserStatistics().getHonorCount())
+                .role(joinedRoomUser.getRole())
+                .team(joinedRoomUser.getTeam())
+                .isLeader(joinedRoomUser.getIsLeader())
+                .isReady(joinedRoomUser.getIsReady())
+                .build();
+        log.info("입장 - 방 입장 결과: {}", responseDto);
         return responseDto;
     }
 
     // 방 입장하고 방에 대한 정보 가져오기
     @Override
     public ResponseGetRoomInfoDto getRoomInfo(Long roomId) {
-        log.info("방 정보 조회 요청: {}", roomId);
+        log.info("방 내부 정보 조회 - 방 정보 조회 요청: {}", roomId);
 
         GameRoom gameRoom = gameRoomRepository.findById(roomId).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("방 내부 정보 조회 - 존재하지 않는 방입니다."));
 
         List<RoomUser> roomUsers = roomUserRepository.findAllByGameRoom(gameRoom);
         List<MultiRoomUserDto> roomUserInfoList = roomUsers.stream()
@@ -400,31 +373,31 @@ public class GameRoomServiceImpl implements GameRoomService {
                 .usersData(roomUserInfoList)
                 .build();
 
-        log.info("방 정보 조회 결과: {}", responseDto);
+        log.info("방 내부 정보 조회 - 방 정보 조회 결과: {}", responseDto);
         return responseDto;
     }
 
     @Override
     public ResposeCheckPasswordDto checkPassword(RequestCheckPasswordDto requestDto) {
-        log.info("비밀 방 비밀번호 입력: {}", requestDto);
+        log.info("비밀번호 - 비밀 방 비밀번호 입력: {}", requestDto);
         GameRoom gameRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("비밀번호 - 존재하지 않는 방입니다."));
 
         ResposeCheckPasswordDto responseDto = ResposeCheckPasswordDto.builder()
                 .isCorrect(Objects.equals(gameRoom.getPassword(), requestDto.getPassword()))
                 .build();
 
-        log.info("비밀 방 비밀번호 입력 결과: {}", responseDto);
+        log.info("비밀번호 - 비밀 방 비밀번호 입력 결과: {}", responseDto);
         return responseDto;
     }
 
     @Override
     @Transactional
     public ResponseGiveHonorDto giveHonor(RequestGiveHonorDto requestDto) {
-        log.info("명예 주기: {}", requestDto);
+        log.info("명예 - 명예 주기: {}", requestDto);
 
         RoomUser roomUser = roomUserRepository.findById(requestDto.getHonorRoomUserId()).orElseThrow(
-                () -> new NoSuchElementException("존재하지 않는 유저입니다."));
+                () -> new NoSuchElementException("명예 - 존재하지 않는 유저입니다."));
 
         roomUser.getUser().getUserStatistics().addHonorCount();
 
@@ -432,7 +405,7 @@ public class GameRoomServiceImpl implements GameRoomService {
                 .roomUserId(roomUser.getId())
                 .build();
 
-        log.info("명예 주기 결과: {}", responseDto);
+        log.info("명예 - 명예 주기 결과: {}", responseDto);
         return responseDto;
     }
 
