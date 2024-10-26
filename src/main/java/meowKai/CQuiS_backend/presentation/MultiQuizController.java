@@ -37,7 +37,7 @@ public class MultiQuizController {
     @Operation(summary = "유저의 팀 바꾸기")
     @PostMapping("/team-switch")
     public ApiResponse<Object> switchTeam(@Valid @RequestBody RequestSwitchTeamDto requestDto) {
-        ResponseSwitchTeamDto responseDto = gameRoomService.switchTeam(requestDto);
+        ResponseGetRoomInfoDto responseDto = gameRoomService.switchTeam(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
 
@@ -45,7 +45,7 @@ public class MultiQuizController {
     @Operation(summary = "준비하기")
     @PostMapping("/ready")
     public ApiResponse<Object> ready(@Valid @RequestBody RequestReadyDto requestDto) {
-        ResponseReadyDto responseDto = gameRoomService.ready(requestDto);
+        ResponseGetRoomInfoDto responseDto = gameRoomService.ready(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
 
@@ -53,7 +53,7 @@ public class MultiQuizController {
     @Operation(summary = "유저 강퇴(방장 권한 필요)")
     @PostMapping("/kick")
     public ApiResponse<Object> kickUser(@Valid @RequestBody RequestKickUserDto requestDto) {
-        ResponseKickUserDto responseDto = gameRoomService.kickUser(requestDto);
+        ResponseGetRoomInfoDto responseDto = gameRoomService.kickUser(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
 
@@ -61,7 +61,7 @@ public class MultiQuizController {
     @Operation(summary = "방장 위임")
     @PostMapping("/yield-host")
     public ApiResponse<Object> changeHost(@Valid @RequestBody RequestYieldDto requestDto) {
-        ResponseYieldDto responseDto = gameRoomService.changeHost(requestDto);
+        ResponseGetRoomInfoDto responseDto = gameRoomService.changeHost(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
 
@@ -69,7 +69,7 @@ public class MultiQuizController {
     @Operation(summary = "리더 위임")
     @PostMapping("/yield-leader")
     public ApiResponse<Object> changeLeader(@Valid @RequestBody RequestYieldDto requestDto) {
-        ResponseYieldDto responseDto = gameRoomService.changeLeader(requestDto);
+        ResponseGetRoomInfoDto responseDto = gameRoomService.changeLeader(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
 
@@ -77,7 +77,7 @@ public class MultiQuizController {
     @Operation(summary = "방 퇴장")
     @PostMapping("/exit")
     public ApiResponse<Object> exit(@Valid @RequestBody RequestExitDto requestDto) {
-        ResponseExitDto responseDto = gameRoomService.exit(requestDto);
+        ResponseGetRoomInfoDto responseDto = gameRoomService.exit(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
 
@@ -85,7 +85,7 @@ public class MultiQuizController {
     @Operation(summary = "방 입장하기")
     @PostMapping("/rooms/join")
     public ApiResponse<Object> joinRoom(@Valid @RequestBody RequestJoinRoomDto requestDto) {
-        ResponseJoinRoomDto responseDto = gameRoomService.joinRoom(requestDto);
+        ResponseGetRoomInfoDto responseDto = gameRoomService.joinRoom(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
 
