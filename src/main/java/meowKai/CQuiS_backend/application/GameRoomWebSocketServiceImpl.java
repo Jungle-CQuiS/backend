@@ -282,8 +282,10 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
             throw new IllegalStateException("ws - 입장 - 방이 꽉 찼습니다.");
         }
 
-        // TODO: 추후에 팀 랜덤 배정 구현
         RoomUser joinedRoomUser = RoomUser.createRoomUser(foundRoom, joinUser, RoomUserRole.GUEST, RoomUserTeam.BLUE);
+        if (isTeamFull(foundRoom, RoomUserTeam.BLUE)) {
+            joinedRoomUser.changeTeam();
+        }
 
         // 방이 비어있으면 joinedRoomUser를 host, leader로 <- 이런 일이 있을 수 있나?
         System.out.println(countRoomUser(foundRoom));
@@ -391,5 +393,13 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     private boolean isTeamEmpty(GameRoom gameRoom, RoomUserTeam teamColor) {
         return gameRoom.getRoomUsers().stream()
                 .noneMatch(user -> user.getTeam() == teamColor);
+    }
+
+    // 팀이 가득 찼는지 확인
+    private boolean isTeamFull(GameRoom gameRoom, RoomUserTeam teamColor) {
+        return gameRoom.getRoomUsers().stream()
+                .filter(user -> user.getTeam() == teamColor)
+                .count()
+                >= (gameRoom.getMaxUsers() / 2);
     }
 }
