@@ -68,22 +68,12 @@ public class GameRoomServiceImpl implements GameRoomService {
                 requestDto.getPassword()
         );
 
-        RoomUser roomUser = RoomUser.createRoomUser(createdRoom,
-                userRepository.findByUuid(requestDto.getUuid()).orElseThrow(
-                        () -> new NoSuchElementException("멀티 게임 방 생성 - 존재하지 않는 유저입니다."))
-                , RoomUserRole.HOST, RoomUserTeam.BLUE);
-        roomUser.assignTeamLeader(RoomUserTeam.BLUE);
-
-        roomUserRepository.save(roomUser);
         gameRoomRepository.save(createdRoom);
 
         ResponseCreateMultiRoomDto responseDto = ResponseCreateMultiRoomDto.builder()
                 .roomId(createdRoom.getId())
-                .role(roomUser.getRole())
-                .isLeader(roomUser.getIsLeader())
-                .team(roomUser.getTeam())
                 .build();
-        log.info("멀티 게임 방 생성 - 멀티 게임 방 생성 한 유저의 정보: {}", responseDto);
+        log.info("멀티 게임 방 생성 - 멀티 게임 방 생성 결과: {}", responseDto);
         return responseDto;
     }
 
@@ -303,7 +293,6 @@ public class GameRoomServiceImpl implements GameRoomService {
 
     // 방 입장 - ws 통신 후 생성된 RoomUser의 id 반환
     @Override
-    @Transactional
     public ResponseJoinRoomDto joinRoom(RequestJoinRoomDto requestDto) {
         log.info("입장 - 방 입장 요청: {}", requestDto);
 

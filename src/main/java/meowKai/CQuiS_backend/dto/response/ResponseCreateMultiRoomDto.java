@@ -12,7 +12,4 @@ import meowKai.CQuiS_backend.domain.RoomUserTeam;
 public class ResponseCreateMultiRoomDto {
 
     private Long roomId;
-    private RoomUserRole role;
-    private Boolean isLeader;
-    private RoomUserTeam team;
 }

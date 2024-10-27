@@ -287,7 +287,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
             joinedRoomUser.changeTeam();
         }
 
-        // 방이 비어있으면 joinedRoomUser를 host, leader로 <- 이런 일이 있을 수 있나?
+        // 방이 비어있으면 joinedRoomUser를 host, leader로
         System.out.println(countRoomUser(foundRoom));
         if(countRoomUser(foundRoom) <= 0) {
             joinedRoomUser.changeRole();
