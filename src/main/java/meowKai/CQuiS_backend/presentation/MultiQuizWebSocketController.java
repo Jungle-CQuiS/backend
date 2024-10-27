@@ -22,10 +22,19 @@ public class MultiQuizWebSocketController {
     // (PUB)방 입장 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/join")
     public void joinRoom(RequestWebSocketJoinRoom requestDto) {
-        ResponseGetRoomInfoDto responseDto = gameRoomWebSocketService.joinRoom(requestDto);
+        ResponseGetRoomInfoDto responseRoomInfoDto = gameRoomWebSocketService.joinRoom(requestDto);
         messagingTemplate.convertAndSend(
                 "/topic/rooms/" + requestDto.getRoomId() + "/info",
-                responseDto
+                responseRoomInfoDto
+        );
+
+        ResponseJoinRoomDto responseRoomUserDto = gameRoomWebSocketService
+                .getRoomUserId(new RequestJoinRoomDto(requestDto.getUuid()));
+
+        messagingTemplate.convertAndSendToUser(
+                requestDto.getUuid().toString(),
+                "/queue/rooms/join",
+                responseRoomUserDto
         );
     }
 

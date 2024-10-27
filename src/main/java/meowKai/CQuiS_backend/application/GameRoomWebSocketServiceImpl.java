@@ -314,6 +314,26 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         return responseDto;
     }
 
+    // 방 입장 후 생성된 RoomUser의 id 반환
+    @Override
+    public ResponseJoinRoomDto getRoomUserId(RequestJoinRoomDto requestDto) {
+        log.info("ws - roomuser id 반환 요청: {}", requestDto);
+
+        User joinUser = userRepository.findByUuid(requestDto.getUuid()).orElseThrow(
+                () -> new NoSuchElementException("입장 - 존재하지 않는 유저입니다."));
+
+        if(joinUser.getRoomUser() == null) {
+            throw new NoSuchElementException("입장 - 유저의 방 입장 정보가 없습니다.");
+        }
+
+        ResponseJoinRoomDto responseDto = ResponseJoinRoomDto.builder()
+                .roomUserId(joinUser.getRoomUser().getId())
+                .build();
+
+        log.info("ws - roomuser id 반환 결과: {}", responseDto);
+        return responseDto;
+    }
+
     /**
      * GameRoom을 인자로 넘겨주면 해당 방에 있는
      * 각 유저의 정보를 바탕으로 MultiRoomUserDto를 생성한 뒤

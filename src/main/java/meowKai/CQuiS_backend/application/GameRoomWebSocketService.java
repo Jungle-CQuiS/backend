@@ -11,4 +11,5 @@ public interface GameRoomWebSocketService {
     ResponseGetRoomInfoDto changeLeader(RequestYieldDto requestYieldDto); // 리더 권한 위임
     ResponseGetRoomInfoDto exit(RequestExitDto requestExitDto); // 현재 들어와 있는 방에서 퇴장
     ResponseGetRoomInfoDto joinRoom(RequestWebSocketJoinRoom requestJoinRoomDto); // 방 입장
+    ResponseJoinRoomDto getRoomUserId(RequestJoinRoomDto requestJoinRoomDto); // 방 입장 후 생성된 RoomUser의 id 반환
 }
