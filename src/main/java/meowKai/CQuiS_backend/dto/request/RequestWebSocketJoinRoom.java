@@ -4,13 +4,12 @@ import lombok.*;
 
 import java.util.UUID;
 
-@Getter
 @Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class RequestJoinRoomDto {
-
+public class RequestWebSocketJoinRoom {
     private UUID uuid;
-
+    private Long roomId;
 }

@@ -301,52 +301,23 @@ public class GameRoomServiceImpl implements GameRoomService {
         return responseDto;
     }
 
-    // 방 입장
+    // 방 입장 - ws 통신 후 생성된 RoomUser의 id 반환
     @Override
     @Transactional
     public ResponseJoinRoomDto joinRoom(RequestJoinRoomDto requestDto) {
         log.info("입장 - 방 입장 요청: {}", requestDto);
 
-        GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("입장 - 존재하지 않는 방입니다."));
         User joinUser = userRepository.findByUuid(requestDto.getUuid()).orElseThrow(
                 () -> new NoSuchElementException("입장 - 존재하지 않는 유저입니다."));
 
-        if (countRoomUser(foundRoom).equals(foundRoom.getMaxUsers())) {
-            throw new IllegalStateException("입장 - 방이 꽉 찼습니다.");
+        if(joinUser.getRoomUser() == null) {
+            throw new NoSuchElementException("입장 - 유저의 방 입장 정보가 없습니다.");
         }
-
-        // TODO: 추후에 팀 랜덤 배정 구현
-        RoomUser joinedRoomUser = RoomUser.createRoomUser(foundRoom, joinUser, RoomUserRole.GUEST, RoomUserTeam.BLUE);
-        if (isTeamFull(foundRoom, RoomUserTeam.BLUE)) {
-            joinedRoomUser.changeTeam();
-        }
-
-        // 방이 비어있으면 joinedRoomUser를 host, leader로 <- 이런 일이 있을 수 있나?
-        if(countRoomUser(foundRoom) <= 0) {
-            joinedRoomUser.changeRole();
-            joinedRoomUser.changeLeader();
-        } else {
-            // 비어있는 팀이 있으면 joinedRoomUser를 해당 팀으로 보내고 리더로 설정
-            Arrays.stream(RoomUserTeam.values())
-                    .filter(team -> isTeamEmpty(foundRoom, team))
-                    .findFirst()
-                    .ifPresent(joinedRoomUser::assignTeamLeader);
-        }
-
-        roomUserRepository.save(joinedRoomUser);
-        foundRoom.addUser();
-        gameRoomRepository.save(foundRoom);
 
         ResponseJoinRoomDto responseDto = ResponseJoinRoomDto.builder()
-                .roomUserId(joinedRoomUser.getId())
-                .username(joinUser.getUsername())
-                .honorCount(joinUser.getUserStatistics().getHonorCount())
-                .role(joinedRoomUser.getRole())
-                .team(joinedRoomUser.getTeam())
-                .isLeader(joinedRoomUser.getIsLeader())
-                .isReady(joinedRoomUser.getIsReady())
+                .roomUserId(joinUser.getRoomUser().getId())
                 .build();
+
         log.info("입장 - 방 입장 결과: {}", responseDto);
         return responseDto;
     }
