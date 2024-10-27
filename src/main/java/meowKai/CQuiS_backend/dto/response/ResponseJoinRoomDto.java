@@ -12,10 +12,4 @@ import meowKai.CQuiS_backend.domain.RoomUserTeam;
 public class ResponseJoinRoomDto {
 
     private Long roomUserId;
-    private String username;
-    private Integer honorCount;
-    private RoomUserRole role;
-    private RoomUserTeam team;
-    private Boolean isLeader;
-    private Boolean isReady;
 }

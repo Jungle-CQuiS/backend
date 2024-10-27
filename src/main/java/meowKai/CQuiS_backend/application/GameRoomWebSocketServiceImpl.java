@@ -270,7 +270,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
     @Override
     @Transactional
-    public ResponseGetRoomInfoDto joinRoom(RequestJoinRoomDto requestDto) {
+    public ResponseGetRoomInfoDto joinRoom(RequestWebSocketJoinRoom requestDto) {
         log.info("ws - 방 입장 요청: {}", requestDto);
 
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(

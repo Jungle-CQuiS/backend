@@ -21,7 +21,7 @@ public class MultiQuizWebSocketController {
 
     // (PUB)방 입장 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/join")
-    public void joinRoom(RequestJoinRoomDto requestDto) {
+    public void joinRoom(RequestWebSocketJoinRoom requestDto) {
         ResponseGetRoomInfoDto responseDto = gameRoomWebSocketService.joinRoom(requestDto);
         messagingTemplate.convertAndSend(
                 "/topic/rooms/" + requestDto.getRoomId() + "/info",
