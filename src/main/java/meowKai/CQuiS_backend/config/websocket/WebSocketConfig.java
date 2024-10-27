@@ -16,13 +16,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 "/queue/errors"       // 개인 에러 메시지
         );
         registry.setApplicationDestinationPrefixes("/app");
+        registry.setUserDestinationPrefix("/user"); // 사용자별 메시지에 사용되는 prefix
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
+                .setHandshakeHandler(new CustomHandshakeHandler())
                 .setAllowedOrigins("*");
         registry.addEndpoint("/ws")
+                .setHandshakeHandler(new CustomHandshakeHandler())
                 .setAllowedOrigins("*")
                 .withSockJS();
 
