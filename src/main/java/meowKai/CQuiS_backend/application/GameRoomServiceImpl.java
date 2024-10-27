@@ -293,7 +293,6 @@ public class GameRoomServiceImpl implements GameRoomService {
 
     // 방 입장 - ws 통신 후 생성된 RoomUser의 id 반환
     @Override
-    @Transactional
     public ResponseJoinRoomDto joinRoom(RequestJoinRoomDto requestDto) {
         log.info("입장 - 방 입장 요청: {}", requestDto);
 
