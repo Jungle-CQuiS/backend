@@ -38,6 +38,16 @@ public class GameRoomServiceImpl implements GameRoomService {
     public ResponseGetMultiRoomListDto getMultiRoomList() {
         log.info("멀티 게임 방 리스트 조회 요청");
         List<GameRoom> gameRoomList = gameRoomRepository.findAll();
+
+        if(gameRoomList.isEmpty()) {
+            ResponseGetMultiRoomListDto responseDto = ResponseGetMultiRoomListDto.builder()
+                    .rooms(new ArrayList<>())
+                    .build();
+
+            log.info("멀티 게임 방 리스트 조회 결과(비어있음): {}", responseDto);
+            return responseDto;
+        }
+
         List<MultiRoomListDto> multiRoomList = gameRoomList.stream()
                 .map(gameRoom -> MultiRoomListDto.builder()
                         .gameRoomId(gameRoom.getId())
