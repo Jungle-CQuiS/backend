@@ -3,10 +3,14 @@ package meowKai.CQuiS_backend.application;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.domain.User;
+import meowKai.CQuiS_backend.dto.request.RequestLoginDto;
 import meowKai.CQuiS_backend.dto.request.RequestSignUpDto;
 import meowKai.CQuiS_backend.dto.response.ResponseDuplicateCheckEmailDto;
 import meowKai.CQuiS_backend.dto.response.ResponseDuplicateCheckUsernameDto;
+import meowKai.CQuiS_backend.dto.response.ResponseLoginDto;
+import meowKai.CQuiS_backend.dto.response.ResponseSignUpDto;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,19 +21,28 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 회원가입
     @Override
     @Transactional
-    public void signUp(RequestSignUpDto requestSignUpDto) {
+    public ResponseSignUpDto signUp(RequestSignUpDto requestSignUpDto) {
         log.info("회원가입 요청 : {}", requestSignUpDto);
         User createdUser = User.createUser(
                 requestSignUpDto.getEmail(),
                 requestSignUpDto.getUsername(),
                 requestSignUpDto.getPassword()
         );
-        log.info("생성된 유저 : {}", createdUser);
-        userRepository.save(createdUser);
+        createdUser.encodePassword(passwordEncoder);
+        log.info("생성된 유저 : {}", createdUser.toString());
+        User savedUser = userRepository.save(createdUser);
+        ResponseSignUpDto responseDto = ResponseSignUpDto
+                .builder()
+                .email(savedUser.getEmail())
+                .username(savedUser.getUsername())
+                .uuid(savedUser.getUuid())
+                .build();
+        return responseDto;
     }
 
     // 이메일 중복 체크
@@ -53,6 +66,4 @@ public class AuthServiceImpl implements AuthService {
         log.info("유저네임 중복 체크 결과 : {}", responseDto);
         return responseDto;
     }
-
-
 }

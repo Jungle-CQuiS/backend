@@ -3,19 +3,19 @@ package meowKai.CQuiS_backend.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import meowKai.CQuiS_backend.global.base.BaseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
 @Entity
 @Getter
 @Builder
-@Table(name = "quiz_user")
+@Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
 public class User extends BaseEntity {
@@ -24,19 +24,19 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = LAZY, mappedBy = "user")
+    @OneToOne(mappedBy = "user")
     private RoomUser roomUser;
 
-    @OneToOne(fetch = LAZY, mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user")
     private UserStatistics userStatistics;
 
-    @OneToMany(fetch = LAZY, mappedBy = "user")
+    @OneToMany(mappedBy = "user")
     private List<UserQuizLog> userQuizLogs;
 
-    @OneToMany(fetch = LAZY, mappedBy = "user")
+    @OneToMany(mappedBy = "user")
     private List<UserCategoryLevel> userCategoryLevels;
 
-    @OneToMany(fetch = LAZY, mappedBy = "user")
+    @OneToMany(mappedBy = "user")
     private List<QuizWrong> quizWrongs;
 
     // 유저의 email
@@ -59,6 +59,8 @@ public class User extends BaseEntity {
     @Column
     private UUID uuid;
 
+    @Column(length = 1000)
+    private String refreshToken;
 
     /**
      * 엔티티 비즈니스 로직
@@ -83,5 +85,21 @@ public class User extends BaseEntity {
     // 유저의 마지막 접속시간 업데이트
     public void updateLastAccessed() {
         this.lastAccessed = LocalDateTime.now();
+    }
+
+    // 유저의 refresh token 업데이트
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    // 유저의 refresh token 삭제
+    public void removeRefreshToken() {
+        this.refreshToken = null;
+    }
+
+
+    // 비밀번호 암호화
+    public void encodePassword(PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
     }
 }
