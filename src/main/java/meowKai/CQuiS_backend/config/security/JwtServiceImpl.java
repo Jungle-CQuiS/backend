@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import meowKai.CQuiS_backend.domain.User;
+import meowKai.CQuiS_backend.dto.response.ResponseLoginDto;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Transactional
 @Service
@@ -82,22 +85,28 @@ public class JwtServiceImpl implements JwtService{
     public void removeRefreshToken(String email) {
         userRepository.findByEmail(email)
                 .ifPresentOrElse(
-                        user -> user.removeRefreshToken(),
+                        User::removeRefreshToken,
                         () -> new Exception("회원 조회 실패")
                 );
     }
 
     // access token, refresh token 전송
     @Override
-    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException {
+    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken, UUID uuid) throws IOException {
         response.setStatus(HttpServletResponse.SC_OK);
 
         setAccessTokenHeader(response, accessToken);
         setRefreshTokenHeader(response, refreshToken);
 
-        Map<String, String> tokenMap = Map.of(ACCESS_TOKEN_SUBJECT, accessToken, REFRESH_TOKEN_SUBJECT, refreshToken);
-        String token = objectMapper.writeValueAsString(tokenMap);
-        response.getWriter().write(token);
+        ResponseLoginDto responseDto = ResponseLoginDto
+                .builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .uuid(uuid)
+                .build();
+//        Map<String, String> tokenMap = Map.of(ACCESS_TOKEN_SUBJECT, accessToken, REFRESH_TOKEN_SUBJECT, refreshToken);
+        String responseData = objectMapper.writeValueAsString(responseDto);
+        response.getWriter().write(responseData);
     }
 
     // access token 전송
