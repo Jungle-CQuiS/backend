@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface JwtService {
 
@@ -15,7 +16,7 @@ public interface JwtService {
     void updateRefreshToken(String email, String refreshToken);
     void removeRefreshToken(String email);
 
-    void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) throws IOException;
+    void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken, UUID uuid) throws IOException;
     void sendAccessToken(HttpServletResponse response, String accessToken) throws IOException;
 
     Optional<String> extractAccessToken(HttpServletRequest request) throws IOException, ServletException;
