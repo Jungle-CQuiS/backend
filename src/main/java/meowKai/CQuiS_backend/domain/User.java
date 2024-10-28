@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static jakarta.persistence.CascadeType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
@@ -27,7 +28,7 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user")
     private RoomUser roomUser;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = ALL)
     private UserStatistics userStatistics;
 
     @OneToMany(mappedBy = "user")
