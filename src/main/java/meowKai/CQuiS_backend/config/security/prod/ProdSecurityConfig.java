@@ -101,7 +101,7 @@ public class ProdSecurityConfig {
 
     // 로그인 실패 시 핸들러
     @Bean
-    public LoginFailureHandler loginFailureHanlder() {
+    public LoginFailureHandler loginFailureHandler() {
         return new LoginFailureHandler();
     }
 
@@ -111,7 +111,7 @@ public class ProdSecurityConfig {
         CustomLoginAuthFilter loginFilter = new CustomLoginAuthFilter(objectMapper);
         loginFilter.setAuthenticationManager(authenticationManager());
         loginFilter.setAuthenticationSuccessHandler(loginSuccessJWTProvideHandler());
-        loginFilter.setAuthenticationFailureHandler(loginFailureHanlder());
+        loginFilter.setAuthenticationFailureHandler(loginFailureHandler());
         return loginFilter;
     }
 

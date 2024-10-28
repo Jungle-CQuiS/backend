@@ -2,6 +2,8 @@ package meowKai.CQuiS_backend.dto.response;
 
 import lombok.*;
 
+import java.util.UUID;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -9,6 +11,7 @@ import lombok.*;
 @Builder
 public class ResponseLoginDto {
 
+    private UUID uuid;
     private String accessToken;
     private String refreshToken;
 }

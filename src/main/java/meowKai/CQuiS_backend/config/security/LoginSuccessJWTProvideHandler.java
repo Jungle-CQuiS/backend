@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,23 +25,29 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
             throws IOException, ServletException {
 
         String email = extractEmail(authentication);
+        UUID uuid = extractUuid(authentication);
 
         // 로그인 성공 시 JWT 발급
         String accessToken = jwtService.createAccessToken(email);
         String refreshToken = jwtService.createRefreshToken();
 
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
+        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken, uuid);
         userRepository.findByEmail(email).ifPresent(
                 user -> jwtService.updateRefreshToken(email, refreshToken)
         );
 
         log.info("로그인에 성공했습니다. email: {}", email);
-        response.getWriter().write("Login Success");
     }
 
     // Authentication 객체에서 email 추출
     private String extractEmail(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         return userDetails.getUsername();
+    }
+
+    // Authentication 객체에서 uuid 추출
+    private UUID extractUuid(Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return userDetails.getUuid();
     }
 }
