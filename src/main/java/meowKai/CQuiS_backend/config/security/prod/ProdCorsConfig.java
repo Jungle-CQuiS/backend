@@ -20,8 +20,10 @@ public class ProdCorsConfig {
         config.setAllowedOriginPatterns(
                 // TODO: 배포 시 swagger 삭제하기!
                 List.of(
-                        "cquis.net/**",
-                        "dev.cquis.net/**",
+                        "https://cquis.net/**",
+                        "https://dev.cquis.net/**",
+                        "http://cquis.net/**",
+                        "http://dev.cquis.net/**",
                         "/swagger-ui/**"
                 )
         );
