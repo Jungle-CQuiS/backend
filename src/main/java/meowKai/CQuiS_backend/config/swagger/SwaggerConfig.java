@@ -8,6 +8,8 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import meowKai.CQuiS_backend.dto.request.RequestLoginDto;
 import meowKai.CQuiS_backend.dto.response.ResponseLoginDto;
 import org.springframework.context.annotation.Bean;
@@ -21,9 +23,28 @@ public class SwaggerConfig {
 
     @Bean
     public OpenAPI openAPI() {
+
+        // Security Scheme 설정
+        String jwtSchemeName = "JWT Authentication";
+
+        // API 요청 헤더에 인증정보 포함
+        SecurityRequirement securityRequirement = new SecurityRequirement()
+                .addList(jwtSchemeName);
+
+        // Security Scheme 등록
+        Components authComponents = new Components()
+                .addSecuritySchemes(jwtSchemeName, new SecurityScheme()
+                        .name(jwtSchemeName)
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("Bearer")
+                        .bearerFormat("JWT")
+                );
+
         return new OpenAPI()
                 .components(new Components())
                 .info(apiInfo())
+                .addSecurityItem(securityRequirement)
+                .components(authComponents)
                 .paths(loginPaths());
     }
 
