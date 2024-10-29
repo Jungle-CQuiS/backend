@@ -13,7 +13,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker(
                 "/topic",       // 방 전체 관련 구독
-                "/queue"       // 개인 에러 메시지
+                "/queue"       // 개인 메시지
         );
         registry.setApplicationDestinationPrefixes("/app");
         registry.setUserDestinationPrefix("/user"); // 사용자별 메시지에 사용되는 prefix
