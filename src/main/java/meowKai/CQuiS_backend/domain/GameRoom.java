@@ -40,6 +40,9 @@ public class GameRoom extends BaseEntity {
     @Column
     private Integer password;
 
+    @Enumerated(value = EnumType.STRING)
+    private GameEvent gameEvent;
+
     /**
      * 엔티티 비즈니스 로직
      */
@@ -51,6 +54,7 @@ public class GameRoom extends BaseEntity {
                 .currentUsers(1)
                 .maxUsers(maxUsers)
                 .password(password)
+                .gameEvent(GameEvent.WAITING)
                 .build();
     }
 
@@ -62,6 +66,11 @@ public class GameRoom extends BaseEntity {
     // 방 인원 감소
     public void removeUser() {
         this.currentUsers--;
+    }
+
+    // 게임 상태 전환
+    public void changeGameEvent(GameEvent gameEvent) {
+        this.gameEvent = gameEvent;
     }
 
 }
