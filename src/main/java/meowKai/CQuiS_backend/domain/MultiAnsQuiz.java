@@ -41,5 +41,5 @@ public class MultiAnsQuiz {
 
     // 문제 답
     @Column
-    private String answer;
+    private Integer answer;
 }

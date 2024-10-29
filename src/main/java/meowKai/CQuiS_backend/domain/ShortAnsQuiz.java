@@ -23,7 +23,11 @@ public class ShortAnsQuiz {
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
 
-    // 문제 답
+    // 문제 답(영어)
     @Column
-    private String answer;
+    private String englishAnswer;
+
+    // 문제 답(한국어)
+    @Column
+    private String koreanAnswer;
 }
