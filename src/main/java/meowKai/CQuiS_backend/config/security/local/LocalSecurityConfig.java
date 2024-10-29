@@ -55,6 +55,7 @@ public class LocalSecurityConfig {
                 // 인증 없이 접근 가능한 요청
                 .authorizeHttpRequests(
                         requests -> requests.requestMatchers(
+                                "ws://**", // 웹 소켓
                                 "/api/admin/**",
                                 "/api/auth/login",
                                 "/api/auth/signup",
