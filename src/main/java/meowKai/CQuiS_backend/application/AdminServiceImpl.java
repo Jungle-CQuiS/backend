@@ -38,6 +38,7 @@ public class AdminServiceImpl implements AdminService {
         Quiz quiz = Quiz.builder()
                 .name(requestDto.getName())
                 .category(foundCategory)
+                .type(requestDto.getType())
                 .build();
         Quiz savedQuiz = quizRepository.save(quiz);
         foundCategory.addQuiz(savedQuiz);
@@ -73,6 +74,7 @@ public class AdminServiceImpl implements AdminService {
         Quiz quiz = Quiz.builder()
                 .name(requestDto.getName())
                 .category(foundCategory)
+                .type(requestDto.getType())
                 .build();
         Quiz savedQuiz = quizRepository.save(quiz);
         foundCategory.addQuiz(savedQuiz);

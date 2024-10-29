@@ -22,6 +22,7 @@ public class LocalCorsConfig {
                 List.of(
                         "http://localhost:8080/**",
                         "http://localhost:3000/**",
+                        "ws://**", // 웹 소켓
                         "/swagger-ui/**"
                 )
         );

@@ -53,6 +53,7 @@ public class ProdSecurityConfig {
                 // TODO: 개발 끝나면 swagger-ui 지우기
                 .authorizeHttpRequests(requests -> requests.requestMatchers(
                                 "/ws/**",
+                                "ws://**", // 웹 소켓
                                 "/api/admin/**",
                                 "/api/auth/login",
                                 "/api/auth/signup",
