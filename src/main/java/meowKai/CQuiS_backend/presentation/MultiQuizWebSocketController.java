@@ -1,36 +1,33 @@
 package meowKai.CQuiS_backend.presentation;
 
-import io.swagger.v3.oas.annotations.headers.Header;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import meowKai.CQuiS_backend.application.GameRoomService;
 import meowKai.CQuiS_backend.application.GameRoomWebSocketService;
-import meowKai.CQuiS_backend.application.GameRoomWebSocketServiceImpl;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
-import java.util.Map;
+import java.security.Principal;
 
 @Slf4j
 @Controller
 @RequiredArgsConstructor
 public class MultiQuizWebSocketController {
 
-    private final GameRoomService gameRoomService;
     private final GameRoomWebSocketService gameRoomWebSocketService;
+
+    @PersistenceContext
     private final SimpMessagingTemplate messagingTemplate;
 
     // (PUB)방 입장 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/join")
-    public void joinRoom(@Payload  RequestWebSocketJoinRoom requestDto, @Headers Map<String, Object> headers) {
-        log.info("웹소켓 헤거: {}", headers);
+    public void joinRoom(@Payload RequestWebSocketJoinRoom requestDto, Principal principal) {
         log.info("join 요청 받음: {}", requestDto);
+        log.info("현재 인증된 사용자: {}", principal.getName());
         ResponseGetRoomInfoDto responseRoomInfoDto = gameRoomWebSocketService.joinRoom(requestDto);
         messagingTemplate.convertAndSend(
                 "/topic/rooms/" + requestDto.getRoomId() + "/info",
