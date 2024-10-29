@@ -25,6 +25,7 @@ public class ProdCorsConfig {
                         "http://cquis.net",
                         "http://dev.cquis.net",
                         "ws://**", // 웹 소켓
+                        "wss://**", // 웹 소켓
                         "/swagger-ui/**"
                 )
         );
