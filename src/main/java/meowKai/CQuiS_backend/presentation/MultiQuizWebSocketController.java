@@ -29,7 +29,7 @@ public class MultiQuizWebSocketController {
     // (PUB)방 입장 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/join")
     public void joinRoom(@Payload  RequestWebSocketJoinRoom requestDto, @Headers Map<String, Object> headers) {
-        log.info("웹소켓 헤거: {}", headers);
+        log.info("웹소켓 헤더: {}", headers);
         log.info("join 요청 받음: {}", requestDto);
         ResponseGetRoomInfoDto responseRoomInfoDto = gameRoomWebSocketService.joinRoom(requestDto);
         messagingTemplate.convertAndSend(
