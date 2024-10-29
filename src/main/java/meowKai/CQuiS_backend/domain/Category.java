@@ -34,4 +34,11 @@ public class Category {
     @Column
     @Enumerated(STRING)
     private CategoryType category;
+
+    /**
+     * 엔티티 비즈니스 로직
+     */
+    public void addQuiz(Quiz quiz) {
+        this.quizzes.add(quiz);
+    }
 }

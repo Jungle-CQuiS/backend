@@ -8,7 +8,7 @@ import meowKai.CQuiS_backend.domain.CategoryType;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseCreateNewMultipleAnswerQuizDto {
+public class ResponseCreateNewChoiceAnswerQuizDto {
 
     private Long quizId;
     private String name;

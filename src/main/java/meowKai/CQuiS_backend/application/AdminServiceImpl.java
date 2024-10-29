@@ -3,12 +3,12 @@ package meowKai.CQuiS_backend.application;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.domain.*;
-import meowKai.CQuiS_backend.dto.request.RequestCreateNewMultipleAnswerQuiz;
+import meowKai.CQuiS_backend.dto.request.RequestCreateNewChoiceAnswerQuiz;
 import meowKai.CQuiS_backend.dto.request.RequestCreateNewShortAnswerQuizDto;
-import meowKai.CQuiS_backend.dto.response.ResponseCreateNewMultipleAnswerQuizDto;
+import meowKai.CQuiS_backend.dto.response.ResponseCreateNewChoiceAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.infrastructure.CategoryRepository;
-import meowKai.CQuiS_backend.infrastructure.MultiAnsQuizRepository;
+import meowKai.CQuiS_backend.infrastructure.ChoiceAnsQuizRepository;
 import meowKai.CQuiS_backend.infrastructure.QuizRepository;
 import meowKai.CQuiS_backend.infrastructure.ShortAnsQuizRepository;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class AdminServiceImpl implements AdminService {
     private final CategoryRepository categoryRepository;
     private final QuizRepository quizRepository;
     private final ShortAnsQuizRepository shortAnsQuizRepository;
-    private final MultiAnsQuizRepository multiAnsQuizRepository;
+    private final ChoiceAnsQuizRepository choiceAnsQuizRepository;
 
     // 주관식 퀴즈 생성하기
     @Override
@@ -40,6 +40,7 @@ public class AdminServiceImpl implements AdminService {
                 .category(foundCategory)
                 .build();
         Quiz savedQuiz = quizRepository.save(quiz);
+        foundCategory.addQuiz(savedQuiz);
 
         // 주관식 퀴즈 생성
         ShortAnsQuiz shortAnsQuiz = ShortAnsQuiz.builder()
@@ -63,7 +64,7 @@ public class AdminServiceImpl implements AdminService {
 
     // 객관식 퀴즈 생성하기
     @Override
-    public ResponseCreateNewMultipleAnswerQuizDto createNewMultipleQuiz(RequestCreateNewMultipleAnswerQuiz requestDto) {
+    public ResponseCreateNewChoiceAnswerQuizDto createNewChoiceQuiz(RequestCreateNewChoiceAnswerQuiz requestDto) {
         log.info("객관식 퀴즈 생성 요청 : {}", requestDto);
         Category foundCategory = categoryRepository.findByCategory(requestDto.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
@@ -74,9 +75,10 @@ public class AdminServiceImpl implements AdminService {
                 .category(foundCategory)
                 .build();
         Quiz savedQuiz = quizRepository.save(quiz);
+        foundCategory.addQuiz(savedQuiz);
 
         // 객관식 퀴즈 생성하기
-        MultiAnsQuiz multiAnsQuiz = MultiAnsQuiz.builder()
+        ChoiceAnsQuiz choiceAnsQuiz = ChoiceAnsQuiz.builder()
                 .quiz(savedQuiz)
                 .choice1(requestDto.getChoice1())
                 .choice2(requestDto.getChoice2())
@@ -84,13 +86,13 @@ public class AdminServiceImpl implements AdminService {
                 .choice4(requestDto.getChoice4())
                 .answer(requestDto.getAnswer())
                 .build();
-        multiAnsQuizRepository.save(multiAnsQuiz);
+        choiceAnsQuizRepository.save(choiceAnsQuiz);
 
-        ResponseCreateNewMultipleAnswerQuizDto responseDto = ResponseCreateNewMultipleAnswerQuizDto
+        ResponseCreateNewChoiceAnswerQuizDto responseDto = ResponseCreateNewChoiceAnswerQuizDto
                 .builder()
                 .quizId(savedQuiz.getId())
                 .name(savedQuiz.getName())
-                .answer(multiAnsQuiz.getAnswer())
+                .answer(choiceAnsQuiz.getAnswer())
                 .category(foundCategory.getCategory())
                 .build();
         log.info("객관식 퀴즈 생성 완료 : {}", responseDto);
@@ -105,9 +107,9 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void createNewMultipleMultipleQuiz(List<RequestCreateNewMultipleAnswerQuiz> requestList) {
-        for (RequestCreateNewMultipleAnswerQuiz request : requestList) {
-            createNewMultipleQuiz(request);
+    public void createNewMultipleChoiceQuiz(List<RequestCreateNewChoiceAnswerQuiz> requestList) {
+        for (RequestCreateNewChoiceAnswerQuiz request : requestList) {
+            createNewChoiceQuiz(request);
         }
     }
 }

@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.application.AdminService;
-import meowKai.CQuiS_backend.dto.request.RequestCreateNewMultipleAnswerQuiz;
+import meowKai.CQuiS_backend.dto.request.RequestCreateNewChoiceAnswerQuiz;
 import meowKai.CQuiS_backend.dto.request.RequestCreateNewShortAnswerQuizDto;
-import meowKai.CQuiS_backend.dto.response.ResponseCreateNewMultipleAnswerQuizDto;
+import meowKai.CQuiS_backend.dto.response.ResponseCreateNewChoiceAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +32,8 @@ public class AdminController {
     @Tag(name = "관리자")
     @Operation(summary = "객관식 퀴즈 생성")
     @PostMapping("/quiz-creation/multiple-choice")
-    public ApiResponse<Object> createNewMultipleQuiz(@Valid @RequestBody RequestCreateNewMultipleAnswerQuiz requestDto) {
-        ResponseCreateNewMultipleAnswerQuizDto responseDto = adminService.createNewMultipleQuiz(requestDto);
+    public ApiResponse<Object> createNewChoiceAnswerQuiz(@Valid @RequestBody RequestCreateNewChoiceAnswerQuiz requestDto) {
+        ResponseCreateNewChoiceAnswerQuizDto responseDto = adminService.createNewChoiceQuiz(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
 
@@ -48,8 +48,8 @@ public class AdminController {
     @Tag(name = "관리자")
     @Operation(summary = "객관식 퀴즈 여러개 생성하기")
     @PostMapping("/quiz-creation/multiple-choice/multiple")
-    public ApiResponse<Object> createNewMultipleMultipleAnswerQuiz(@Valid @RequestBody List<RequestCreateNewMultipleAnswerQuiz> requestList) {
-        adminService.createNewMultipleMultipleQuiz(requestList);
+    public ApiResponse<Object> createNewMultipleChoiceAnswerQuiz(@Valid @RequestBody List<RequestCreateNewChoiceAnswerQuiz> requestList) {
+        adminService.createNewMultipleChoiceQuiz(requestList);
         return ApiResponse.ofSuccess();
     }
 }

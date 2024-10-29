@@ -9,7 +9,7 @@ import meowKai.CQuiS_backend.domain.QuizType;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RequestCreateNewMultipleAnswerQuiz {
+public class RequestCreateNewChoiceAnswerQuiz {
 
     private CategoryType category;
     private String name;
