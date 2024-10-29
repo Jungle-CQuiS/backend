@@ -31,11 +31,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setHandshakeHandler(new CustomHandshakeHandler())
-                .setAllowedOrigins("*");
+                .setAllowedOriginPatterns("*");
         registry.addEndpoint("/ws")
-                .setHandshakeHandler(new CustomHandshakeHandler())
-                .setAllowedOrigins("*")
+                .setAllowedOriginPatterns("*")
                 .withSockJS();
 
     }
@@ -46,11 +44,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-
-                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    // 현재 인증 정보 가져오기
-                    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                    accessor.setUser(authentication);
+                if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
+                    accessor.setUser(null); // 인증 없이 요청을 처리하게 설정
                 }
                 return message;
             }

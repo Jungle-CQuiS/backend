@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.config.security.*;
+import meowKai.CQuiS_backend.config.security.local.LocalSecurityConfig;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,9 +40,39 @@ public class ProdSecurityConfig {
     private final UserRepository userRepository;
     private final ProdCorsConfig prodCorsConfig;
 
+    // WebSocket 요청을 처리하는 필터 클래스 분리
+    private class WebSocketJwtFilter extends OncePerRequestFilter {
+        private final JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter;
+
+        public WebSocketJwtFilter(JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter) {
+            this.jwtAuthenticationProcessingFilter = jwtAuthenticationProcessingFilter;
+        }
+
+        @Override
+        protected void doFilterInternal(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        FilterChain filterChain) throws ServletException, IOException {
+            // WebSocket 관련 요청은 JWT 필터를 건너뛰기
+            if (request.getRequestURI().startsWith("/ws") ||
+                    request.getRequestURI().startsWith("/app") ||
+                    request.getRequestURI().startsWith("/topic") ||
+                    request.getRequestURI().startsWith("/queue")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            try {
+                // 다른 요청은 JWT 필터 적용
+                jwtAuthenticationProcessingFilter.doFilter(request, response, filterChain);
+            } catch (Exception e) {
+                throw new ServletException("JWT Authentication failed", e);
+            }
+        }
+    }
+
     // HTTP 요청에 대한 보안 필터 체인 구성
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, CustomLoginAuthFilter customLoginAuthFilter, JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter) throws Exception {
+        JwtAuthenticationProcessingFilter jwtFilter = jwtAuthenticationProcessingFilter();
         http
                 // CORS 설정
                 .cors(cors -> cors.configurationSource(prodCorsConfig.corsConfigurationSource()))
@@ -60,10 +91,10 @@ public class ProdSecurityConfig {
                 // 인증 없이 접근 가능한 요청
                 // TODO: 개발 끝나면 swagger-ui 지우기
                 .authorizeHttpRequests(requests -> requests.requestMatchers(
-                                "ws/**", // 웹 소켓
-                                "/ws/**", // 웹 소켓
-                                "ws://**", // 웹 소켓
-                                "wss://**", // 웹 소켓
+                                "/ws/**",
+                                "/app/**",
+                                "/topic/**",
+                                "/queue/**",
                                 "/api/admin/**",
                                 "/api/auth/login",
                                 "/api/auth/signup",
@@ -91,7 +122,7 @@ public class ProdSecurityConfig {
 
         http
                 .addFilterAfter(customLoginAuthFilter(), LogoutFilter.class)
-                .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomLoginAuthFilter.class);
+                .addFilterBefore(new WebSocketJwtFilter(jwtFilter), CustomLoginAuthFilter.class);
 
         return http.build();
     }
@@ -144,9 +175,6 @@ public class ProdSecurityConfig {
     // jwt 인증 필터
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() throws Exception {
-        JwtAuthenticationProcessingFilter jsonUsernamePasswordLoginFilter =
-                new JwtAuthenticationProcessingFilter(jwtService, userRepository);
-
-        return jsonUsernamePasswordLoginFilter;
+        return new JwtAuthenticationProcessingFilter(jwtService, userRepository);
     }
 }

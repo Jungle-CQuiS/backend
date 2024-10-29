@@ -28,25 +28,22 @@ public class MultiQuizWebSocketController {
 
     // (PUB)방 입장 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/join")
-    public void joinRoom(@Payload  RequestWebSocketJoinRoom requestDto, @Headers Map<String, Object> headers) {
-        log.info("웹소켓 헤거: {}", headers);
+    public void joinRoom(RequestWebSocketJoinRoom requestDto) {
         log.info("join 요청 받음: {}", requestDto);
         ResponseGetRoomInfoDto responseRoomInfoDto = gameRoomWebSocketService.joinRoom(requestDto);
         messagingTemplate.convertAndSend(
                 "/topic/rooms/" + requestDto.getRoomId() + "/info",
                 responseRoomInfoDto
         );
-
-
-        ResponseJoinRoomDto responseRoomUserDto = gameRoomWebSocketService
-                .getRoomUserId(new RequestJoinRoomDto(requestDto.getUuid()));
-        log.info("유저에게 개별 구독 메시지 전송: {}", requestDto.getUuid());
-        messagingTemplate.convertAndSendToUser(
-                requestDto.getUuid().toString(),
-                "/queue/rooms/join",
-                responseRoomUserDto
-        );
-        log.info("개별 구독 메시지 전송: {}", responseRoomUserDto);
+//        ResponseJoinRoomDto responseRoomUserDto = gameRoomWebSocketService
+//                .getRoomUserId(new RequestJoinRoomDto(requestDto.getUuid()));
+//        log.info("유저에게 개별 구독 메시지 전송: {}", requestDto.getUuid());
+//        messagingTemplate.convertAndSendToUser(
+//                requestDto.getUuid().toString(),
+//                "/queue/rooms/join",
+//                responseRoomUserDto
+//        );
+//        log.info("개별 구독 메시지 전송: {}", responseRoomUserDto);
     }
 
     // (PUB)팀 변경 - (SUB)유저 변경 알림
