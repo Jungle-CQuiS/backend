@@ -7,6 +7,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -17,6 +18,8 @@ public class ProdCorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
+        config.setAllowedMethods(Arrays.asList("GET", "POST"));
+        config.setAllowedHeaders(Arrays.asList("*"));
         config.setAllowedOriginPatterns(
                 // TODO: 배포 시 swagger 삭제하기!
                 List.of(
