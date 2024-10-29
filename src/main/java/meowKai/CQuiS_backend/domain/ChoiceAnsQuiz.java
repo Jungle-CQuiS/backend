@@ -12,7 +12,7 @@ import static lombok.AccessLevel.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class MultiAnsQuiz {
+public class ChoiceAnsQuiz {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -41,5 +41,5 @@ public class MultiAnsQuiz {
 
     // 문제 답
     @Column
-    private String answer;
+    private Integer answer;
 }

@@ -26,7 +26,7 @@ public class Quiz {
 
     // 객관식 퀴즈와 매핑
     @OneToOne(fetch = LAZY, mappedBy = "quiz")
-    private MultiAnsQuiz multiAnsQuiz;
+    private ChoiceAnsQuiz choiceAnsQuiz;
 
     // 주관식 퀴즈와 매핑
     @OneToOne(fetch = LAZY, mappedBy = "quiz")

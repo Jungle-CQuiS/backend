@@ -55,16 +55,16 @@ public class LocalSecurityConfig {
                 // 인증 없이 접근 가능한 요청
                 .authorizeHttpRequests(
                         requests -> requests.requestMatchers(
+                                "/api/admin/**",
                                 "/api/auth/login",
                                 "/api/auth/signup",
                                 "/api/auth/username/**",
                                 "/api/auth/email/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
-                        )
-                        .permitAll()
-                        // 그 외의 요청은 모두 인증 요청
-                        .anyRequest().authenticated());
+                                ).permitAll()
+                                // 그 외의 요청은 모두 인증 요청
+                                .anyRequest().authenticated());
 
         http
                 .addFilterAfter(customLoginAuthFilter(), LogoutFilter.class)
