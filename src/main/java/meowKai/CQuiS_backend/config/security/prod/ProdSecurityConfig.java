@@ -1,6 +1,10 @@
 package meowKai.CQuiS_backend.config.security.prod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.config.security.*;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
@@ -17,7 +21,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -65,7 +73,20 @@ public class ProdSecurityConfig {
                         )
                         .permitAll()
                         // 그 외의 요청은 모두 인증 요청
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated())
+                        .addFilterBefore(
+                                new OncePerRequestFilter() {
+                                    @Override
+                                    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+                                        if (request.getRequestURI().startsWith("/ws")) {
+                                            filterChain.doFilter(request, response);
+                                            return;
+                                        }
+                                        jwtAuthenticationProcessingFilter.doFilter(request, response, filterChain);
+                                    }
+                                },
+                                UsernamePasswordAuthenticationFilter.class
+                );
 
         http
                 .addFilterAfter(customLoginAuthFilter(), LogoutFilter.class)
