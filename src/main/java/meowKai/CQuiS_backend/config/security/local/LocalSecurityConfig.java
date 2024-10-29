@@ -56,6 +56,7 @@ public class LocalSecurityConfig {
                 .authorizeHttpRequests(
                         requests -> requests.requestMatchers(
                                 "ws://**", // 웹 소켓
+                                "wss://**", // 웹 소켓
                                 "/api/admin/**",
                                 "/api/auth/login",
                                 "/api/auth/signup",
