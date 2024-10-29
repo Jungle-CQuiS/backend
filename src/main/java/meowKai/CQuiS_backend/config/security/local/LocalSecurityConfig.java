@@ -49,23 +49,22 @@ public class LocalSecurityConfig {
         }
 
         @Override
+        protected boolean shouldNotFilter(HttpServletRequest request) {
+            return request.getRequestURI().startsWith("/ws") ||
+                    request.getRequestURI().startsWith("/app") ||
+                    request.getRequestURI().startsWith("/topic") ||
+                    request.getRequestURI().startsWith("/queue");
+        }
+
+        @Override
         protected void doFilterInternal(HttpServletRequest request,
                                         HttpServletResponse response,
                                         FilterChain filterChain) throws ServletException, IOException {
-            // WebSocket 관련 요청은 JWT 필터를 건너뛰기
-            if (request.getRequestURI().startsWith("/ws") ||
-                    request.getRequestURI().startsWith("/app") ||
-                    request.getRequestURI().startsWith("/topic") ||
-                    request.getRequestURI().startsWith("/queue")) {
+            if (shouldNotFilter(request)) {
                 filterChain.doFilter(request, response);
                 return;
             }
-            try {
-                // 다른 요청은 JWT 필터 적용
-                jwtAuthenticationProcessingFilter.doFilter(request, response, filterChain);
-            } catch (Exception e) {
-                throw new ServletException("JWT Authentication failed", e);
-            }
+            jwtAuthenticationProcessingFilter.doFilter(request, response, filterChain);
         }
     }
 
@@ -162,16 +161,11 @@ public class LocalSecurityConfig {
         return loginFilter;
     }
 
-//    // jwt 인증 필터
-//    @Bean
-//    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() throws Exception {
-//        JwtAuthenticationProcessingFilter jsonUsernamePasswordLoginFilter =
-//                new JwtAuthenticationProcessingFilter(jwtService, userRepository);
-//
-//        return jsonUsernamePasswordLoginFilter;
-//    }
+    // jwt 인증 필터
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() throws Exception {
-        return new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+        JwtAuthenticationProcessingFilter jsonUsernamePasswordLoginFilter =
+                new JwtAuthenticationProcessingFilter(jwtService, userRepository);
+        return jsonUsernamePasswordLoginFilter;
     }
 }
