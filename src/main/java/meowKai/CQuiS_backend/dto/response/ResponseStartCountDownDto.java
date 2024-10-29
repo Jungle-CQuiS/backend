@@ -1,7 +1,7 @@
 package meowKai.CQuiS_backend.dto.response;
 
 import lombok.*;
-import meowKai.CQuiS_backend.domain.GameEvent;
+import meowKai.CQuiS_backend.domain.GameStatus;
 
 @Builder
 @Getter
@@ -9,6 +9,6 @@ import meowKai.CQuiS_backend.domain.GameEvent;
 @NoArgsConstructor
 @ToString
 public class ResponseStartCountDownDto {
-    private GameEvent gameEvent;
+    private GameStatus gameStatus;
     private Integer count;
 }

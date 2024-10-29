@@ -84,11 +84,11 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         roomUserRepository.save(foundRoomUser);
 
         if(!foundRoomUser.getIsReady()) {
-            if(foundRoom.getGameEvent() == GameEvent.ALL_READY) {   // ALL_READY 상태에서 유저가 레디 취소하면
+            if(foundRoom.getGameStatus() == GameStatus.ALL_READY) {   // ALL_READY 상태에서 유저가 레디 취소하면
                 stopCountdown(foundRoom);
             }
         } else if (isAllReady(foundRoom)) {     // 모든 유저가 레디했다면
-            foundRoom.changeGameEvent(GameEvent.ALL_READY);
+            foundRoom.changeGameEvent(GameStatus.ALL_READY);
             gameRoomRepository.save(foundRoom);
             startCountdown(foundRoom);
         }
@@ -456,7 +456,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         ScheduledFuture<?> task = taskScheduler.scheduleAtFixedRate(() -> {     // 중괄호 안의 코드를 1초마다 반복하는 작업, ScheduledFuture로 작업을 관리
             try {
                 // 상태가 ALLREADY가 아니면 카운트다운 중지
-                if (gameRoom.getGameEvent() != GameEvent.ALL_READY) {
+                if (gameRoom.getGameStatus() != GameStatus.ALL_READY) {
                     stopCountdown(gameRoom);
                     return;
                 }
@@ -466,17 +466,17 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                     // 남은 시간(초)을 전송
                     messagingTemplate.convertAndSend("/topic/rooms/" + gameRoom.getId() + "/status",
                             ResponseStartCountDownDto.builder()
-                                    .gameEvent(gameRoom.getGameEvent())
+                                    .gameStatus(gameRoom.getGameStatus())
                                     .count(currentCount)
                                     .build());
                 } else {
-                    gameRoom.changeGameEvent(GameEvent.GAME_START);     // 시간이 다 되어 GameRoom의 상태 전환
+                    gameRoom.changeGameEvent(GameStatus.GAME_START);     // 시간이 다 되어 GameRoom의 상태 전환
                     gameRoomRepository.save(gameRoom);
                     stopCountdown(gameRoom);
 
                     messagingTemplate.convertAndSend("/topic/rooms/" + gameRoom.getId() + "/status",
                             ResponseStartCountDownDto.builder()
-                                    .gameEvent(gameRoom.getGameEvent())
+                                    .gameStatus(gameRoom.getGameStatus())
                                     .count(currentCount)
                                     .build());
                 }
@@ -492,16 +492,16 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     // 카운트 다운 도중 레디 취소가 발생했을 때 처리
     private void stopCountdown(GameRoom gameRoom) {
         ScheduledFuture<?> task = countdownTasks.remove(gameRoom.getId());
-        gameRoom.changeGameEvent(GameEvent.STOP_READY);
+        gameRoom.changeGameEvent(GameStatus.STOP_READY);
         if(task != null) {
             task.cancel(false); // 작업 중지
         }
         messagingTemplate.convertAndSend("/topic/rooms/" + gameRoom.getId() + "/status",
                 ResponseStartCountDownDto.builder()
-                        .gameEvent(gameRoom.getGameEvent())
+                        .gameStatus(gameRoom.getGameStatus())
                         .count(10)
                         .build());
-        gameRoom.changeGameEvent(GameEvent.WAITING);
+        gameRoom.changeGameEvent(GameStatus.WAITING);
 
     }
 }
