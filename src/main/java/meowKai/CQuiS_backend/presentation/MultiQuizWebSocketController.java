@@ -15,6 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.util.Map;
 
 @Slf4j
@@ -22,14 +23,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MultiQuizWebSocketController {
 
-    private final GameRoomService gameRoomService;
     private final GameRoomWebSocketService gameRoomWebSocketService;
     private final SimpMessagingTemplate messagingTemplate;
 
     // (PUB)방 입장 - (SUB)유저 변경 알림
     @MessageMapping("/rooms/join")
-    public void joinRoom(@Payload  RequestWebSocketJoinRoom requestDto, @Headers Map<String, Object> headers) {
-        log.info("웹소켓 헤거: {}", headers);
+    public void joinRoom(@Payload  RequestWebSocketJoinRoom requestDto, Principal principal) {
+        String userUuid = principal.getName();
+
         log.info("join 요청 받음: {}", requestDto);
         ResponseGetRoomInfoDto responseRoomInfoDto = gameRoomWebSocketService.joinRoom(requestDto);
         messagingTemplate.convertAndSend(
@@ -37,12 +38,12 @@ public class MultiQuizWebSocketController {
                 responseRoomInfoDto
         );
 
-
         ResponseJoinRoomDto responseRoomUserDto = gameRoomWebSocketService
                 .getRoomUserId(new RequestJoinRoomDto(requestDto.getUuid()));
+
         log.info("유저에게 개별 구독 메시지 전송: {}", requestDto.getUuid());
         messagingTemplate.convertAndSendToUser(
-                requestDto.getUuid().toString(),
+                userUuid,
                 "/queue/rooms/join",
                 responseRoomUserDto
         );

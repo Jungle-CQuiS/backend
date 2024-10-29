@@ -15,6 +15,8 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import java.util.UUID;
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -31,10 +33,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setHandshakeHandler(new CustomHandshakeHandler())
+//                .setHandshakeHandler(new CustomHandshakeHandler())
                 .setAllowedOrigins("*");
         registry.addEndpoint("/ws")
-                .setHandshakeHandler(new CustomHandshakeHandler())
+//                .setHandshakeHandler(new CustomHandshakeHandler())
                 .setAllowedOrigins("*")
                 .withSockJS();
 
@@ -47,10 +49,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    // 현재 인증 정보 가져오기
-                    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                    accessor.setUser(authentication);
+                if(StompCommand.CONNECT.equals(accessor.getCommand())) {
+                    String uuid = accessor.getNativeHeader("uuid") != null ?
+                            accessor.getNativeHeader("uuid").get(0) :
+                            UUID.randomUUID().toString();
+                    accessor.setUser(new StompPrincipal(uuid));
                 }
                 return message;
             }
