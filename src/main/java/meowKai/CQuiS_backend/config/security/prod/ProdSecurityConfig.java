@@ -78,6 +78,7 @@ public class ProdSecurityConfig {
                                 "/api/admin/**",
                                 "/api/auth/login",
                                 "/api/auth/signup",
+                                "/api/admin/health-check",
                                 "/api/auth/username/**",
                                 "/api/auth/email/**",
                                 "/swagger-ui/**",
