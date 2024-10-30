@@ -60,6 +60,8 @@ public class ProdSecurityConfig {
                 // 인증 없이 접근 가능한 요청
                 // TODO: 개발 끝나면 swagger-ui 지우기
                 .authorizeHttpRequests(requests -> requests.requestMatchers(
+                                "/", // 메인 페이지
+                                "/index.html", // 메인 페이지
                                 "ws/**", // 웹 소켓 기본
                                 "/ws/**", // 웹 소켓 하위 경로
                                 "/topic/**", // 구독
