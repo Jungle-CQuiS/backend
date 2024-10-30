@@ -23,6 +23,8 @@ public class ProdCorsConfig {
         config.setAllowedOriginPatterns(
                 // TODO: 배포 시 swagger 삭제하기!
                 List.of(
+                        "http://localhost:3000",
+                        "https://localhost:3000",
                         "ws://localhost:8080/ws", // TODO: 임시, 나중에 삭제하기
                         "https://cquis.net",
                         "https://dev.cquis.net",
