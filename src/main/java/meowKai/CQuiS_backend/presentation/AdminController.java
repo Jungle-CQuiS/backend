@@ -22,6 +22,13 @@ public class AdminController {
     private final AdminService adminService;
 
     @Tag(name = "관리자")
+    @Operation(summary = "서버 상태 체크")
+    @GetMapping("/health-check")
+    public ApiResponse<Object> healthCheck() {
+        return ApiResponse.ofSuccess();
+    }
+
+    @Tag(name = "관리자")
     @Operation(summary = "주관식 퀴즈 생성")
     @PostMapping("/quiz-creation/short-answer")
     public ApiResponse<Object> createNewShortAnswerQuiz(@Valid @RequestBody RequestCreateNewShortAnswerQuizDto requestDto) {
