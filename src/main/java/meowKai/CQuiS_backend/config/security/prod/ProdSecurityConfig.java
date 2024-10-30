@@ -46,10 +46,10 @@ public class ProdSecurityConfig {
                 // CORS 설정
                 .cors(cors -> cors.configurationSource(prodCorsConfig.corsConfigurationSource()))
                 // JWT 사용하기 때문에 세션 상태 STATELESS로 설정
-//                .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // TODO: https 프로토콜 요청만 허용하도록 나중에 바꿔야함.
                 // https 프로토콜 요청만 허용
-                .requiresChannel(rcc -> rcc.anyRequest().requiresSecure())
+//                .requiresChannel(rcc -> rcc.anyRequest().requiresSecure())
                 // csrf 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
