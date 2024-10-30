@@ -19,22 +19,22 @@ public class ProdCorsConfig {
 
         config.setAllowCredentials(true);
         config.setAllowedMethods(Arrays.asList("GET", "POST"));
-        config.setAllowedHeaders(Arrays.asList("*"));
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowedOriginPatterns(
                 // TODO: 배포 시 swagger 삭제하기!
                 List.of(
                         "http://localhost:3000",
                         "https://localhost:3000",
                         "ws://localhost:8080/ws", // TODO: 임시, 나중에 삭제하기
-                        "https://cquis.net/**",
-                        "https://dev.cquis.net/**",
-                        "http://cquis.net/**",
-                        "http://dev.cquis.net/**",
-                        "/ws/**", // 웹 소켓
-                        "ws/**", // 웹 소켓
-                        "ws://**", // 웹 소켓
-                        "wss://**", // 웹 소켓
-                        "/swagger-ui/**"
+                        "https://cquis.net",
+                        "https://dev.cquis.net",
+                        "http://cquis.net",
+                        "http://dev.cquis.net",
+                        "/ws/", // 웹 소켓
+                        "ws/", // 웹 소켓
+                        "ws://", // 웹 소켓
+                        "wss://", // 웹 소켓
+                        "/swagger-ui/"
                 )
         );
         config.addAllowedMethod("*");
