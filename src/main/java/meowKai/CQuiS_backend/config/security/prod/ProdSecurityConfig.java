@@ -76,7 +76,10 @@ public class ProdSecurityConfig {
                         )
                         .permitAll()
                         // 그 외의 요청은 모두 인증 요청
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated());
+
+        http
+                .addFilterAfter(customLoginAuthFilter(), LogoutFilter.class)
                 .addFilterBefore(
                         new OncePerRequestFilter() {
                             @Override
@@ -100,11 +103,6 @@ public class ProdSecurityConfig {
                         },
                         UsernamePasswordAuthenticationFilter.class
                 );
-
-        http
-                .addFilterAfter(customLoginAuthFilter(), LogoutFilter.class)
-                .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomLoginAuthFilter.class);
-
         return http.build();
     }
 
