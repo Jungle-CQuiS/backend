@@ -271,6 +271,8 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         if(shouldDeleteRoom) {
             gameRoomRepository.delete(foundRoom);
             log.info("ws - 퇴장 - 방 삭제: {}", foundRoom.getId());
+        } else {
+            gameRoomRepository.save(foundRoom);
         }
 
         // 영속성 컨텍스트를 비워서 변경사항 DB에 반영

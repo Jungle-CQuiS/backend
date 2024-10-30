@@ -292,6 +292,8 @@ public class GameRoomServiceImpl implements GameRoomService {
         if(shouldDeleteRoom) {
             gameRoomRepository.delete(foundRoom);
             log.info("퇴장 - 방 삭제: {}", foundRoom.getId());
+        } else {
+            gameRoomRepository.save(foundRoom);
         }
 
         ResponseExitDto responseDto = ResponseExitDto.builder()

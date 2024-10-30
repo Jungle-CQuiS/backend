@@ -51,7 +51,7 @@ public class GameRoom extends BaseEntity {
     public static GameRoom createGameRoom(String name, Integer maxUsers, Integer password) {
         return GameRoom.builder()
                 .name(name)
-                .currentUsers(1)
+                .currentUsers(0)
                 .maxUsers(maxUsers)
                 .password(password)
                 .gameStatus(GameStatus.WAITING)
