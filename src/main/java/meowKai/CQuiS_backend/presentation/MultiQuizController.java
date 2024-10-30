@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.application.GameRoomService;
+import meowKai.CQuiS_backend.application.QuizService;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class MultiQuizController {
 
     private final GameRoomService gameRoomService;
+    private final QuizService quizService;
 
     @Tag(name = "멀티모드 퀴즈")
     @Operation(summary = "퀴즈방 목록 조회")
@@ -30,6 +32,14 @@ public class MultiQuizController {
     @PostMapping("/rooms")
     public ApiResponse<Object> createMultiRoom(@Valid @RequestBody RequestCreateMultiRoomDto requestDto) {
         ResponseCreateMultiRoomDto responseDto = gameRoomService.createMultiRoom(requestDto);
+        return ApiResponse.ofSuccess(responseDto);
+    }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "카테고리 별로 랜덤 문제 두 문제씩 가져오기")
+    @GetMapping("/random-quizzes/categories")
+    public ApiResponse<Object> getRandomQuizzesByCategories() {
+        ResponseGetRandomQuizzesByCategoriesDto responseDto = quizService.getRandomQuizzesByCategories();
         return ApiResponse.ofSuccess(responseDto);
     }
 
