@@ -60,10 +60,12 @@ public class ProdSecurityConfig {
                 // 인증 없이 접근 가능한 요청
                 // TODO: 개발 끝나면 swagger-ui 지우기
                 .authorizeHttpRequests(requests -> requests.requestMatchers(
-                                "ws/**", // 웹 소켓
-                                "/ws/**", // 웹 소켓
-                                "ws://**", // 웹 소켓
-                                "wss://**", // 웹 소켓
+                                "ws/**", // 웹 소켓 기본
+                                "/ws/**", // 웹 소켓 하위 경로
+                                "/topic/**", // 구독
+                                "/queue/**", // 개인 메시지
+                                "/app/**", // 메시지 발행
+                                "/user/**", // 사용자별 메시지
                                 "/api/admin/**",
                                 "/api/auth/login",
                                 "/api/auth/signup",
@@ -75,18 +77,28 @@ public class ProdSecurityConfig {
                         .permitAll()
                         // 그 외의 요청은 모두 인증 요청
                         .anyRequest().authenticated())
-                        .addFilterBefore(
-                                new OncePerRequestFilter() {
-                                    @Override
-                                    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-                                        if (request.getRequestURI().startsWith("/ws")) {
-                                            filterChain.doFilter(request, response);
-                                            return;
-                                        }
-                                        jwtAuthenticationProcessingFilter.doFilter(request, response, filterChain);
-                                    }
-                                },
-                                UsernamePasswordAuthenticationFilter.class
+                .addFilterBefore(
+                        new OncePerRequestFilter() {
+                            @Override
+                            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+                                // 웹소켓 관련 모든 요청 체크
+                                if (isWebSocketRequest(request)) {
+                                    filterChain.doFilter(request, response);
+                                    return;
+                                }
+                                jwtAuthenticationProcessingFilter.doFilter(request, response, filterChain);
+                            }
+
+                            private boolean isWebSocketRequest(HttpServletRequest request) {
+                                String path = request.getRequestURI();
+                                return path.startsWith("/ws") ||
+                                        path.startsWith("/topic") ||
+                                        path.startsWith("/app") ||
+                                        path.startsWith("/queue") ||
+                                        path.startsWith("/user");
+                            }
+                        },
+                        UsernamePasswordAuthenticationFilter.class
                 );
 
         http
