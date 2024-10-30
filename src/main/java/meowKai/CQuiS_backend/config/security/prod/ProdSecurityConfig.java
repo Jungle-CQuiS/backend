@@ -1,6 +1,10 @@
 package meowKai.CQuiS_backend.config.security.prod;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.config.security.*;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
@@ -17,7 +21,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -52,8 +60,21 @@ public class ProdSecurityConfig {
                 // 인증 없이 접근 가능한 요청
                 // TODO: 개발 끝나면 swagger-ui 지우기
                 .authorizeHttpRequests(requests -> requests.requestMatchers(
-                                "/ws/**",
-                                "ws://**", // 웹 소켓
+//                                "/", // 메인 페이지
+//                                "/index.html", // 메인 페이지
+//                                "/*.html", // HTML 파일들
+//                                "/*.js", // JS 파일들
+//                                "/*.css", // CSS 파일들
+//                                "/*.ico", // favicon
+//                                "/assets/**", // 정적 리소스들
+//                                "/static/**", // 정적 리소스들
+//                                "/images/**", // 이미지 파일들
+                                "ws/**", // 웹 소켓 기본
+                                "/ws/**", // 웹 소켓 하위 경로
+                                "/topic/**", // 구독
+                                "/queue/**", // 개인 메시지
+                                "/app/**", // 메시지 발행
+                                "/user/**", // 사용자별 메시지
                                 "/api/admin/**",
                                 "/api/auth/login",
                                 "/api/auth/signup",
@@ -68,8 +89,36 @@ public class ProdSecurityConfig {
 
         http
                 .addFilterAfter(customLoginAuthFilter(), LogoutFilter.class)
-                .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomLoginAuthFilter.class);
+                .addFilterBefore(
+                        new OncePerRequestFilter() {
+                            @Override
+                            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+                                // 웹소켓 관련 모든 요청 체크
+                                if (isWebSocketRequest(request)) {
+                                    filterChain.doFilter(request, response);
+                                    return;
+                                }
+                                jwtAuthenticationProcessingFilter.doFilter(request, response, filterChain);
+                            }
 
+                            private boolean isWebSocketRequest(HttpServletRequest request) {
+                                // Upgrade 헤더와 Connection 헤더를 확인하여 WebSocket 요청을 식별
+                                String upgradeHeader = request.getHeader("Upgrade");
+                                String connectionHeader = request.getHeader("Connection");
+
+                                String path = request.getRequestURI();
+
+                                return path.startsWith("/ws") || //
+                                        path.startsWith("/topic") ||
+                                        path.startsWith("/app") ||
+                                        path.startsWith("/queue") ||
+                                        path.startsWith("/user") ||
+                                        "websocket".equalsIgnoreCase(upgradeHeader) ||
+                                        "Upgrade".equalsIgnoreCase(connectionHeader);
+                            }
+                        },
+                        UsernamePasswordAuthenticationFilter.class
+                );
         return http.build();
     }
 

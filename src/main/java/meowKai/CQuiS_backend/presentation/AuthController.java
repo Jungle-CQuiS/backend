@@ -10,6 +10,7 @@ import meowKai.CQuiS_backend.dto.response.ResponseDuplicateCheckEmailDto;
 import meowKai.CQuiS_backend.dto.response.ResponseDuplicateCheckUsernameDto;
 import meowKai.CQuiS_backend.dto.response.ResponseSignUpDto;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
+import meowKai.CQuiS_backend.infrastructure.UserRepository;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
+    private final UserRepository userRepository; // TODO: 테스트용 지우기!
 
     @Tag(name = "보안")
     @Operation(summary = "회원가입")
@@ -44,8 +46,9 @@ public class AuthController {
         return ApiResponse.ofSuccess(responseDto);
     }
 
+    // TODO: 로그아웃, 로그인 Spring Security로 구현하기
     // TODO: 로그인 시 User 엔티티의 lastAccessed 필드 업데이트 하기
-    // TODO: 로그아웃 시 accessToken destroy 처리해야함.
+    // TODO: 로그인 시 accessToken destroy 처리해야함.
     @Tag(name = "보안")
     @Operation(summary = "로그아웃")
     @PostMapping("/logout")
