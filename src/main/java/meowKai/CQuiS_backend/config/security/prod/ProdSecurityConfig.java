@@ -62,6 +62,13 @@ public class ProdSecurityConfig {
                 .authorizeHttpRequests(requests -> requests.requestMatchers(
                                 "/", // 메인 페이지
                                 "/index.html", // 메인 페이지
+                                "/*.html", // HTML 파일들
+                                "/*.js", // JS 파일들
+                                "/*.css", // CSS 파일들
+                                "/*.ico", // favicon
+                                "/assets/**", // 정적 리소스들
+                                "/static/**", // 정적 리소스들
+                                "/images/**", // 이미지 파일들
                                 "ws/**", // 웹 소켓 기본
                                 "/ws/**", // 웹 소켓 하위 경로
                                 "/topic/**", // 구독
