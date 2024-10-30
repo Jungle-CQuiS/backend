@@ -102,12 +102,19 @@ public class ProdSecurityConfig {
                             }
 
                             private boolean isWebSocketRequest(HttpServletRequest request) {
+                                // Upgrade 헤더와 Connection 헤더를 확인하여 WebSocket 요청을 식별
+                                String upgradeHeader = request.getHeader("Upgrade");
+                                String connectionHeader = request.getHeader("Connection");
+
                                 String path = request.getRequestURI();
-                                return path.startsWith("/ws") ||
+
+                                return path.startsWith("/ws") || //
                                         path.startsWith("/topic") ||
                                         path.startsWith("/app") ||
                                         path.startsWith("/queue") ||
-                                        path.startsWith("/user");
+                                        path.startsWith("/user") ||
+                                        "websocket".equalsIgnoreCase(upgradeHeader) ||
+                                        "Upgrade".equalsIgnoreCase(connectionHeader);
                             }
                         },
                         UsernamePasswordAuthenticationFilter.class
