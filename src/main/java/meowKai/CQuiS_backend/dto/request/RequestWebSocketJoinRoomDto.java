@@ -9,7 +9,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class RequestWebSocketJoinRoom {
+public class RequestWebSocketJoinRoomDto {
     private UUID uuid;
     private Long roomId;
 }

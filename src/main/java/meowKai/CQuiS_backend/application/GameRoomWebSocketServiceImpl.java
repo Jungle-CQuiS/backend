@@ -11,14 +11,19 @@ import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +37,10 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     private final GameRoomRepository gameRoomRepository;
     private final RoomUserRepository roomUserRepository;
     private final UserRepository userRepository;
+
+    private final Map<Long, ScheduledFuture<?>> countdownTasks = new ConcurrentHashMap<>(); // 카운트다운 관리
+    private final SimpleAsyncTaskScheduler taskScheduler;
+    private final SimpMessagingTemplate messagingTemplate; // 웹 소켓 통신으로 메시지 전달 시에 사용
 
     @Override
     @Transactional
@@ -48,6 +57,16 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         foundRoomUser.changeTeam();
         roomUserRepository.save(foundRoomUser);
+
+        if(!foundRoomUser.getIsReady()) {
+            if(foundRoom.getGameStatus() == GameStatus.ALL_READY) { // ALL_READY 상태에서 유저가 레디를 취소하면
+                stopCountdown(foundRoom);
+            }
+        } else if(isAllReady(foundRoom)) { // 모든 유저가 레디했다면
+            foundRoom.changeGameStatus(GameStatus.ALL_READY);
+            gameRoomRepository.save(foundRoom);
+            startCountdown(foundRoom);
+        }
 
         // 영속성 컨텍스트를 비워서 변경사항 DB에 반영
         entityManager.flush();
@@ -270,7 +289,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
     @Override
     @Transactional
-    public ResponseGetRoomInfoDto joinRoom(RequestWebSocketJoinRoom requestDto) {
+    public ResponseGetRoomInfoDto joinRoom(RequestWebSocketJoinRoomDto requestDto) {
         log.info("ws - 방 입장 요청: {}", requestDto);
 
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
@@ -408,6 +427,13 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         return (Integer) gameRoom.getRoomUsers().size();
     }
 
+    // 모든 유저가 레디 상태인지 확인
+    private boolean isAllReady(GameRoom gameRoom) {
+        return gameRoom.getRoomUsers().stream()
+                .filter(RoomUser::getIsReady)
+                .count()
+                == countRoomUser(gameRoom);
+    }
 
     // 유저가 들어오는 상황에서 팀이 비어있는지 확인
     private boolean isTeamEmpty(GameRoom gameRoom, RoomUserTeam teamColor) {
@@ -421,5 +447,63 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                 .filter(user -> user.getTeam() == teamColor)
                 .count()
                 >= (gameRoom.getMaxUsers() / 2);
+    }
+
+    // 모든 유저가 레디했을 때 5초를 카운트하면서 지속적으로 남은 시간(초)을 전송
+    private void startCountdown(GameRoom gameRoom) {
+        if(countdownTasks.containsKey(gameRoom.getId())) {
+            stopCountdown(gameRoom);
+        }
+
+        AtomicInteger count = new AtomicInteger(5);     // 원자성 보장을 위해 AtomicInteger 사용
+        ScheduledFuture<?> task = taskScheduler.scheduleAtFixedRate(() -> {
+            try {
+                // ALL_READY 상태가 아니라면 카운트다운 중지
+                if (gameRoom.getGameStatus() != GameStatus.ALL_READY) {
+                    stopCountdown(gameRoom);
+                    return;
+                }
+
+                int currentCount = count.getAndDecrement();
+                if (currentCount > 0) {
+                    // 남은 시간(초)을 전송
+                    messagingTemplate.convertAndSend("/topic/rooms/" + gameRoom.getId() + "/status",
+                            ResponseStartCountdownDto.builder()
+                                    .gameStatus(gameRoom.getGameStatus())
+                                    .count(currentCount)
+                                    .build());
+                } else {
+                    gameRoom.changeGameStatus(GameStatus.GAME_START);   // 시간이 다 되어 GameRoom의 상태 전환
+                    gameRoomRepository.save(gameRoom);
+                    stopCountdown(gameRoom);
+
+                    messagingTemplate.convertAndSend("/topic/rooms/" + gameRoom.getId() + "/status",
+                            ResponseStartCountdownDto.builder()
+                                    .gameStatus(gameRoom.getGameStatus())
+                                    .count(currentCount)
+                                    .build());
+                }
+            } catch (Exception e) {
+                log.error("게임 시작 카운트다운 에러: {}", e.getMessage());
+                stopCountdown(gameRoom);
+            }
+        }, Duration.ofSeconds(1));
+
+        countdownTasks.put(gameRoom.getId(), task);
+    }
+
+    // 카운트다운 도중 레디 취소가 발생했을 때 처리
+    private void stopCountdown(GameRoom gameRoom) {
+        ScheduledFuture<?> task = countdownTasks.remove(gameRoom.getId());
+        gameRoom.changeGameStatus(GameStatus.STOP_READY);
+        if(task != null) {
+            task.cancel(false); // 작업 중지
+        }
+        messagingTemplate.convertAndSend("/topic/rooms/" + gameRoom.getId() + "/status",
+                ResponseStartCountdownDto.builder()
+                        .gameStatus(gameRoom.getGameStatus())
+                        .count(10)
+                        .build());
+        gameRoom.changeGameStatus(GameStatus.WAITING);
     }
 }
