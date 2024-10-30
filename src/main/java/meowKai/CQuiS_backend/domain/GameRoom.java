@@ -40,6 +40,9 @@ public class GameRoom extends BaseEntity {
     @Column
     private Integer password;
 
+    @Enumerated(value = EnumType.STRING)
+    private GameStatus gameStatus;
+
     /**
      * 엔티티 비즈니스 로직
      */
@@ -51,6 +54,7 @@ public class GameRoom extends BaseEntity {
                 .currentUsers(1)
                 .maxUsers(maxUsers)
                 .password(password)
+                .gameStatus(GameStatus.WAITING)
                 .build();
     }
 
@@ -64,4 +68,8 @@ public class GameRoom extends BaseEntity {
         this.currentUsers--;
     }
 
+    // 게임 상태 전환
+    public void changeGameStatus(GameStatus gameStatus) {
+        this.gameStatus = gameStatus;
+    }
 }
