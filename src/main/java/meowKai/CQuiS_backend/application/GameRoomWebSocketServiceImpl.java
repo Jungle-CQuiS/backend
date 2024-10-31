@@ -58,16 +58,6 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         foundRoomUser.changeTeam();
         roomUserRepository.save(foundRoomUser);
 
-        if(!foundRoomUser.getIsReady()) {
-            if(foundRoom.getGameStatus() == GameStatus.ALL_READY) { // ALL_READY 상태에서 유저가 레디를 취소하면
-                stopCountdown(foundRoom);
-            }
-        } else if(isAllReady(foundRoom)) { // 모든 유저가 레디했다면
-            foundRoom.changeGameStatus(GameStatus.ALL_READY);
-            gameRoomRepository.save(foundRoom);
-            startCountdown(foundRoom);
-        }
-
         // 영속성 컨텍스트를 비워서 변경사항 DB에 반영
         entityManager.flush();
         entityManager.clear();
@@ -92,9 +82,18 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         if(!foundRoomUser.getGameRoom().getId().equals(foundRoom.getId())) {
             throw new IllegalStateException("ws - 레디 - 방에 해당 유저가 존재하지 않습니다.");
         }
-
         foundRoomUser.changeReady();
         roomUserRepository.save(foundRoomUser);
+
+        if(!foundRoomUser.getIsReady()) {
+            if(foundRoom.getGameStatus() == GameStatus.ALL_READY) { // ALL_READY 상태에서 유저가 레디를 취소하면
+                stopCountdown(foundRoom);
+            }
+        } else if(isAllReady(foundRoom)) { // 모든 유저가 레디했다면
+            foundRoom.changeGameStatus(GameStatus.ALL_READY);
+            gameRoomRepository.save(foundRoom);
+            startCountdown(foundRoom);
+        }
 
         // 영속성 컨텍스트를 비워서 변경사항 DB에 반영
         entityManager.flush();
