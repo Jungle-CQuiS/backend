@@ -280,29 +280,27 @@ public class QuizServiceImpl implements QuizService {
             for (Quiz randomQuiz : randomQuizzes) {
 
                 if (randomQuiz.getType() == QuizType.CHOICE) {
-                    ChoiceAnsQuiz choiceAnsQuiz = choiceAnsQuizRepository.findByQuiz(randomQuiz);
                     responseDto.getRandomQuizList().add(GetChoiceAnsQuizDto.builder()
                             .categoryId(randomQuiz.getCategory().getId())
                             .quizId(randomQuiz.getId())
                             .categoryType(randomQuiz.getCategory().getCategory())
                             .name(randomQuiz.getName())
-                            .choice1(choiceAnsQuiz.getChoice1())
-                            .choice2(choiceAnsQuiz.getChoice2())
-                            .choice3(choiceAnsQuiz.getChoice3())
-                            .choice4(choiceAnsQuiz.getChoice4())
-                            .answer(choiceAnsQuiz.getAnswer())
+                            .choice1(randomQuiz.getChoiceAnsQuiz().getChoice1())
+                            .choice2(randomQuiz.getChoiceAnsQuiz().getChoice2())
+                            .choice3(randomQuiz.getChoiceAnsQuiz().getChoice3())
+                            .choice4(randomQuiz.getChoiceAnsQuiz().getChoice4())
+                            .answer(randomQuiz.getChoiceAnsQuiz().getAnswer())
                             .build()
                     );
                 }
                 else if (randomQuiz.getType() == QuizType.SHORT) {
-                    ShortAnsQuiz shortAnsQuiz = shortAnsQuizRepository.findByQuiz(randomQuiz);
                     responseDto.getRandomQuizList().add(GetShortAnsQuizDto.builder()
                             .categoryId(randomQuiz.getCategory().getId())
                             .quizId(randomQuiz.getId())
                             .categoryType(randomQuiz.getCategory().getCategory())
                             .name(randomQuiz.getName())
-                            .englishAnswer(shortAnsQuiz.getEnglishAnswer())
-                            .koreanAnswer(shortAnsQuiz.getKoreanAnswer())
+                            .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
+                            .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
                             .build()
                     );
                 }
