@@ -8,7 +8,6 @@ import meowKai.CQuiS_backend.domain.GameStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ResponseStartCountdownDto {
+public class ResponseChangeGameStatusDto {
     private GameStatus gameStatus;
-    private Integer count;
 }
