@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.application.quiz.KoreanAnalyzer;
 import meowKai.CQuiS_backend.application.quiz.SimilarityCalculator;
-import meowKai.CQuiS_backend.domain.Category;
-import meowKai.CQuiS_backend.domain.Quiz;
-import meowKai.CQuiS_backend.domain.QuizType;
+import meowKai.CQuiS_backend.domain.*;
 import meowKai.CQuiS_backend.dto.GetCategoryDto;
 import meowKai.CQuiS_backend.dto.GetChoiceAnsQuizDto;
 import meowKai.CQuiS_backend.dto.GetShortAnsQuizDto;
@@ -282,27 +280,29 @@ public class QuizServiceImpl implements QuizService {
             for (Quiz randomQuiz : randomQuizzes) {
 
                 if (randomQuiz.getType() == QuizType.CHOICE) {
+                    ChoiceAnsQuiz choiceAnsQuiz = choiceAnsQuizRepository.findByQuiz(randomQuiz);
                     responseDto.getRandomQuizList().add(GetChoiceAnsQuizDto.builder()
                             .categoryId(randomQuiz.getCategory().getId())
                             .quizId(randomQuiz.getId())
                             .categoryType(randomQuiz.getCategory().getCategory())
                             .name(randomQuiz.getName())
-                            .choice1(randomQuiz.getChoiceAnsQuiz().getChoice1())
-                            .choice2(randomQuiz.getChoiceAnsQuiz().getChoice2())
-                            .choice3(randomQuiz.getChoiceAnsQuiz().getChoice3())
-                            .choice4(randomQuiz.getChoiceAnsQuiz().getChoice4())
-                            .answer(randomQuiz.getChoiceAnsQuiz().getAnswer())
+                            .choice1(choiceAnsQuiz.getChoice1())
+                            .choice2(choiceAnsQuiz.getChoice2())
+                            .choice3(choiceAnsQuiz.getChoice3())
+                            .choice4(choiceAnsQuiz.getChoice4())
+                            .answer(choiceAnsQuiz.getAnswer())
                             .build()
                     );
                 }
                 else if (randomQuiz.getType() == QuizType.SHORT) {
+                    ShortAnsQuiz shortAnsQuiz = shortAnsQuizRepository.findByQuiz(randomQuiz);
                     responseDto.getRandomQuizList().add(GetShortAnsQuizDto.builder()
                             .categoryId(randomQuiz.getCategory().getId())
                             .quizId(randomQuiz.getId())
                             .categoryType(randomQuiz.getCategory().getCategory())
                             .name(randomQuiz.getName())
-                            .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
-                            .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
+                            .englishAnswer(shortAnsQuiz.getEnglishAnswer())
+                            .koreanAnswer(shortAnsQuiz.getKoreanAnswer())
                             .build()
                     );
                 }
