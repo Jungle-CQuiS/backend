@@ -12,7 +12,6 @@ import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,11 +32,12 @@ public class GameRoomServiceImpl implements GameRoomService {
     private final UserRepository userRepository;
 
     // TODO: 페이지네이션 | 무한스크롤로 구현하기
-    // 존재하는 모든 멀티 게임 방 조회하기
+    // TODO: gameStatus == WAITING인 GameRoom만 조회되도록 수정
+    // 입장할 수 있는 멀티 게임 방 조회하기
     @Override
     public ResponseGetMultiRoomListDto getMultiRoomList() {
         log.info("멀티 게임 방 리스트 조회 요청");
-        List<GameRoom> gameRoomList = gameRoomRepository.findAll();
+        List<GameRoom> gameRoomList = gameRoomRepository.findByGameStatus(GameStatus.WAITING); // gameStatus가 WAITING인 방만 가져옴
 
         if(gameRoomList.isEmpty()) {
             ResponseGetMultiRoomListDto responseDto = ResponseGetMultiRoomListDto.builder()
@@ -66,7 +66,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         return responseDto;
     }
 
-    // TODO: 중간 테이블 생성하고 방 만든 사람 방장으로 설정하기
+    // TODO: 중간 테이블 생성
     // 멀티 게임 방 생성하기
     @Override
     @Transactional
@@ -384,28 +384,6 @@ public class GameRoomServiceImpl implements GameRoomService {
         return responseDto;
     }
 
-    /**
-     * GameRoom을 인자로 넘겨주면 해당 방에 있는
-     * 각 유저의 정보를 바탕으로 MultiRoomUserDto를 생성한 뒤
-     * 그것을 리스트로 만들고
-     * ResponseGetRoomInfoDto에 넣어서 반환
-     */
-    private static ResponseGetRoomInfoDto getResponseGetRoomInfoDto(GameRoom foundRoom) {
-        return ResponseGetRoomInfoDto
-                .builder()
-                .usersData(foundRoom.getRoomUsers().stream()
-                        .map(user -> MultiRoomUserDto.builder()
-                                .roomUserId(user.getId())
-                                .username(user.getUser().getUsername())
-                                .honorCount(user.getUser().getUserStatistics().getHonorCount())
-                                .role(user.getRole())
-                                .team(user.getTeam())
-                                .isLeader(user.getIsLeader())
-                                .isReady(user.getIsReady()).build())
-                        .toList())
-                .build();
-    }
-
     private void yieldHost(GameRoom foundRoom, RoomUser yieldRoomUser) {
         List<RoomUser> currentTeamUsers = roomUserRepository.findAllByGameRoom(foundRoom);
 
@@ -456,20 +434,5 @@ public class GameRoomServiceImpl implements GameRoomService {
     // 현재 방에 몇 명이 있는지 확인
     private Integer countRoomUser(GameRoom gameRoom) {
         return (Integer) gameRoom.getRoomUsers().size();
-    }
-
-
-    // 유저가 들어오는 상황에서 팀이 비어있는지 확인
-    private boolean isTeamEmpty(GameRoom gameRoom, RoomUserTeam teamColor) {
-        return gameRoom.getRoomUsers().stream()
-                .noneMatch(user -> user.getTeam() == teamColor);
-    }
-
-    // 팀이 가득 찼는지 확인
-    private boolean isTeamFull(GameRoom gameRoom, RoomUserTeam teamColor) {
-        return gameRoom.getRoomUsers().stream()
-                .filter(user -> user.getTeam() == teamColor)
-                .count()
-                >= (gameRoom.getMaxUsers() / 2);
     }
 }
