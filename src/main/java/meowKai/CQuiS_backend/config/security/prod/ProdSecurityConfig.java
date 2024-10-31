@@ -83,7 +83,7 @@ public class ProdSecurityConfig {
                                 "/api/auth/email/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/quiz/multi/random-quizzes/categories"
+                                "/error"
                         )
                         .permitAll()
                         // 그 외의 요청은 모두 인증 요청
