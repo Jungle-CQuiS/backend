@@ -17,4 +17,5 @@ public interface GameRoomService {
     ResponseGetRoomInfoDto getRoomInfo(Long roomId); // 방 정보 조회
     ResposeCheckPasswordDto checkPassword(RequestCheckPasswordDto requestPasswordDto); // 방 비밀번호 체크
     ResponseGiveHonorDto giveHonor(RequestGiveHonorDto requestGiveHonorDto); // 특정 유저에게 명예 주기
+    ResponseGameStartDto gameStart(RequestGameStartDto requestGameStartDto); // 게임 시작 선공팀 설정
 }

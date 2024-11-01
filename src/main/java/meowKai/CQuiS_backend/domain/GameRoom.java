@@ -5,9 +5,13 @@ import lombok.*;
 import meowKai.CQuiS_backend.global.base.BaseEntity;
 
 import java.util.List;
+import java.util.Random;
 
+import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
+import static meowKai.CQuiS_backend.domain.TeamStatus.DEFENSE;
+import static meowKai.CQuiS_backend.domain.TeamStatus.OFFENSE;
 
 @Entity
 @Getter
@@ -23,6 +27,10 @@ public class GameRoom extends BaseEntity {
     // 방에 참가한 유저 목록
     @OneToMany(mappedBy = "gameRoom")
     private List<RoomUser> roomUsers;
+
+    // 방의 팀 목록
+    @OneToMany(mappedBy = "gameRoom", cascade = CascadeType.ALL)
+    private List<Team> teams;
 
     // 방 제목
     @Column
@@ -40,7 +48,7 @@ public class GameRoom extends BaseEntity {
     @Column
     private Integer password;
 
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(value = STRING)
     private GameStatus gameStatus;
 
     /**
@@ -71,5 +79,15 @@ public class GameRoom extends BaseEntity {
     // 게임 상태 전환
     public void changeGameStatus(GameStatus gameStatus) {
         this.gameStatus = gameStatus;
+    }
+
+    // 랜덤으로 공격, 수비 팀을 정하고 공격팀을 반환
+    public Team assignRandomTeamStatus() {
+        Random random = new Random();
+        int firstOffense = random.nextInt(2);
+        teams.get(firstOffense).changeTeamStatus(OFFENSE);
+        teams.get(firstOffense ^ 1).changeTeamStatus(DEFENSE);
+
+        return teams.get(firstOffense);
     }
 }

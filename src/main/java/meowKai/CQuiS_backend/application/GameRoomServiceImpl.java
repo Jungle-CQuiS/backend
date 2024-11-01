@@ -368,7 +368,7 @@ public class GameRoomServiceImpl implements GameRoomService {
     @Override
     @Transactional
     public ResponseGiveHonorDto giveHonor(RequestGiveHonorDto requestDto) {
-        log.info("명예 - 명예 주기: {}", requestDto);
+        log.info("명예 - 명예 주기 요청: {}", requestDto);
 
         RoomUser roomUser = roomUserRepository.findById(requestDto.getHonorRoomUserId()).orElseThrow(
                 () -> new NoSuchElementException("명예 - 존재하지 않는 유저입니다."));
@@ -380,6 +380,34 @@ public class GameRoomServiceImpl implements GameRoomService {
                 .build();
 
         log.info("명예 - 명예 주기 결과: {}", responseDto);
+        return responseDto;
+    }
+
+    /**
+     * 게임 시작 알림을 받으면 BLUE, RED 팀을 생성하고
+     * 랜덤으로 한 팀을 선택해 선공 팀으로 설정한 뒤 반환한다.
+     */
+    @Override
+    @Transactional
+    public ResponseGameStartDto gameStart(RequestGameStartDto requestDto) {
+        log.info("멀티 게임 시작 - 게임 시작 알림 받음: {}", requestDto);
+
+        GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("멀티 게임 시작 - 존재하지 않는 방입니다."));
+
+        foundRoom.changeGameStatus(requestDto.getGameStatus()); // 입력으로 들어온 대로 방 상태 변경
+
+        Arrays.stream(RoomUserTeam.values())
+                .forEach(teamColor -> Team.createTeam(foundRoom, teamColor)); // 레드팀, 블루팀 생성
+
+        Team firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
+
+        gameRoomRepository.save(foundRoom);
+
+        ResponseGameStartDto responseDto = ResponseGameStartDto.builder()
+                .teamColor(firstOffenseTeam.getTeamColor())
+                .build();
+        log.info("멀티 게임 시작 - 게임 세팅 완료, 선공 팀: {}", responseDto);
         return responseDto;
     }
 

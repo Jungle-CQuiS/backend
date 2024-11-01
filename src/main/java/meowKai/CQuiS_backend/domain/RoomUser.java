@@ -50,7 +50,7 @@ public class RoomUser {
 
     // 방 참가하기
     public static RoomUser createRoomUser(GameRoom gameRoom, User user, RoomUserRole userRole, RoomUserTeam userTeam) {
-        return RoomUser.builder()
+        RoomUser roomUser = RoomUser.builder()
                 .gameRoom(gameRoom)
                 .user(user)
                 .role(userRole)
@@ -58,6 +58,9 @@ public class RoomUser {
                 .isLeader(false)
                 .isReady(false)
                 .build();
+
+        gameRoom.getRoomUsers().add(roomUser); // 양방향 관계 설정
+        return roomUser;
     }
 
     // team 바꾸기
