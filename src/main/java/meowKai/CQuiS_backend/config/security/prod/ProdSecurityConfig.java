@@ -23,6 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -90,6 +92,7 @@ public class ProdSecurityConfig {
                         .anyRequest().authenticated());
 
         http
+                .addFilterBefore(characterEncodingFilter(), CsrfFilter.class) // 인코딩 필터
                 .addFilterAfter(customLoginAuthFilter(), LogoutFilter.class)
                 .addFilterBefore(
                         new OncePerRequestFilter() {
@@ -176,5 +179,14 @@ public class ProdSecurityConfig {
                 new JwtAuthenticationProcessingFilter(jwtService, userRepository);
 
         return jsonUsernamePasswordLoginFilter;
+    }
+
+    // 유니코드 인코딩 필터
+    @Bean
+    public CharacterEncodingFilter characterEncodingFilter() throws Exception{
+        CharacterEncodingFilter filter = new CharacterEncodingFilter();
+        filter.setEncoding("UTF-8");
+        filter.setForceEncoding(true);
+        return filter;
     }
 }
