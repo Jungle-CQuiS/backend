@@ -14,4 +14,5 @@ public class ResponseLoginDto {
     private UUID uuid;
     private String accessToken;
     private String refreshToken;
+    private String username;
 }

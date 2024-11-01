@@ -26,12 +26,13 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 
         String email = extractEmail(authentication);
         UUID uuid = extractUuid(authentication);
+        String username = extractUsername(authentication);
 
         // 로그인 성공 시 JWT 발급
         String accessToken = jwtService.createAccessToken(email);
         String refreshToken = jwtService.createRefreshToken();
 
-        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken, uuid);
+        jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken, uuid, username);
         userRepository.findByEmail(email).ifPresent(
                 user -> jwtService.updateRefreshToken(email, refreshToken)
         );
@@ -49,5 +50,11 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
     private UUID extractUuid(Authentication authentication) {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         return userDetails.getUuid();
+    }
+
+    // Authentication 객체에서 username 추출
+    private String extractUsername(Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return userDetails.getNickname();
     }
 }

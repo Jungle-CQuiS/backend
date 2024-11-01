@@ -17,6 +17,10 @@ public interface JwtService {
     void removeRefreshToken(String email);
 
     void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken, UUID uuid) throws IOException;
+
+    // access token, refresh token 전송
+    void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken, UUID uuid, String username) throws IOException;
+
     void sendAccessToken(HttpServletResponse response, String accessToken) throws IOException;
 
     Optional<String> extractAccessToken(HttpServletRequest request) throws IOException, ServletException;

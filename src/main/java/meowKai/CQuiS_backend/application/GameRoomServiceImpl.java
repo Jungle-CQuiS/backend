@@ -32,7 +32,6 @@ public class GameRoomServiceImpl implements GameRoomService {
     private final UserRepository userRepository;
 
     // TODO: 페이지네이션 | 무한스크롤로 구현하기
-    // TODO: gameStatus == WAITING인 GameRoom만 조회되도록 수정
     // 입장할 수 있는 멀티 게임 방 조회하기
     @Override
     public ResponseGetMultiRoomListDto getMultiRoomList() {
