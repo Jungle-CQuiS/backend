@@ -47,7 +47,7 @@ public class Team {
     }
 
     //  수비 팀이 방어에 실패하면 체력 감소
-    public void decreseHp() {
+    public void decreaseHp() {
         this.teamHp--;
     }
 
