@@ -109,6 +109,26 @@ public class JwtServiceImpl implements JwtService{
         response.getWriter().write(responseData);
     }
 
+    // 기존의 반환 + 닉네임 전송
+    @Override
+    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken, UUID uuid, String username) throws IOException {
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        setAccessTokenHeader(response, accessToken);
+        setRefreshTokenHeader(response, refreshToken);
+
+        ResponseLoginDto responseDto = ResponseLoginDto
+                .builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .uuid(uuid)
+                .username(username)
+                .build();
+//        Map<String, String> tokenMap = Map.of(ACCESS_TOKEN_SUBJECT, accessToken, REFRESH_TOKEN_SUBJECT, refreshToken);
+        String responseData = objectMapper.writeValueAsString(responseDto);
+        response.getWriter().write(responseData);
+    }
+
     // access token 전송
     @Override
     public void sendAccessToken(HttpServletResponse response, String accessToken) throws IOException {
