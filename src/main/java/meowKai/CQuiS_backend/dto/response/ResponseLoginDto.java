@@ -12,7 +12,7 @@ import java.util.UUID;
 public class ResponseLoginDto {
 
     private UUID uuid;
+    private String username;
     private String accessToken;
     private String refreshToken;
-    private String username;
 }
