@@ -123,4 +123,12 @@ public class MultiQuizController {
         ResposeCheckPasswordDto responseDto = gameRoomService.checkPassword(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "게임 시작 - 선공 팀 설정")
+    @PostMapping("/game/start")
+    public ApiResponse<Object> gameStart(@RequestBody RequestGameStartDto requestDto) {
+        ResponseGameStartDto responseDto = gameRoomService.gameStart(requestDto);
+        return ApiResponse.ofSuccess(responseDto);
+    }
 }
