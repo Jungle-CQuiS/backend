@@ -214,7 +214,7 @@ public class UtilServiceImpl implements UtilService {
 
         String jsonSchema = """
                 {
-                    "type": "array",
+                    "type": "object",
                     "items": {
                         "type": "object",
                         "properties": {
