@@ -9,7 +9,7 @@ import meowKai.CQuiS_backend.dto.request.RequestCreateChoiceQuizzesFromTextDto;
 import meowKai.CQuiS_backend.dto.request.RequestCreateNewChoiceAnswerQuiz;
 import meowKai.CQuiS_backend.dto.request.RequestCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.request.RequestCreateShortQuizzesFromTextDto;
-import meowKai.CQuiS_backend.dto.response.ResponseCreateChoiceQuizzesFromTextDto;
+import meowKai.CQuiS_backend.dto.response.ResponseCreateChoiceQuizFromTextDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewChoiceAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateShortQuizzesFromTextDto;
@@ -50,8 +50,8 @@ public class UtilController {
     @PostMapping("/quiz-creation/choice-answer")
     public ApiResponse<Object> createChoiceAnsQuizFromText(@Valid @RequestBody RequestCreateChoiceQuizzesFromTextDto requestDto) {
         try {
-            ResponseCreateChoiceQuizzesFromTextDto responseDto = utilService.generateChoiceAnswerQuizzesFromText(requestDto);
-            return ApiResponse.ofSuccess(responseDto);
+            List<ResponseCreateChoiceQuizFromTextDto> response = utilService.generateChoiceAnswerQuizzesFromText(requestDto);
+            return ApiResponse.ofSuccess(response);
         }
         catch (Exception e) {
             return ApiResponse.ofFail(e.getMessage());

@@ -5,7 +5,7 @@ import meowKai.CQuiS_backend.dto.request.RequestCreateChoiceQuizzesFromTextDto;
 import meowKai.CQuiS_backend.dto.request.RequestCreateNewChoiceAnswerQuiz;
 import meowKai.CQuiS_backend.dto.request.RequestCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.request.RequestCreateShortQuizzesFromTextDto;
-import meowKai.CQuiS_backend.dto.response.ResponseCreateChoiceQuizzesFromTextDto;
+import meowKai.CQuiS_backend.dto.response.ResponseCreateChoiceQuizFromTextDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewChoiceAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateShortQuizzesFromTextDto;
@@ -18,5 +18,5 @@ public interface UtilService {
     void createNewMultipleShortQuiz(List<RequestCreateNewShortAnswerQuizDto> requestList);
     void createNewMultipleChoiceQuiz(List<RequestCreateNewChoiceAnswerQuiz> requestList);
     ResponseCreateShortQuizzesFromTextDto generateShortAnswerQuizzesFromText(RequestCreateShortQuizzesFromTextDto requestDto) throws JsonProcessingException;
-    ResponseCreateChoiceQuizzesFromTextDto generateChoiceAnswerQuizzesFromText(RequestCreateChoiceQuizzesFromTextDto requestDto) throws JsonProcessingException;
+    List<ResponseCreateChoiceQuizFromTextDto> generateChoiceAnswerQuizzesFromText(RequestCreateChoiceQuizzesFromTextDto requestDto) throws JsonProcessingException;
 }
