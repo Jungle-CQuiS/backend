@@ -1,6 +1,7 @@
 package meowKai.CQuiS_backend.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.aot.hint.TypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
@@ -281,16 +283,32 @@ public class UtilServiceImpl implements UtilService {
 
     private List<ResponseCreateChoiceQuizFromTextDto> parseResponse(ChatResponse chatResponse) {
         ObjectMapper objectMapper = new ObjectMapper();
-        return chatResponse.getResults().stream()
-                .map(generation -> {
-                    try {
-                        String jsonData = generation.getOutput().getContent();
-                        return objectMapper.readValue(jsonData, ResponseCreateChoiceQuizFromTextDto.class);
-                    }
-                    catch (JsonProcessingException e) {
-                        throw new RuntimeException("JSON 매핑 오류.", e);
-                    }
-                })
-                .toList();
+        try {
+            // JSON 응답에서 quizzes 배열을 추출
+            String jsonData = chatResponse.getResults().get(0).getOutput().getContent();
+            JsonNode rootNode = objectMapper.readTree(jsonData);
+            JsonNode quizzesNode = rootNode.get("quizzes");
+
+            // quizzes 배열을 List<ResponseCreateChoiceQuizFromTextDto>로 변환
+            return objectMapper.convertValue(
+                    quizzesNode,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, ResponseCreateChoiceQuizFromTextDto.class)
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON 매핑 오류.", e);
+        }
+//        return chatResponse.getResults().stream()
+//                .map(generation -> {
+//                    try {
+//                        String jsonData = generation.getOutput().getContent();
+//                        JsonNode rootNode = objectMapper.readTree(jsonData);
+//                        JsonNode quizzesNode = rootNode.get("quizzes");
+//                        return objectMapper.readValue(quizzesNode.toString(), ResponseCreateChoiceQuizFromTextDto.class);
+//                    }
+//                    catch (JsonProcessingException e) {
+//                        throw new RuntimeException("JSON 매핑 오류.", e);
+//                    }
+//                })
+//                .toList();
     }
 }
