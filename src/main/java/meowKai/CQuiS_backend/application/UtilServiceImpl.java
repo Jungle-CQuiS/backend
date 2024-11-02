@@ -23,11 +23,12 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.aot.hint.TypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -240,27 +241,9 @@ public class UtilServiceImpl implements UtilService {
         }
         """;
 
-//        String jsonSchema = """
-//                {
-//                    "type": "object",
-//                    "items": {
-//                        "type": "object",
-//                        "properties": {
-//                            "quizName": { "type": "string" },
-//                            "choice1": { "type": "string" },
-//                            "choice2": { "type": "string" },
-//                            "choice3": { "type": "string" },
-//                            "choice4": { "type": "string" },
-//                            "answer": { "type": "integer" }
-//                        },
-//                        "required": ["quizName", "choice1", "choice2", "choice3", "choice4", "answer"],
-//                        "additionalProperties": false
-//                    }
-//                }
-//                """;
-
         log.info("객관식 퀴즈 추출 요청 : {}...", inputData.substring(0, 15));
-        String inputPrompt = String.format(CHOICE_QUIZ_PROMPT, inputData, quizCount);
+        String decodedText = Base64.getEncoder().encodeToString(inputData.getBytes(StandardCharsets.UTF_8));
+        String inputPrompt = String.format(CHOICE_QUIZ_PROMPT, decodedText, quizCount);
 
         Prompt prompt = new Prompt(inputPrompt,
                 OpenAiChatOptions.builder()
