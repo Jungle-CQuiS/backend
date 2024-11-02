@@ -242,7 +242,7 @@ public class UtilServiceImpl implements UtilService {
         """;
 
         log.info("객관식 퀴즈 추출 요청 : {}...", inputData.substring(0, 15));
-        String decodedText = Base64.getEncoder().encodeToString(inputData.getBytes(StandardCharsets.UTF_8));
+        String decodedText = new String(Base64.getDecoder().decode(inputData), StandardCharsets.UTF_8);
         String inputPrompt = String.format(CHOICE_QUIZ_PROMPT, decodedText, quizCount);
 
         Prompt prompt = new Prompt(inputPrompt,
