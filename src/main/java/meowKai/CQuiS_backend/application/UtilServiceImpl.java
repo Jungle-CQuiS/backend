@@ -212,8 +212,16 @@ public class UtilServiceImpl implements UtilService {
     @Override
     public List<ResponseCreateChoiceQuizFromTextDto> generateChoiceAnswerQuizzesFromText(RequestCreateChoiceQuizzesFromTextDto requestDto) throws JsonProcessingException {
 
+        log.info("textData: {}, quizCount: {}", requestDto.getTextData(), requestDto.getQuizCount());
+
         int quizCount = requestDto.getQuizCount();
         String inputData = requestDto.getTextData();
+
+        log.info("inputData (Base64로 인코딩되어야 함): {}", inputData);
+
+        if (inputData == null || inputData.isEmpty()) {
+            log.error("inputData가 null이거나 빈 값입니다.");
+        }
 
         String jsonSchema = """
         {
@@ -245,7 +253,7 @@ public class UtilServiceImpl implements UtilService {
         String decodedText = new String(Base64.getDecoder().decode(inputData), StandardCharsets.UTF_8);
         log.info("디코딩 된 텍스트 : {}...", decodedText);
         String inputPrompt = String.format(CHOICE_QUIZ_PROMPT, decodedText, quizCount);
-        
+
         Prompt prompt = new Prompt(inputPrompt,
                 OpenAiChatOptions.builder()
                         .withModel(OpenAiApi.ChatModel.GPT_4_O_MINI)
