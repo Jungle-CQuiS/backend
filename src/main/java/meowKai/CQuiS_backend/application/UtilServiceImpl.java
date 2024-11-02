@@ -237,7 +237,10 @@ public class UtilServiceImpl implements UtilService {
         Prompt prompt = new Prompt(inputPrompt,
                 OpenAiChatOptions.builder()
                         .withModel(OpenAiApi.ChatModel.GPT_4_O_MINI)
-                        .withResponseFormat(new OpenAiApi.ChatCompletionRequest.ResponseFormat(OpenAiApi.ChatCompletionRequest.ResponseFormat.Type.JSON_SCHEMA, jsonSchema))
+                        .withResponseFormat(new OpenAiApi.ChatCompletionRequest.ResponseFormat(
+                                OpenAiApi.ChatCompletionRequest.ResponseFormat.Type.JSON_SCHEMA, "result", jsonSchema, true
+                                )
+                        )
                         .build());
 
         OpenAiChatModel chatModel = new OpenAiChatModel(
