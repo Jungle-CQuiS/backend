@@ -80,6 +80,7 @@ public class ProdSecurityConfig {
                                 "/api/util",
                                 "/api/auth/login",
                                 "/api/auth/signup",
+                                "/api/util", // TODO: 임시, 지워주기
                                 "/api/util/health-check",
                                 "/api/auth/username/**",
                                 "/api/auth/email/**",
