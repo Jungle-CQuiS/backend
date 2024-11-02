@@ -52,7 +52,6 @@ public class LocalSecurityConfig {
                         .addLogoutHandler(logoutService)
                         .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
                 )
-                // 인증 없이 접근 가능한 요청
                 .authorizeHttpRequests(
                         requests -> requests.requestMatchers(
                                 "/", // 메인 페이지
@@ -63,7 +62,7 @@ public class LocalSecurityConfig {
                                 "/queue/**", // 개인 메시지
                                 "/app/**", // 메시지 발행
                                 "/user/**", // 사용자별 메시지
-                                "/api/admin/**",
+                                "/api/util/**",
                                 "/api/auth/login",
                                 "/api/auth/signup",
                                 "/api/auth/username/**",
@@ -73,7 +72,6 @@ public class LocalSecurityConfig {
                                 ).permitAll()
                                 // 그 외의 요청은 모두 인증 요청
                                 .anyRequest().authenticated());
-
         http
                 .addFilterAfter(customLoginAuthFilter(), LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomLoginAuthFilter.class);
