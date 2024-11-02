@@ -57,6 +57,7 @@ public class UtilController {
             return ApiResponse.ofSuccess(response);
         }
         catch (Exception e) {
+            log.info("에러 발생: " + e.getMessage());
             return ApiResponse.ofFail(e.getMessage());
         }
     }
