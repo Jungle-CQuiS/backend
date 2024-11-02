@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.application.GameRoomService;
 import meowKai.CQuiS_backend.application.GameRoomWebSocketService;
+import meowKai.CQuiS_backend.dto.SelectQuizResult;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -19,7 +20,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class MultiQuizWebSocketController {
 
-    private final GameRoomService gameRoomService;
     private final GameRoomWebSocketService gameRoomWebSocketService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -103,5 +103,19 @@ public class MultiQuizWebSocketController {
                 "/topic/rooms/" + requestDto.getRoomId() + "/info",
                 responseDto
         );
+    }
+
+    // (PUB)수비팀 리더 문제 선택 - (SUB)수비팀 팀원 문제 전달
+    @MessageMapping("/game/quiz-select")
+    public void selectQuiz(RequestSelectQuizDto requestDto) {
+
+        SelectQuizResult result = gameRoomWebSocketService.selectQuiz(requestDto);
+        String destination = String.format(
+                "/topic/game/%d/%s",
+                requestDto.getRoomId(),
+                result.defenseTeamColor()
+        );
+
+        messagingTemplate.convertAndSend(destination, result.responseDto());
     }
 }

@@ -6,22 +6,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.domain.*;
 import meowKai.CQuiS_backend.dto.MultiRoomUserDto;
+import meowKai.CQuiS_backend.dto.SelectQuizResult;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
+import meowKai.CQuiS_backend.infrastructure.QuizRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +33,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     private final GameRoomRepository gameRoomRepository;
     private final RoomUserRepository roomUserRepository;
     private final UserRepository userRepository;
+    private final QuizRepository quizRepository;
 
     private final SimpMessagingTemplate messagingTemplate; // 웹 소켓 통신으로 메시지 전달 시에 사용
 
@@ -351,6 +350,43 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         log.info("ws - roomuser id 반환 결과: {}", responseDto);
         return responseDto;
+    }
+
+    // 수비 팀 리더가 선택한 퀴즈를 수비 팀 전원에게 전달
+    @Override
+    public SelectQuizResult selectQuiz(RequestSelectQuizDto requestDto) {
+        GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("퀴즈 선택 & 전달 - 존재하지 않는 방입니다."));
+
+        // 수비팀 찾기 -> GameRoom 클래스의 메소드로 빼야할까?
+        RoomUserTeam defenseTeamColor = (foundRoom.getTeams().get(0).getTeamStatus() == TeamStatus.DEFENSE
+                ? foundRoom.getTeams().get(0) : foundRoom.getTeams().get(1))
+                .getTeamColor();
+
+        foundRoom.saveCurrentQuizId(requestDto.getNumber()); // gameRoom에 currentQuizId 저장
+        gameRoomRepository.save(foundRoom);
+
+        Quiz foundQuiz = quizRepository.findById(requestDto.getNumber()).orElseThrow(
+                () -> new NoSuchElementException("퀴즈 선택 & 전달 - 존재하지 않는 퀴즈입니다."));
+
+        // QuizType에 따라 responseDto 만들어 반환
+        ResponseSelectQuizDto responseDto = foundQuiz.getType() == QuizType.SHORT ?
+                ResponseSelectShortQuizDto.builder()
+                        .quizId(foundQuiz.getId())
+                        .name(foundQuiz.getName())
+                        .categoryType(foundQuiz.getCategory().getCategory())
+                        .build() :
+                ResponseSelectChoiceQuizDto.builder()
+                        .quizId(foundQuiz.getId())
+                        .name(foundQuiz.getName())
+                        .categoryType(foundQuiz.getCategory().getCategory())
+                        .choice1(foundQuiz.getChoiceAnsQuiz().getChoice1())
+                        .choice2(foundQuiz.getChoiceAnsQuiz().getChoice2())
+                        .choice3(foundQuiz.getChoiceAnsQuiz().getChoice3())
+                        .choice4(foundQuiz.getChoiceAnsQuiz().getChoice4())
+                        .build();
+
+        return new SelectQuizResult(responseDto, defenseTeamColor);
     }
 
     /**
