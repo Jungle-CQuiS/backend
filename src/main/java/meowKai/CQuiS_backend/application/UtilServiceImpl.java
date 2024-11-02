@@ -129,7 +129,7 @@ public class UtilServiceImpl implements UtilService {
 
     @Value("${spring.ai.openai.api-key}")
     private String openAiSecretKey;
-    private static final String DEFAULT_CHAT_URL = "https://api.openai.com/v1/chat/completions";
+    private static final String DEFAULT_CHAT_URL = "https://api.openai.com";
 
     private static final String CHOICE_QUIZ_PROMPT =
             """
