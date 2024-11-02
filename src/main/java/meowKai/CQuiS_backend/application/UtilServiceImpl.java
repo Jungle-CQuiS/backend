@@ -213,8 +213,11 @@ public class UtilServiceImpl implements UtilService {
         String inputData = requestDto.getTextData();
 
         String jsonSchema = """
-                {
-                    "type": "object",
+        {
+            "type": "object",
+            "properties": {
+                "quizzes": {
+                    "type": "array",
                     "items": {
                         "type": "object",
                         "properties": {
@@ -229,7 +232,30 @@ public class UtilServiceImpl implements UtilService {
                         "additionalProperties": false
                     }
                 }
-                """;
+            },
+            "required": ["quizzes"],
+            "additionalProperties": false
+        }
+        """;
+
+//        String jsonSchema = """
+//                {
+//                    "type": "object",
+//                    "items": {
+//                        "type": "object",
+//                        "properties": {
+//                            "quizName": { "type": "string" },
+//                            "choice1": { "type": "string" },
+//                            "choice2": { "type": "string" },
+//                            "choice3": { "type": "string" },
+//                            "choice4": { "type": "string" },
+//                            "answer": { "type": "integer" }
+//                        },
+//                        "required": ["quizName", "choice1", "choice2", "choice3", "choice4", "answer"],
+//                        "additionalProperties": false
+//                    }
+//                }
+//                """;
 
         log.info("객관식 퀴즈 추출 요청 : {}...", inputData.substring(0, 15));
         String inputPrompt = String.format(CHOICE_QUIZ_PROMPT, inputData, quizCount);
