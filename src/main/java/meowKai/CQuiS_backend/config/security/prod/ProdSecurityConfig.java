@@ -77,10 +77,10 @@ public class ProdSecurityConfig {
                                 "/queue/**", // 개인 메시지
                                 "/app/**", // 메시지 발행
                                 "/user/**", // 사용자별 메시지
-                                "/api/admin/**",
+                                "/api/util",
                                 "/api/auth/login",
                                 "/api/auth/signup",
-                                "/api/admin/health-check",
+                                "/api/util/health-check",
                                 "/api/auth/username/**",
                                 "/api/auth/email/**",
                                 "/swagger-ui/**",
