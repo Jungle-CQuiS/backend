@@ -51,6 +51,10 @@ public class GameRoom extends BaseEntity {
     @Enumerated(value = STRING)
     private GameStatus gameStatus;
 
+    // 현재 선택된 퀴즈의 id
+    @Column
+    private Long currentQuizId;
+
     /**
      * 엔티티 비즈니스 로직
      */
@@ -89,5 +93,10 @@ public class GameRoom extends BaseEntity {
         teams.get(firstOffense ^ 1).changeTeamStatus(DEFENSE);
 
         return teams.get(firstOffense);
+    }
+
+    // 현재 선택된 퀴즈를 gameRoom에 저장해 둠
+    public void saveCurrentQuizId(Long quizId) {
+        this.currentQuizId = quizId;
     }
 }
