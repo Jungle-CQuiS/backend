@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.application.GameRoomService;
 import meowKai.CQuiS_backend.application.GameRoomWebSocketService;
+import meowKai.CQuiS_backend.domain.ResponseStatus;
 import meowKai.CQuiS_backend.dto.SelectQuizResult;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
@@ -109,7 +110,10 @@ public class MultiQuizWebSocketController {
     @MessageMapping("/game/quiz-select")
     public void selectQuiz(RequestSelectQuizDto requestDto) {
 
-        SelectQuizResult result = gameRoomWebSocketService.selectQuiz(requestDto);
+        SelectQuizResult<?> result = requestDto.getResponseStatus().equals(ResponseStatus.QUIZ_SELECT)
+                ? gameRoomWebSocketService.selectOption(requestDto)
+                : gameRoomWebSocketService.selectQuiz(requestDto);
+
         String destination = String.format(
                 "/topic/game/%d/%s",
                 requestDto.getRoomId(),

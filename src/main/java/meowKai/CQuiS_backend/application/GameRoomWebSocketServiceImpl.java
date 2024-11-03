@@ -355,9 +355,31 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         return responseDto;
     }
 
+    // 수비 팀 리더가 선택을 바꿀 때마다 수비 팀 전원에게 전달
+    @Override
+    public SelectQuizResult<ResponseSelectOptionDto> selectOption(RequestSelectQuizDto requestDto) {
+        log.info("ws - 수비 팀 리더 선택 변경 요청: {}", requestDto);
+
+        GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("ws - 수비 팀 리더 선택 변경 - 존재하지 않는 방입니다."));
+
+        // 수비팀 찾기 -> GameRoom 클래스의 메소드로 빼야할까?
+        RoomUserTeam defenseTeamColor = (foundRoom.getTeams().get(0).getTeamStatus() == TeamStatus.DEFENSE
+                ? foundRoom.getTeams().get(0) : foundRoom.getTeams().get(1))
+                .getTeamColor();
+
+        ResponseSelectOptionDto responseDto = ResponseSelectOptionDto.builder()
+                .responseStatus(requestDto.getResponseStatus())
+                .number(requestDto.getNumber())
+                .build();
+
+        log.info("ws - 수비 팀 리더 선택 변경 결과: {}", responseDto);
+        return new SelectQuizResult<ResponseSelectOptionDto>(responseDto, defenseTeamColor);
+    }
+
     // 수비 팀 리더가 선택한 퀴즈를 수비 팀 전원에게 전달
     @Override
-    public SelectQuizResult selectQuiz(RequestSelectQuizDto requestDto) {
+    public SelectQuizResult<ResponseSelectQuizDto> selectQuiz(RequestSelectQuizDto requestDto) {
         log.info("ws - 퀴즈 선택 & 전달 요청: {}", requestDto);
 
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
@@ -397,7 +419,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         log.info("ws - 퀴즈 선택 & 전달 결과: {}", responseDto);
 
-        return new SelectQuizResult(responseDto, defenseTeamColor);
+        return new SelectQuizResult<ResponseSelectQuizDto>(responseDto, defenseTeamColor);
     }
 
     // 수비 팀 팀원들이 제출한 답안을 roomId를 key로 저장

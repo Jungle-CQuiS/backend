@@ -13,6 +13,7 @@ public interface GameRoomWebSocketService {
     ResponseGetRoomInfoDto exit(RequestExitDto requestExitDto); // 현재 들어와 있는 방에서 퇴장
     ResponseGetRoomInfoDto joinRoom(RequestWebSocketJoinRoomDto requestJoinRoomDto); // 방 입장
     ResponseJoinRoomDto getRoomUserId(RequestJoinRoomDto requestJoinRoomDto); // 방 입장 후 생성된 RoomUser의 id 반환
-    SelectQuizResult selectQuiz(RequestSelectQuizDto requestSelectQuizDto); // 수비 팀 리더가 선택한 퀴즈를 수비 팀 전원에게 전달
+    SelectQuizResult<ResponseSelectOptionDto> selectOption(RequestSelectQuizDto requestSelectQuizDto); // 수비 팀 리더가 선택을 바꿀 때마다 수비 팀 전원에게 전달
+    SelectQuizResult<ResponseSelectQuizDto> selectQuiz(RequestSelectQuizDto requestSelectQuizDto); // 수비 팀 리더가 최종적으로 선택한 퀴즈를 수비 팀 전원에게 전달
     void submitPersonal(RequestSubmitPersonalDto requestSubmitPersonalDto); // 수비 팀 팀원들이 답안을 제출
 }
