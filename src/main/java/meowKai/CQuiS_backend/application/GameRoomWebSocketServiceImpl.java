@@ -307,9 +307,10 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         // 방이 비어있으면 joinedRoomUser를 host, leader로
         System.out.println(countRoomUser(foundRoom));
-        if(countRoomUser(foundRoom) <= 0) {
+        if(countRoomUser(foundRoom) <= 1) {
             joinedRoomUser.changeRole();
             joinedRoomUser.changeLeader();
+            log.info("ws - 입장 - 첫 번째 유저입니다: {}", joinedRoomUser.getId());
         } else {
             // 비어있는 팀이 있으면 joinedRoomUser를 해당 팀으로 보내고 리더로 설정
             Arrays.stream(RoomUserTeam.values())
