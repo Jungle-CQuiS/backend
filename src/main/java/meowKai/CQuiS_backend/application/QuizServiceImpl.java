@@ -11,11 +11,9 @@ import meowKai.CQuiS_backend.dto.GetShortAnsQuizDto;
 import meowKai.CQuiS_backend.dto.request.RequestGetChoiceAnswerQuizzesDto;
 import meowKai.CQuiS_backend.dto.request.RequestGetShortAnswerQuizzesDto;
 import meowKai.CQuiS_backend.dto.request.RequestGradeDto;
+import meowKai.CQuiS_backend.dto.request.RequestSaveSingleGameStatisticsDto;
 import meowKai.CQuiS_backend.dto.response.*;
-import meowKai.CQuiS_backend.infrastructure.CategoryRepository;
-import meowKai.CQuiS_backend.infrastructure.ChoiceAnsQuizRepository;
-import meowKai.CQuiS_backend.infrastructure.QuizRepository;
-import meowKai.CQuiS_backend.infrastructure.ShortAnsQuizRepository;
+import meowKai.CQuiS_backend.infrastructure.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +27,8 @@ public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
     private final CategoryRepository categoryRepository;
-    private final ShortAnsQuizRepository shortAnsQuizRepository;
-    private final ChoiceAnsQuizRepository choiceAnsQuizRepository;
+    private final UserStatisticsRepository userStatisticsRepository;
+    private final UserRepository userRepository;
 
     @Override
     public ResponseGradeDto checkGrade(RequestGradeDto requestDto) {
@@ -308,6 +306,38 @@ public class QuizServiceImpl implements QuizService {
             }
         }
         log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 응답 : {}", responseDto);
+        return responseDto;
+    }
+
+    // 플레이한 싱글 게임 통계 정보 저장
+    @Override
+    @Transactional
+    public ResponseSaveSingleGameStatisticsDto saveStatisticsForSingleGame(RequestSaveSingleGameStatisticsDto requestDto) {
+        log.info("플레이한 싱글 게임 통계 정보 저장 요청 : {}", requestDto);
+
+        User foundUser = userRepository.findByUuid(requestDto.getUuid())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        UserStatistics foundUserStatistics = userStatisticsRepository.findByUser(foundUser)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 통계 정보입니다."));
+
+        int solvedCount = requestDto.getQuizCount(); // 한 판에서 푼 전체 문제 수
+        int correctCount = requestDto.getCorrectCount(); // 한 판에서 맞춘 문제 수
+        int wrongCount = solvedCount - correctCount; // 한 판에서 틀린 문제 수
+
+        // 푼 문제 수 업데이트(기존 푼 문제 수 + 게임에서 푼 문제 수)
+        foundUserStatistics.updateSolvedCount(solvedCount);
+        // 틀린 문제 수 업데이트(기존 틀린 문제 수 + 게임에서 틀린 문제 수)
+        foundUserStatistics.updateWrongCount(wrongCount);
+        // 정답률 업데이트
+        foundUserStatistics.updateCorrectRate();
+
+        ResponseSaveSingleGameStatisticsDto responseDto = ResponseSaveSingleGameStatisticsDto.builder()
+                .updatedSolvedCount(foundUserStatistics.getSolvedCount())
+                .updatedWrongCount(foundUser.getUserStatistics().getWrongCount())
+                .updatedCorrectRate(foundUserStatistics.getCorrectRate())
+                .build();
+
+        log.info("플레이한 싱글 게임 통계 정보 저장 응답 : {}", responseDto);
         return responseDto;
     }
 }
