@@ -382,11 +382,13 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                         .quizId(foundQuiz.getId())
                         .name(foundQuiz.getName())
                         .categoryType(foundQuiz.getCategory().getCategory())
+                        .type(foundQuiz.getType())
                         .build() :
                 ResponseSelectChoiceQuizDto.builder()
                         .quizId(foundQuiz.getId())
                         .name(foundQuiz.getName())
                         .categoryType(foundQuiz.getCategory().getCategory())
+                        .type(foundQuiz.getType())
                         .choice1(foundQuiz.getChoiceAnsQuiz().getChoice1())
                         .choice2(foundQuiz.getChoiceAnsQuiz().getChoice2())
                         .choice3(foundQuiz.getChoiceAnsQuiz().getChoice3())
