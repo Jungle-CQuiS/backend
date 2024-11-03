@@ -545,4 +545,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                         .build());
     }
 
+    public List<UserAnswer> getRoomAnswers(Long roomId) {
+        return roomAnswers.getOrDefault(roomId, new ArrayList<>());
+    }
 }

@@ -139,4 +139,12 @@ public class MultiQuizController {
         ResponseGameStartDto responseDto = gameRoomService.gameStart(requestDto);
         return ApiResponse.ofSuccess(responseDto);
     }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "답안 제출 제한 시간 종료")
+    @GetMapping("/game/{roomId}/timeout")
+    public ApiResponse<Object> submitTimeout(@PathVariable Long roomId) {
+        ResponseSubmitTimeoutDto responseDto = gameRoomService.submitTimeout(roomId);
+        return ApiResponse.ofSuccess(responseDto);
+    }
 }

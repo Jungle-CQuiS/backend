@@ -31,6 +31,8 @@ public class GameRoomServiceImpl implements GameRoomService {
     private final RoomUserRepository roomUserRepository;
     private final UserRepository userRepository;
 
+    private final GameRoomWebSocketServiceImpl gameRoomWebSocketService;
+
     // TODO: 페이지네이션 | 무한스크롤로 구현하기
     // 입장할 수 있는 멀티 게임 방 조회하기
     @Override
@@ -428,6 +430,22 @@ public class GameRoomServiceImpl implements GameRoomService {
 
         log.info("게임 시작 전 유저 조회 결과: {}", responseDto);
 
+        return responseDto;
+    }
+
+    // 답안 제출 제한 시간 종료 알림을 받으면 제출된 답안을 모아 리스트 형식으로 반환
+    @Override
+    public ResponseSubmitTimeoutDto submitTimeout(Long roomId) {
+        log.info("답안 제출 제한 시간 종료 - roomId: {}", roomId);
+
+        GameRoom foundRoom = gameRoomRepository.findById(roomId).orElseThrow(
+                () -> new NoSuchElementException("답안 제출 제한 시간 종료 - 존재하지 않는 방입니다."));
+
+        ResponseSubmitTimeoutDto responseDto = ResponseSubmitTimeoutDto.builder()
+                .answerList(gameRoomWebSocketService.getRoomAnswers(foundRoom.getId()))
+                .build();
+
+        log.info("제출된 답안 리스트: {}", responseDto);
         return responseDto;
     }
 
