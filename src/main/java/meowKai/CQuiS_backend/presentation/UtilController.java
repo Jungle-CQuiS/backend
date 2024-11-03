@@ -48,7 +48,7 @@ public class UtilController {
     @Tag(name = "유틸리티")
     @Operation(summary = "유저로부터 문제 생성을 위한 텍스트 받아서 객관식 퀴즈 생성")
     @PostMapping("/quiz-creation/choice-answer")
-    public ApiResponse<Object> createChoiceAnsQuizFromText(@RequestBody RequestCreateChoiceQuizzesFromTextDto requestDto) {
+    public ApiResponse<Object> createChoiceAnsQuizFromText(@Valid @RequestBody RequestCreateChoiceQuizzesFromTextDto requestDto) {
         try {
             log.info("generatedChoiceAnswerQuizzesFromText 메서드 호출됨");
             List<ResponseCreateChoiceQuizFromTextDto> response = utilService.generateChoiceAnswerQuizzesFromText(requestDto);

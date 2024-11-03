@@ -83,7 +83,7 @@ public class QuizServiceImpl implements QuizService {
         return responseDto;
     }
 
-    // 주관식 문제 가져오기
+    // 주관식 문제를 주어진 카테고리 내에서 랜덤하게 유저가 입력한 갯수만큼 랜덤하게 가져오기
     @Override
     public ResponseGetShortAnswerQuizzesDto getShortAnswerQuizzesByConditions(RequestGetShortAnswerQuizzesDto requestDto) {
         log.info("주관식 문제 요청 : {}", requestDto);
@@ -170,6 +170,7 @@ public class QuizServiceImpl implements QuizService {
         return responseDto;
     }
 
+    // 객관식 문제를 주어진 카테고리 내에서 유저가 입력한 갯수만큼 랜덤하게 가져오기
     @Override
     public ResponseGetChoiceAnswerQuizzesDto getChoiceAnswerQuizzesByConditions(RequestGetChoiceAnswerQuizzesDto requestDto) {
         log.info("객관식 문제 요청 : {}", requestDto);
@@ -259,7 +260,7 @@ public class QuizServiceImpl implements QuizService {
                 }
             }
         });
-        log.info("객관식 문제 응답 : {}", responseDto);
+        log.info("객관식 문제 요청 응답 : {}", responseDto);
         return responseDto;
     }
 
