@@ -411,6 +411,26 @@ public class GameRoomServiceImpl implements GameRoomService {
         return responseDto;
     }
 
+    // 게임 시작 직전 유저의 정보가 더 이상 변할 수 없을 때 유저의 정보 조회
+    @Override
+    public ResponseGetUserInfoDto getUserInfo(Long roomUserId) {
+        log.info("게임 시작 전 유저 조회 요청 - roomUserId: {}", roomUserId);
+
+        RoomUser foundRoomUser = roomUserRepository.findById(roomUserId).orElseThrow(
+                () -> new NoSuchElementException("게임 시작 전 유저 조회 - 존재하지 않는 유저입니다."));
+
+        ResponseGetUserInfoDto responseDto = ResponseGetUserInfoDto.builder()
+                .username(foundRoomUser.getUser().getUsername())
+                .role(foundRoomUser.getRole())
+                .team(foundRoomUser.getTeam())
+                .isLeader(foundRoomUser.getIsLeader())
+                .build();
+
+        log.info("게임 시작 전 유저 조회 결과: {}", responseDto);
+
+        return responseDto;
+    }
+
     private void yieldHost(GameRoom foundRoom, RoomUser yieldRoomUser) {
         List<RoomUser> currentTeamUsers = roomUserRepository.findAllByGameRoom(foundRoom);
 

@@ -14,4 +14,5 @@ public interface GameRoomWebSocketService {
     ResponseGetRoomInfoDto joinRoom(RequestWebSocketJoinRoomDto requestJoinRoomDto); // 방 입장
     ResponseJoinRoomDto getRoomUserId(RequestJoinRoomDto requestJoinRoomDto); // 방 입장 후 생성된 RoomUser의 id 반환
     SelectQuizResult selectQuiz(RequestSelectQuizDto requestSelectQuizDto); // 수비 팀 리더가 선택한 퀴즈를 수비 팀 전원에게 전달
+    void submitPersonal(RequestSubmitPersonalDto requestSubmitPersonalDto); // 수비 팀 팀원들이 답안을 제출
 }

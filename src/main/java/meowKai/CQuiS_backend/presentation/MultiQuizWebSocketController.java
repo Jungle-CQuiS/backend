@@ -118,4 +118,10 @@ public class MultiQuizWebSocketController {
 
         messagingTemplate.convertAndSend(destination, result.responseDto());
     }
+
+    // (PUB)수비팀 팀원 답안 제출
+    @MessageMapping("/game/personal-submit")
+    public void submitPersonal(RequestSubmitPersonalDto requestDto) {
+        gameRoomWebSocketService.submitPersonal(requestDto);
+    }
 }
