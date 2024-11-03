@@ -11,7 +11,5 @@ import meowKai.CQuiS_backend.domain.QuizType;
 @Builder
 public class RequestCreateShortQuizzesFromTextDto {
     private String textData;
-    private QuizType quizType;
-    private CategoryType categoryType;
     private Integer quizCount;
 }
