@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.domain.*;
 import meowKai.CQuiS_backend.dto.MultiRoomUserDto;
 import meowKai.CQuiS_backend.dto.SelectQuizResult;
+import meowKai.CQuiS_backend.dto.UserAnswer;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
@@ -17,9 +18,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +36,8 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     private final QuizRepository quizRepository;
 
     private final SimpMessagingTemplate messagingTemplate; // 웹 소켓 통신으로 메시지 전달 시에 사용
+
+    private final Map<Long, List<UserAnswer>> roomAnswers = new ConcurrentHashMap<>(); // 방 단위로 유저가 보내는 답안을 관리, roomId를 key로 사용
 
     @Override
     @Transactional
@@ -353,11 +355,35 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         return responseDto;
     }
 
+    // 수비 팀 리더가 선택을 바꿀 때마다 수비 팀 전원에게 전달
+    @Override
+    public SelectQuizResult<ResponseSelectOptionDto> selectOption(RequestSelectQuizDto requestDto) {
+        log.info("ws - 수비 팀 리더 선택 변경 요청: {}", requestDto);
+
+        GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("ws - 수비 팀 리더 선택 변경 - 존재하지 않는 방입니다."));
+
+        // 수비팀 찾기 -> GameRoom 클래스의 메소드로 빼야할까?
+        RoomUserTeam defenseTeamColor = (foundRoom.getTeams().get(0).getTeamStatus() == TeamStatus.DEFENSE
+                ? foundRoom.getTeams().get(0) : foundRoom.getTeams().get(1))
+                .getTeamColor();
+
+        ResponseSelectOptionDto responseDto = ResponseSelectOptionDto.builder()
+                .responseStatus(requestDto.getResponseStatus())
+                .number(requestDto.getNumber())
+                .build();
+
+        log.info("ws - 수비 팀 리더 선택 변경 결과: {}", responseDto);
+        return new SelectQuizResult<ResponseSelectOptionDto>(responseDto, defenseTeamColor);
+    }
+
     // 수비 팀 리더가 선택한 퀴즈를 수비 팀 전원에게 전달
     @Override
-    public SelectQuizResult selectQuiz(RequestSelectQuizDto requestDto) {
+    public SelectQuizResult<ResponseSelectQuizDto> selectQuiz(RequestSelectQuizDto requestDto) {
+        log.info("ws - 퀴즈 선택 & 전달 요청: {}", requestDto);
+
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("퀴즈 선택 & 전달 - 존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("ws - 퀴즈 선택 & 전달 - 존재하지 않는 방입니다."));
 
         // 수비팀 찾기 -> GameRoom 클래스의 메소드로 빼야할까?
         RoomUserTeam defenseTeamColor = (foundRoom.getTeams().get(0).getTeamStatus() == TeamStatus.DEFENSE
@@ -366,9 +392,11 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         foundRoom.saveCurrentQuizId(requestDto.getNumber()); // gameRoom에 currentQuizId 저장
         gameRoomRepository.save(foundRoom);
+        roomAnswers.remove(foundRoom.getId()); // 같은 방에서 이전에 제출된 답안들을 삭제 -> 답안 선택 구현 시 그쪽으로 옮길 것
+        log.info("ws - 퀴즈 선택 & 전달 - 이전 답안 초기화 roomId: {}", foundRoom.getId());
 
         Quiz foundQuiz = quizRepository.findById(requestDto.getNumber()).orElseThrow(
-                () -> new NoSuchElementException("퀴즈 선택 & 전달 - 존재하지 않는 퀴즈입니다."));
+                () -> new NoSuchElementException("ws - 퀴즈 선택 & 전달 - 존재하지 않는 퀴즈입니다."));
 
         // QuizType에 따라 responseDto 만들어 반환
         ResponseSelectQuizDto responseDto = foundQuiz.getType() == QuizType.SHORT ?
@@ -376,18 +404,31 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                         .quizId(foundQuiz.getId())
                         .name(foundQuiz.getName())
                         .categoryType(foundQuiz.getCategory().getCategory())
+                        .type(foundQuiz.getType())
                         .build() :
                 ResponseSelectChoiceQuizDto.builder()
                         .quizId(foundQuiz.getId())
                         .name(foundQuiz.getName())
                         .categoryType(foundQuiz.getCategory().getCategory())
+                        .type(foundQuiz.getType())
                         .choice1(foundQuiz.getChoiceAnsQuiz().getChoice1())
                         .choice2(foundQuiz.getChoiceAnsQuiz().getChoice2())
                         .choice3(foundQuiz.getChoiceAnsQuiz().getChoice3())
                         .choice4(foundQuiz.getChoiceAnsQuiz().getChoice4())
                         .build();
 
-        return new SelectQuizResult(responseDto, defenseTeamColor);
+        log.info("ws - 퀴즈 선택 & 전달 결과: {}", responseDto);
+
+        return new SelectQuizResult<ResponseSelectQuizDto>(responseDto, defenseTeamColor);
+    }
+
+    // 수비 팀 팀원들이 제출한 답안을 roomId를 key로 저장
+    @Override
+    public void submitPersonal(RequestSubmitPersonalDto requestDto) {
+        log.info("ws - 수비 팀 답안 제출: {}", requestDto);
+        roomAnswers.computeIfAbsent(requestDto.getRoomId(),
+                k -> Collections.synchronizedList(new ArrayList<>()))   // roomAnswers에 roomId가 없는 경우 동기화된 리스트를 새로 만듦
+                .add(new UserAnswer(requestDto.getRoomUserId(), requestDto.getAnswer()));
     }
 
     /**

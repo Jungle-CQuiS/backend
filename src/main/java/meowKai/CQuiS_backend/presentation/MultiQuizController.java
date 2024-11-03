@@ -125,6 +125,14 @@ public class MultiQuizController {
     }
 
     @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "게임 시작 전 유저 정보 조회")
+    @GetMapping("/rooms/user-info/{roomUserId}")
+    public ApiResponse<Object> getUserInfo(@PathVariable Long roomUserId) {
+        ResponseGetUserInfoDto responseDto = gameRoomService.getUserInfo(roomUserId);
+        return ApiResponse.ofSuccess(responseDto);
+    }
+
+    @Tag(name = "멀티모드 퀴즈")
     @Operation(summary = "게임 시작 - 선공 팀 설정")
     @PostMapping("/game/start")
     public ApiResponse<Object> gameStart(@RequestBody RequestGameStartDto requestDto) {

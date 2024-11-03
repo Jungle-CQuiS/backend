@@ -7,7 +7,7 @@ import meowKai.CQuiS_backend.dto.response.ResponseSelectQuizDto;
  * Service -> Controller로
  * responseDto와 defenseTeamColor를 한꺼번에 전달하기 위한 record
  */
-public record SelectQuizResult(
-        ResponseSelectQuizDto responseDto,
+public record SelectQuizResult<T>(
+        T responseDto,
         RoomUserTeam defenseTeamColor
 ) {}
