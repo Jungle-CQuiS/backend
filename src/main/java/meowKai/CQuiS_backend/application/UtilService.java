@@ -8,7 +8,7 @@ import meowKai.CQuiS_backend.dto.request.RequestCreateShortQuizzesFromTextDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateChoiceQuizFromTextDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewChoiceAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewShortAnswerQuizDto;
-import meowKai.CQuiS_backend.dto.response.ResponseCreateShortQuizzesFromTextDto;
+import meowKai.CQuiS_backend.dto.response.ResponseCreateShortQuizFromTextDto;
 
 import java.util.List;
 
@@ -17,6 +17,6 @@ public interface UtilService {
     ResponseCreateNewChoiceAnswerQuizDto createNewChoiceQuiz(RequestCreateNewChoiceAnswerQuiz requestDto);
     void createNewMultipleShortQuiz(List<RequestCreateNewShortAnswerQuizDto> requestList);
     void createNewMultipleChoiceQuiz(List<RequestCreateNewChoiceAnswerQuiz> requestList);
-    ResponseCreateShortQuizzesFromTextDto generateShortAnswerQuizzesFromText(RequestCreateShortQuizzesFromTextDto requestDto) throws JsonProcessingException;
+    List<ResponseCreateShortQuizFromTextDto> generateShortAnswerQuizzesFromText(RequestCreateShortQuizzesFromTextDto requestDto) throws JsonProcessingException;
     List<ResponseCreateChoiceQuizFromTextDto> generateChoiceAnswerQuizzesFromText(RequestCreateChoiceQuizzesFromTextDto requestDto) throws JsonProcessingException;
 }
