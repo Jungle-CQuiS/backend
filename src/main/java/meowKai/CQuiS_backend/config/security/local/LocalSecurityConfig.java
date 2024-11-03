@@ -62,7 +62,7 @@ public class LocalSecurityConfig {
                                 "/queue/**", // 개인 메시지
                                 "/app/**", // 메시지 발행
                                 "/user/**", // 사용자별 메시지
-                                "/api/util/**",
+                                "/api/util",
                                 "/api/auth/login",
                                 "/api/auth/signup",
                                 "/api/auth/username/**",
