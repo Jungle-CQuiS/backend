@@ -35,11 +35,19 @@ public class MultiQuizController {
         return ApiResponse.ofSuccess(responseDto);
     }
 
+//    @Tag(name = "멀티모드 퀴즈")
+//    @Operation(summary = "카테고리 별로 랜덤 문제 두 문제씩 가져오기")
+//    @GetMapping("/random-quizzes/categories")
+//    public ApiResponse<Object> getRandomQuizzesByCategories() {
+//        ResponseGetRandomQuizzesByCategoriesDto responseDto = quizService.getRandomQuizzesByCategories();
+//        return ApiResponse.ofSuccess(responseDto);
+//    }
+
     @Tag(name = "멀티모드 퀴즈")
     @Operation(summary = "카테고리 별로 랜덤 문제 두 문제씩 가져오기")
-    @GetMapping("/random-quizzes/categories")
-    public ApiResponse<Object> getRandomQuizzesByCategories() {
-        ResponseGetRandomQuizzesByCategoriesDto responseDto = quizService.getRandomQuizzesByCategories();
+    @GetMapping("/random-quizzes/{roomId}")
+    public ApiResponse<Object> getRandomQuizzesByCategories(@PathVariable Long roomId) {
+        ResponseGetRandomQuizzesByCategoriesDto responseDto = quizService.getRandomQuizzesByCategories(roomId);
         return ApiResponse.ofSuccess(responseDto);
     }
 

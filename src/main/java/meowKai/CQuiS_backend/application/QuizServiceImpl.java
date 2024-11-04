@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,10 @@ public class QuizServiceImpl implements QuizService {
     private final CategoryRepository categoryRepository;
     private final UserStatisticsRepository userStatisticsRepository;
     private final UserRepository userRepository;
+    private final GameRoomRepository gameRoomRepository;
+
+    private final Map<Long, List<Object>> roomQuizzes = new ConcurrentHashMap<>(); // 방별로 미리 퀴즈를 할당받아 저장해놓기 위한 ConcurrentHashMap
+
 
     @Override
     public ResponseGradeDto checkGrade(RequestGradeDto requestDto) {
@@ -291,49 +296,61 @@ public class QuizServiceImpl implements QuizService {
 
     // 카테고리 별로 랜덤 문제 두 문제씩 가져오기
     @Override
-    public ResponseGetRandomQuizzesByCategoriesDto getRandomQuizzesByCategories() {
+    public ResponseGetRandomQuizzesByCategoriesDto getRandomQuizzesByCategories(Long roomId) {
         log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 요청");
-        List<Category> categories = categoryRepository.findAll();
-        ResponseGetRandomQuizzesByCategoriesDto responseDto = ResponseGetRandomQuizzesByCategoriesDto.builder()
-                .randomQuizList(new ArrayList<>())
-                .build();
 
-        for (Category category : categories) {
+        GameRoom foundRoom = gameRoomRepository.findById(roomId).orElseThrow(
+                () -> new NoSuchElementException("랜덤 문제 두 문제씩 가져오기 - 존재하지 않는 방입니다."));
+        Integer roundIndex = foundRoom.getQuizCount(); // 현재까지 진행된 문제 수를 인덱스로 사용
 
-            // 카테고리 별로 랜덤 문제 두 문제씩 가져오기
-            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), 2);
-
-            for (Quiz randomQuiz : randomQuizzes) {
-
-                if (randomQuiz.getType() == QuizType.CHOICE) {
-                    responseDto.getRandomQuizList().add(GetChoiceAnsQuizDto.builder()
-                            .categoryId(randomQuiz.getCategory().getId())
-                            .quizId(randomQuiz.getId())
-                            .categoryType(randomQuiz.getCategory().getCategory())
-                            .name(randomQuiz.getName())
-                            .choice1(randomQuiz.getChoiceAnsQuiz().getChoice1())
-                            .choice2(randomQuiz.getChoiceAnsQuiz().getChoice2())
-                            .choice3(randomQuiz.getChoiceAnsQuiz().getChoice3())
-                            .choice4(randomQuiz.getChoiceAnsQuiz().getChoice4())
-                            .answer(randomQuiz.getChoiceAnsQuiz().getAnswer())
-                            .build()
-                    );
-                }
-                else if (randomQuiz.getType() == QuizType.SHORT) {
-                    responseDto.getRandomQuizList().add(GetShortAnsQuizDto.builder()
-                            .categoryId(randomQuiz.getCategory().getId())
-                            .quizId(randomQuiz.getId())
-                            .categoryType(randomQuiz.getCategory().getCategory())
-                            .name(randomQuiz.getName())
-                            .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
-                            .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
-                            .build()
-                    );
-                }
-            }
+        List<Object> allQuizzes = roomQuizzes.get(foundRoom.getId());
+        if (allQuizzes == null || allQuizzes.isEmpty()) {
+            throw new IllegalStateException("퀴즈를 불러오는데 실패했습니다.");
         }
-        log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 응답 : {}", responseDto);
-        return responseDto;
+
+        List<Object> transferQuizzes = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+
+        }
+
+
+//        for (Category category : categories) {
+//
+//            // 카테고리 별로 랜덤 문제 두 문제씩 가져오기
+//            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), 2);
+//
+//            for (Quiz randomQuiz : randomQuizzes) {
+//
+//                if (randomQuiz.getType() == QuizType.CHOICE) {
+//                    responseDto.getRandomQuizList().add(GetChoiceAnsQuizDto.builder()
+//                            .categoryId(randomQuiz.getCategory().getId())
+//                            .quizId(randomQuiz.getId())
+//                            .categoryType(randomQuiz.getCategory().getCategory())
+//                            .name(randomQuiz.getName())
+//                            .choice1(randomQuiz.getChoiceAnsQuiz().getChoice1())
+//                            .choice2(randomQuiz.getChoiceAnsQuiz().getChoice2())
+//                            .choice3(randomQuiz.getChoiceAnsQuiz().getChoice3())
+//                            .choice4(randomQuiz.getChoiceAnsQuiz().getChoice4())
+//                            .answer(randomQuiz.getChoiceAnsQuiz().getAnswer())
+//                            .build()
+//                    );
+//                }
+//                else if (randomQuiz.getType() == QuizType.SHORT) {
+//                    responseDto.getRandomQuizList().add(GetShortAnsQuizDto.builder()
+//                            .categoryId(randomQuiz.getCategory().getId())
+//                            .quizId(randomQuiz.getId())
+//                            .categoryType(randomQuiz.getCategory().getCategory())
+//                            .name(randomQuiz.getName())
+//                            .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
+//                            .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
+//                            .build()
+//                    );
+//                }
+//            }
+//        }
+//        log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 응답 : {}", responseDto);
+//        return responseDto;
+        return null;
     }
 
     // 플레이한 싱글 게임 통계 정보 저장
@@ -366,5 +383,48 @@ public class QuizServiceImpl implements QuizService {
 
         log.info("플레이한 싱글 게임 통계 정보 저장 응답 : {}", responseDto);
         return responseDto;
+    }
+
+
+    public void storeQuizzes(GameRoom gameRoom) {
+        List<Category> categories = categoryRepository.findAll();
+
+        for (Category category : categories) {
+
+            // 카테고리 별로 랜덤 문제 열 문제씩 가져오기
+            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), 10);
+
+            for (Quiz randomQuiz : randomQuizzes) {
+
+                if (randomQuiz.getType() == QuizType.CHOICE) {
+                    roomQuizzes.computeIfAbsent(gameRoom.getId(),
+                                    k -> Collections.synchronizedList(new ArrayList<>()))
+                            .add(GetChoiceAnsQuizDto.builder()
+                                    .categoryId(randomQuiz.getCategory().getId())
+                                    .quizId(randomQuiz.getId())
+                                    .categoryType(randomQuiz.getCategory().getCategory())
+                                    .name(randomQuiz.getName())
+                                    .choice1(randomQuiz.getChoiceAnsQuiz().getChoice1())
+                                    .choice2(randomQuiz.getChoiceAnsQuiz().getChoice2())
+                                    .choice3(randomQuiz.getChoiceAnsQuiz().getChoice3())
+                                    .choice4(randomQuiz.getChoiceAnsQuiz().getChoice4())
+                                    .answer(randomQuiz.getChoiceAnsQuiz().getAnswer())
+                                    .build()
+                            );
+                } else if (randomQuiz.getType() == QuizType.SHORT) {
+                    roomQuizzes.computeIfAbsent(gameRoom.getId(),
+                                    k -> Collections.synchronizedList(new ArrayList<>()))
+                            .add(GetShortAnsQuizDto.builder()
+                                    .categoryId(randomQuiz.getCategory().getId())
+                                    .quizId(randomQuiz.getId())
+                                    .categoryType(randomQuiz.getCategory().getCategory())
+                                    .name(randomQuiz.getName())
+                                    .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
+                                    .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
+                                    .build()
+                            );
+                }
+            }
+        }
     }
 }
