@@ -312,7 +312,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         // 방이 비어있으면 joinedRoomUser를 host, leader로
         System.out.println(countRoomUser(foundRoom));
-        if(countRoomUser(foundRoom) <= 1) {
+        if(countRoomUser(foundRoom) <= 0) {
             joinedRoomUser.changeRole();
             joinedRoomUser.changeLeader();
             log.info("ws - 입장 - 첫 번째 유저입니다: {}", joinedRoomUser.getId());
@@ -325,6 +325,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         }
 
         roomUserRepository.save(joinedRoomUser);
+        foundRoom.getRoomUsers().add(joinedRoomUser);
         foundRoom.addUser();
         gameRoomRepository.save(foundRoom);
 
