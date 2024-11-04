@@ -114,13 +114,11 @@ public class MultiQuizWebSocketController {
                 ? gameRoomWebSocketService.selectOption(requestDto)
                 : gameRoomWebSocketService.selectQuiz(requestDto);
 
-        String destination = String.format(
-                "/topic/game/%d/%s",
-                requestDto.getRoomId(),
-                result.defenseTeamColor().toString().toLowerCase()
-        );
+        String destination = "/topic/game/" + requestDto.getRoomId() + "/select/";
+        String optionalPath = requestDto.getResponseStatus().equals(ResponseStatus.QUIZ_SELECT)
+                ? "option" : "quiz";
 
-        messagingTemplate.convertAndSend(destination, result.responseDto());
+        messagingTemplate.convertAndSend(destination + optionalPath, result.responseDto());
     }
 
     // (PUB)수비팀 팀원 답안 제출
