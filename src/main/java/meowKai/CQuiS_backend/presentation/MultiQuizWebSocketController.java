@@ -128,4 +128,15 @@ public class MultiQuizWebSocketController {
     public void submitPersonal(RequestSubmitPersonalDto requestDto) {
         gameRoomWebSocketService.submitPersonal(requestDto);
     }
+
+    //(PUB)최종 제출 답안 선택 - (SUB)채점 및 세팅 + 게임 종료 조건 체크
+    @MessageMapping("/game/team-submit")
+    public void submitTeam(RequestSubmitTeamDto requestDto) {
+        ResponseSubmitTeamDto responseDto = gameRoomWebSocketService.submitTeam(requestDto);
+        messagingTemplate.convertAndSend(
+                "/topic/game/" + requestDto.getRoomId() + "/grading",
+                responseDto
+        );
+        gameRoomWebSocketService.isGameover(requestDto.getRoomId());
+    }
 }

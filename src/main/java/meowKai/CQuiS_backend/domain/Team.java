@@ -32,7 +32,12 @@ public class Team {
     private RoomUserTeam teamColor;
 
     // 팀 체력
+    @Column
     private Integer teamHp;
+
+    // 맞춘 문제 수
+    @Column
+    private Integer correctCount;
 
     // 팀 생성
     public static Team createTeam(GameRoom gameRoom, RoomUserTeam teamColor) {
@@ -40,6 +45,7 @@ public class Team {
                 .gameRoom(gameRoom)
                 .teamColor(teamColor)
                 .teamHp(3)
+                .correctCount(0)
                 .build();
 
         gameRoom.getTeams().add(team); // 양방향 관계 설정
@@ -54,5 +60,10 @@ public class Team {
     // teamStatus를 변경
     public void changeTeamStatus(TeamStatus teamStatus) {
         this.teamStatus = teamStatus;
+    }
+
+    // 문제를 맞춤
+    public void addCorrectCount() {
+        correctCount++;
     }
 }

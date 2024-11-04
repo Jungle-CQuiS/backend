@@ -1,5 +1,6 @@
 package meowKai.CQuiS_backend.application;
 
+import meowKai.CQuiS_backend.domain.GameRoom;
 import meowKai.CQuiS_backend.dto.SelectQuizResult;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
@@ -16,4 +17,6 @@ public interface GameRoomWebSocketService {
     SelectQuizResult<ResponseSelectOptionDto> selectOption(RequestSelectQuizDto requestSelectQuizDto); // 수비 팀 리더가 선택을 바꿀 때마다 수비 팀 전원에게 전달
     SelectQuizResult<ResponseSelectQuizDto> selectQuiz(RequestSelectQuizDto requestSelectQuizDto); // 수비 팀 리더가 최종적으로 선택한 퀴즈를 수비 팀 전원에게 전달
     void submitPersonal(RequestSubmitPersonalDto requestSubmitPersonalDto); // 수비 팀 팀원들이 답안을 제출
+    ResponseSubmitTeamDto submitTeam(RequestSubmitTeamDto requestSubmitTeamDto); // 수비 팀 리더가 최종 답안을 제출, 채점 및 다음 문제를 위한 세팅, hp 변경 알림, 게임 종료 알림 수행
+    Boolean isGameover(Long roomId); // 게임 종료 조건을 체크
 }

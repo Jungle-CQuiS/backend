@@ -18,6 +18,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,6 +35,8 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     private final RoomUserRepository roomUserRepository;
     private final UserRepository userRepository;
     private final QuizRepository quizRepository;
+
+    private final QuizService quizService; // 채점
 
     private final SimpMessagingTemplate messagingTemplate; // 웹 소켓 통신으로 메시지 전달 시에 사용
 
@@ -431,6 +434,101 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                 .add(new UserAnswer(requestDto.getRoomUserId(), requestDto.getAnswer()));
     }
 
+    // // 수비 팀 리더가 최종 답안을 제출, 채점 및 다음 문제를 위한 세팅, hp 변경 알림, 게임 종료 알림 수행
+    @Override
+    public ResponseSubmitTeamDto submitTeam(RequestSubmitTeamDto requestDto) {
+        log.info("ws - 최종 답안 제출 요청: {}", requestDto);
+
+        // 최종 답안과 현재 퀴즈를 가져옴
+        GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("ws - 최종 답안 제출 - 존재하지 않는 방입니다."));
+
+        Quiz foundQuiz = quizRepository.findById(foundRoom.getCurrentQuizId()).orElseThrow(
+                () -> new NoSuchElementException("ws - 최종 답안 제출 - 존재하지 않는 퀴즈입니다."));
+        UserAnswer userAnswer = roomAnswers.get(requestDto.getRoomId()).get(requestDto.getNumber().intValue());
+
+        // 문제의 정답을 가져옴(반환용)
+        String answer = foundQuiz.getType() == QuizType.CHOICE ?
+                String.valueOf(foundQuiz.getChoiceAnsQuiz().getAnswer())
+                : foundQuiz.getShortAnsQuiz().getKoreanAnswer() + "(" + foundQuiz.getShortAnsQuiz().getEnglishAnswer() + ")";
+
+        // 채점
+        RequestGradeDto requestGradeDto = RequestGradeDto.builder().quizId(foundQuiz.getId()).userInput(userAnswer.getAnswer()).build();
+        ResponseGradeDto responseGradeDto = quizService.checkGrade(requestGradeDto);
+
+
+        // 틀렸다면 -> 체력 감소
+        Team defenseTeam = foundRoom.getTeams().get(0).getTeamStatus() == TeamStatus.DEFENSE
+                ? foundRoom.getTeams().get(0) : foundRoom.getTeams().get(1);
+        if(!responseGradeDto.getIsCorrect()) {
+            // 수비팀 찾기
+            defenseTeam.decreaseHp();
+        } else {
+            defenseTeam.addCorrectCount();
+        }
+
+        // responseDto 만들어 반환
+        ResponseSubmitTeamDto responseDto = ResponseSubmitTeamDto.builder()
+                .isCorrect(responseGradeDto.getIsCorrect())
+                .answer(answer)
+                .teamHp(defenseTeam.getTeamHp())
+                .build();
+
+        log.info("ws - 최종 답안 제출 결과: {}", requestDto);
+
+        // 다음 문제를 위한 세팅 -> 진행된 문제 + 1, 공격 수비 변경
+        foundRoom.addQuizCount();
+        foundRoom.changeTeamStatus();
+        return responseDto;
+    }
+
+    // (SUB)게임 종료 조건을 체크
+    @Override
+    public Boolean isGameover(Long roomId) {
+        log.info("ws - 게임 종료 조건 체크 - roomId: {}", roomId);
+
+        GameRoom foundRoom = gameRoomRepository.findById(roomId).orElseThrow(
+                () -> new NoSuchElementException("ws - 게임 종료 조건 체크 - 존재하지 않는 방입니다."));
+
+        // 수비팀의 HP가 0보다 크지 않다면 or 퀴즈가 10번 진행되었다면 게임 종료
+        boolean isDefenseTeamDead = (foundRoom.getTeams().get(0).getTeamStatus() == TeamStatus.DEFENSE
+                ? foundRoom.getTeams().get(0)
+                : foundRoom.getTeams().get(1)).getTeamHp() <= 0;
+
+        boolean isMaxQuizReached = foundRoom.getQuizCount() >= 10;
+
+        if(isDefenseTeamDead || isMaxQuizReached) {
+            RoomUserTeam winningTeamColor;
+            if(isDefenseTeamDead) {
+                winningTeamColor = (foundRoom.getTeams().get(0).getTeamStatus() == TeamStatus.OFFENSE
+                        ? foundRoom.getTeams().get(0)
+                        : foundRoom.getTeams().get(1))
+                        .getTeamColor();
+            } else {
+                winningTeamColor = (foundRoom.getTeams().get(0).getCorrectCount() >= foundRoom.getTeams().get(1).getCorrectCount()
+                        ? foundRoom.getTeams().get(0)
+                        : foundRoom.getTeams().get(1))
+                        .getTeamColor();
+            }
+
+            foundRoom.changeGameStatus(GameStatus.GAME_END);
+            gameRoomRepository.save(foundRoom);
+
+            ResponseIsGameoverDto responseDto = ResponseIsGameoverDto.builder()
+                    .teamColor(winningTeamColor)
+                    .gameStatus(foundRoom.getGameStatus())
+                    .build();
+
+            messagingTemplate.convertAndSend(
+                    "/topic/game/" + foundRoom.getId() + "/game-end",
+                    responseDto
+            );
+        }
+
+        log.info("ws - 게임 종료 조건 체크 결과 - isGameover: {}", (isDefenseTeamDead || isMaxQuizReached));
+        return (isDefenseTeamDead || isMaxQuizReached);
+    }
+
     /**
      * GameRoom을 인자로 넘겨주면 해당 방에 있는
      * 각 유저의 정보를 바탕으로 MultiRoomUserDto를 생성한 뒤
@@ -535,7 +633,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                 .count() == 2;
     }
 
-    // 모든 유저 레디, 카운트다운 도중 레디 취소로 gameStatus에 변화가 생길 경우 클라이언트에 알림 전송
+    // (SUB)모든 유저 레디, 카운트다운 도중 레디 취소로 gameStatus에 변화가 생길 경우 클라이언트에 알림 전송
     private void changeGameStatus(GameRoom gameRoom, GameStatus gameStatus) {
         gameRoom.changeGameStatus(gameStatus);
         messagingTemplate.convertAndSend(
@@ -545,4 +643,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                         .build());
     }
 
+    public List<UserAnswer> getRoomAnswers(Long roomId) {
+        return roomAnswers.getOrDefault(roomId, new ArrayList<>());
+    }
 }

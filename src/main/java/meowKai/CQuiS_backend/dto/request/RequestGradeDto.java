@@ -1,6 +1,7 @@
 package meowKai.CQuiS_backend.dto.request;
 
 import lombok.*;
+import meowKai.CQuiS_backend.domain.QuizType;
 
 @Builder
 @Getter
@@ -9,7 +10,6 @@ import lombok.*;
 @ToString
 public class RequestGradeDto {
 
-    private Integer categoryId;
-    private Integer quizId;
+    private Long quizId;
     private String userInput;
 }

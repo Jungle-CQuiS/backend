@@ -36,15 +36,20 @@ public class QuizServiceImpl implements QuizService {
     public ResponseGradeDto checkGrade(RequestGradeDto requestDto) {
         log.info("채점 요청 : {}", requestDto);
 
-        // 공백 제거 전처리
-        String correctAnswer = "트랜잭션 ".replace(" ", ""); // TODO: 문제 관련 Repository에서 정답 가져오기, 현재 하드코딩 상태
-        String userInput = requestDto.getUserInput().replace(" ", "");
+        Quiz foundQuiz = quizRepository.findById(requestDto.getQuizId()).orElseThrow(
+                () -> new NoSuchElementException("채점 요청 - 존재하지 않는 퀴즈입니다.")
+        );
 
-        // 영어 음차 표기 여부 확인
-        boolean isTrans = KoreanAnalyzer.isTransliteration(userInput);
+        String userInput = requestDto.getUserInput().replace(" ", ""); // 채점할 사용자의 입력
+
+        boolean isChoice = foundQuiz.getType().equals(QuizType.CHOICE); // 퀴즈가 객관식인지
+        boolean isEnglish = userInput.matches("[a-zA-Z]+"); // 영어로만 이루어져 있는지
+        boolean isTrans = KoreanAnalyzer.isTransliteration(userInput); // 음차 표기인지
+
+        String correctAnswer = getCorrectAnswer(foundQuiz, isEnglish);
 
         double similarity;
-        if(!isTrans) {
+        if(isChoice || isEnglish || !isTrans) {
             similarity = correctAnswer.equals(userInput) ? 1.0 : 0.0;   // 음차 표기가 아니라면 정확하게 일치해야 정답
         } else {
             int length = Math.min(correctAnswer.length(), userInput.length());
@@ -59,9 +64,27 @@ public class QuizServiceImpl implements QuizService {
             }
         }
 
-        ResponseGradeDto responseDto = similarity >= 0.9 ? ResponseGradeDto.builder().isCorrect(true).build() : ResponseGradeDto.builder().isCorrect(false).build();
+        ResponseGradeDto responseDto = similarity >= 0.9 ?
+                ResponseGradeDto.builder()
+                        .isCorrect(true)
+                        .build()
+                : ResponseGradeDto.builder()
+                        .isCorrect(false)
+                        .build();
+
         log.info("채점 완료 : {}", responseDto);
         return responseDto;
+    }
+
+    // 문제의 타입과 유저의 입력에 따라 다른 정답을 가져옴
+    private String getCorrectAnswer(Quiz quiz, boolean isEnglish) {
+        if(quiz.getType() == QuizType.CHOICE) {
+            return quiz.getChoiceAnsQuiz().getAnswer().toString();
+        }
+
+        return isEnglish ?
+                quiz.getShortAnsQuiz().getEnglishAnswer().replace(" ", "").toLowerCase() :
+                quiz.getShortAnsQuiz().getKoreanAnswer().replace(" ", "");
     }
 
     // 카테고리 정보 가져오기
