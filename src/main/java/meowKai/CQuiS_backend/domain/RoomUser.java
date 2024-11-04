@@ -58,8 +58,6 @@ public class RoomUser {
                 .isLeader(false)
                 .isReady(false)
                 .build();
-
-        gameRoom.getRoomUsers().add(roomUser); // 양방향 관계 설정
         return roomUser;
     }
 
