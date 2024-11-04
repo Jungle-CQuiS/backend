@@ -402,7 +402,8 @@ public class GameRoomServiceImpl implements GameRoomService {
         Arrays.stream(RoomUserTeam.values())
                 .forEach(teamColor -> Team.createTeam(foundRoom, teamColor)); // 레드팀, 블루팀 생성
 
-        Team firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
+        // Team firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
+        Team firstOffenseTeam = foundRoom.getTeams().get(0); //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
 
         gameRoomRepository.save(foundRoom);
 
