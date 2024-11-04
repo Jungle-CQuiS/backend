@@ -32,6 +32,7 @@ public class GameRoomServiceImpl implements GameRoomService {
     private final UserRepository userRepository;
 
     private final GameRoomWebSocketServiceImpl gameRoomWebSocketService;
+    private final QuizService quizService;
 
     // TODO: 페이지네이션 | 무한스크롤로 구현하기
     // 입장할 수 있는 멀티 게임 방 조회하기
@@ -404,6 +405,8 @@ public class GameRoomServiceImpl implements GameRoomService {
 
         // Team firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
         Team firstOffenseTeam = foundRoom.getTeams().get(0); //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
+
+        quizService.storeQuizzes(foundRoom); // 게임 시작 전 랜덤으로 100문제를 저장해 둠
 
         gameRoomRepository.save(foundRoom);
 

@@ -297,7 +297,7 @@ public class QuizServiceImpl implements QuizService {
     // 카테고리 별로 랜덤 문제 두 문제씩 가져오기
     @Override
     public ResponseGetRandomQuizzesByCategoriesDto getRandomQuizzesByCategories(Long roomId) {
-        log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 요청");
+        log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 요청 - roomId: {}", roomId);
 
         GameRoom foundRoom = gameRoomRepository.findById(roomId).orElseThrow(
                 () -> new NoSuchElementException("랜덤 문제 두 문제씩 가져오기 - 존재하지 않는 방입니다."));
@@ -310,47 +310,17 @@ public class QuizServiceImpl implements QuizService {
 
         List<Object> transferQuizzes = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-
+            int startIdx = i * 20 + roundIndex * 2;
+            transferQuizzes.add(allQuizzes.get(startIdx));
+            transferQuizzes.add(allQuizzes.get(startIdx + 1));
         }
 
+        ResponseGetRandomQuizzesByCategoriesDto responseDto = ResponseGetRandomQuizzesByCategoriesDto.builder()
+                .randomQuizList(transferQuizzes)
+                .build();
 
-//        for (Category category : categories) {
-//
-//            // 카테고리 별로 랜덤 문제 두 문제씩 가져오기
-//            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), 2);
-//
-//            for (Quiz randomQuiz : randomQuizzes) {
-//
-//                if (randomQuiz.getType() == QuizType.CHOICE) {
-//                    responseDto.getRandomQuizList().add(GetChoiceAnsQuizDto.builder()
-//                            .categoryId(randomQuiz.getCategory().getId())
-//                            .quizId(randomQuiz.getId())
-//                            .categoryType(randomQuiz.getCategory().getCategory())
-//                            .name(randomQuiz.getName())
-//                            .choice1(randomQuiz.getChoiceAnsQuiz().getChoice1())
-//                            .choice2(randomQuiz.getChoiceAnsQuiz().getChoice2())
-//                            .choice3(randomQuiz.getChoiceAnsQuiz().getChoice3())
-//                            .choice4(randomQuiz.getChoiceAnsQuiz().getChoice4())
-//                            .answer(randomQuiz.getChoiceAnsQuiz().getAnswer())
-//                            .build()
-//                    );
-//                }
-//                else if (randomQuiz.getType() == QuizType.SHORT) {
-//                    responseDto.getRandomQuizList().add(GetShortAnsQuizDto.builder()
-//                            .categoryId(randomQuiz.getCategory().getId())
-//                            .quizId(randomQuiz.getId())
-//                            .categoryType(randomQuiz.getCategory().getCategory())
-//                            .name(randomQuiz.getName())
-//                            .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
-//                            .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
-//                            .build()
-//                    );
-//                }
-//            }
-//        }
-//        log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 응답 : {}", responseDto);
-//        return responseDto;
-        return null;
+        log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 응답 : {}", responseDto);
+        return responseDto;
     }
 
     // 플레이한 싱글 게임 통계 정보 저장
@@ -386,20 +356,23 @@ public class QuizServiceImpl implements QuizService {
     }
 
 
+    // 게임 시작 직전 호출되어 카테고리별로 20개의 문제를 저장해 둠
+    @Override
     public void storeQuizzes(GameRoom gameRoom) {
+        log.info("문제 리스트 저장 호출 : {}", gameRoom);
+
+        List<Object> quizzes = new ArrayList<>();
         List<Category> categories = categoryRepository.findAll();
 
         for (Category category : categories) {
 
-            // 카테고리 별로 랜덤 문제 열 문제씩 가져오기
-            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), 10);
+            // 카테고리 별로 랜덤 문제 20문제씩 가져오기
+            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), 20);
 
             for (Quiz randomQuiz : randomQuizzes) {
 
                 if (randomQuiz.getType() == QuizType.CHOICE) {
-                    roomQuizzes.computeIfAbsent(gameRoom.getId(),
-                                    k -> Collections.synchronizedList(new ArrayList<>()))
-                            .add(GetChoiceAnsQuizDto.builder()
+                    quizzes.add(GetChoiceAnsQuizDto.builder()
                                     .categoryId(randomQuiz.getCategory().getId())
                                     .quizId(randomQuiz.getId())
                                     .categoryType(randomQuiz.getCategory().getCategory())
@@ -409,22 +382,20 @@ public class QuizServiceImpl implements QuizService {
                                     .choice3(randomQuiz.getChoiceAnsQuiz().getChoice3())
                                     .choice4(randomQuiz.getChoiceAnsQuiz().getChoice4())
                                     .answer(randomQuiz.getChoiceAnsQuiz().getAnswer())
-                                    .build()
-                            );
-                } else if (randomQuiz.getType() == QuizType.SHORT) {
-                    roomQuizzes.computeIfAbsent(gameRoom.getId(),
-                                    k -> Collections.synchronizedList(new ArrayList<>()))
-                            .add(GetShortAnsQuizDto.builder()
+                                    .build());
+                } else {
+                    quizzes.add(GetShortAnsQuizDto.builder()
                                     .categoryId(randomQuiz.getCategory().getId())
                                     .quizId(randomQuiz.getId())
                                     .categoryType(randomQuiz.getCategory().getCategory())
                                     .name(randomQuiz.getName())
                                     .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
                                     .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
-                                    .build()
-                            );
+                                    .build());
                 }
             }
         }
+        roomQuizzes.put(gameRoom.getId(), Collections.synchronizedList(quizzes));
+        log.info("문제 리스트 저장 완료");
     }
 }
