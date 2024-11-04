@@ -11,9 +11,7 @@ import meowKai.CQuiS_backend.dto.request.RequestCreateNewChoiceAnswerQuiz;
 import meowKai.CQuiS_backend.dto.request.RequestCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.request.RequestCreateShortQuizzesFromTextDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateChoiceQuizFromTextDto;
-import meowKai.CQuiS_backend.dto.response.ResponseCreateNewChoiceAnswerQuizDto;
-import meowKai.CQuiS_backend.dto.response.ResponseCreateNewShortAnswerQuizDto;
-import meowKai.CQuiS_backend.dto.response.ResponseCreateShortQuizzesFromTextDto;
+import meowKai.CQuiS_backend.dto.response.ResponseCreateShortQuizFromTextDto;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,8 +37,8 @@ public class UtilController {
     @PostMapping("/quiz-creation/short-answer")
     public ApiResponse<Object> createShortAnsQuizFromText(@Valid @RequestBody RequestCreateShortQuizzesFromTextDto requestDto) {
         try {
-            ResponseCreateShortQuizzesFromTextDto responseDto = utilService.generateShortAnswerQuizzesFromText(requestDto);
-            return ApiResponse.ofSuccess(responseDto);
+            List<ResponseCreateShortQuizFromTextDto> response = utilService.generateShortAnswerQuizzesFromText(requestDto);
+            return ApiResponse.ofSuccess(response);
         }
         catch (Exception e) {
             return ApiResponse.ofFail("입력한 텍스트가 너무 길어요! 텍스트를 줄여서 다시 시도해주세요.");
@@ -63,23 +61,7 @@ public class UtilController {
     }
 
     @Tag(name = "유틸리티")
-    @Operation(summary = "주관식 퀴즈 생성")
-    @PostMapping("/quiz-insertion/short-answer")
-    public ApiResponse<Object> createNewShortAnswerQuiz(@Valid @RequestBody RequestCreateNewShortAnswerQuizDto requestDto) {
-        ResponseCreateNewShortAnswerQuizDto responseDto = utilService.createNewShortQuiz(requestDto);
-        return ApiResponse.ofSuccess(responseDto);
-    }
-
-    @Tag(name = "유틸리티")
-    @Operation(summary = "객관식 퀴즈 생성")
-    @PostMapping("/quiz-insertion/multiple-choice")
-    public ApiResponse<Object> createNewChoiceAnswerQuiz(@Valid @RequestBody RequestCreateNewChoiceAnswerQuiz requestDto) {
-        ResponseCreateNewChoiceAnswerQuizDto responseDto = utilService.createNewChoiceQuiz(requestDto);
-        return ApiResponse.ofSuccess(responseDto);
-    }
-
-    @Tag(name = "유틸리티")
-    @Operation(summary = "주관식 퀴즈 여러개 생성하기")
+    @Operation(summary = "주관식 퀴즈 저장하기")
     @PostMapping("/quiz-insertion/short-answer/multiple")
     public ApiResponse<Object> createNewMultipleShortAnswerQuiz(@Valid @RequestBody List<RequestCreateNewShortAnswerQuizDto> requestList) {
         utilService.createNewMultipleShortQuiz(requestList);
@@ -87,7 +69,7 @@ public class UtilController {
     }
 
     @Tag(name = "유틸리티")
-    @Operation(summary = "객관식 퀴즈 여러개 생성하기")
+    @Operation(summary = "객관식 퀴즈 저장하기")
     @PostMapping("/quiz-insertion/multiple-choice/multiple")
     public ApiResponse<Object> createNewMultipleChoiceAnswerQuiz(@Valid @RequestBody List<RequestCreateNewChoiceAnswerQuiz> requestList) {
         utilService.createNewMultipleChoiceQuiz(requestList);
