@@ -6,12 +6,11 @@ import meowKai.CQuiS_backend.dto.MultiRoomDto;
 import java.util.List;
 
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @ToString
-public class ResponseGetMultiRoomListDto {
-
-    private List<MultiRoomDto> rooms;
+public class ResponseSearchMultiRoomByRoomNameDto {
+    List<MultiRoomDto> multiRooms;
     Integer nextPageNumber;
 }

@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class MultiRoomListDto {
+public class MultiRoomDto {
 
     private Long gameRoomId;
     private String name;
