@@ -141,7 +141,9 @@ public class QuizServiceImpl implements QuizService {
             }
         }
 
-        ResponseGetShortAnswerQuizzesDto responseDto = ResponseGetShortAnswerQuizzesDto.builder().build();
+        ResponseGetShortAnswerQuizzesDto responseDto = ResponseGetShortAnswerQuizzesDto.builder()
+                .quizList(new ArrayList<>())
+                .build();
         quizzesPerCategory.forEach((key, value) -> {
             // 카테고리 별로 가져와야 할 문제 갯수
             long categoryId = key;
@@ -228,7 +230,9 @@ public class QuizServiceImpl implements QuizService {
             }
         }
 
-        ResponseGetChoiceAnswerQuizzesDto responseDto = ResponseGetChoiceAnswerQuizzesDto.builder().build();
+        ResponseGetChoiceAnswerQuizzesDto responseDto = ResponseGetChoiceAnswerQuizzesDto.builder()
+                .quizList(new ArrayList<>())
+                .build();
 
         quizzesPerCategory.forEach((key, value) -> {
 

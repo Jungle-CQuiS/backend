@@ -34,16 +34,26 @@ public class SingleQuizController {
     @Operation(summary = "퀴즈 설정 조건에 따른 주관식 문제 요청하기")
     @PostMapping("/short")
     public ApiResponse<Object> getShortQuizzesByConditions(@Valid @RequestBody RequestGetShortAnswerQuizzesDto requestDto) {
-        ResponseGetShortAnswerQuizzesDto responseDto = quizService.getShortAnswerQuizzesByConditions(requestDto);
-        return ApiResponse.ofSuccess(responseDto);
+        try {
+            ResponseGetShortAnswerQuizzesDto responseDto = quizService.getShortAnswerQuizzesByConditions(requestDto);
+            return ApiResponse.ofSuccess(responseDto);
+        }
+        catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
     }
 
     @Tag(name = "싱글모드 퀴즈")
     @Operation(summary = "퀴즈 설정 조건에 따른 객관식 문제 요청하기")
     @PostMapping("/choice")
     public ApiResponse<Object> getChoiceQuizzesByConditions(@Valid @RequestBody RequestGetChoiceAnswerQuizzesDto requestDto) {
-        ResponseGetChoiceAnswerQuizzesDto responseDto = quizService.getChoiceAnswerQuizzesByConditions(requestDto);
-        return ApiResponse.ofSuccess(responseDto);
+        try {
+            ResponseGetChoiceAnswerQuizzesDto responseDto = quizService.getChoiceAnswerQuizzesByConditions(requestDto);
+            return ApiResponse.ofSuccess(responseDto);
+        }
+        catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
     }
 
     @Tag(name = "싱글모드 퀴즈")
