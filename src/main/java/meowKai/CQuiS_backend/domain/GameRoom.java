@@ -55,6 +55,10 @@ public class GameRoom extends BaseEntity {
     @Column
     private Long currentQuizId;
 
+    // 현재까지 진행된 퀴즈의 수
+    @Column
+    private Integer quizCount;
+
     /**
      * 엔티티 비즈니스 로직
      */
@@ -67,6 +71,7 @@ public class GameRoom extends BaseEntity {
                 .maxUsers(maxUsers)
                 .password(password)
                 .gameStatus(GameStatus.WAITING)
+                .quizCount(0)
                 .build();
     }
 
@@ -98,5 +103,21 @@ public class GameRoom extends BaseEntity {
     // 현재 선택된 퀴즈를 gameRoom에 저장해 둠
     public void saveCurrentQuizId(Long quizId) {
         this.currentQuizId = quizId;
+    }
+
+    // 퀴즈 하나를 진행
+    public void addQuizCount() {
+        quizCount++;
+    }
+
+    // 팀 간의 공격, 수비 전환
+    public void changeTeamStatus() {
+        if(this.teams.get(0).getTeamStatus() == OFFENSE) {
+            this.teams.get(0).changeTeamStatus(DEFENSE);
+            this.teams.get(1).changeTeamStatus(OFFENSE);
+        } else {
+            this.teams.get(0).changeTeamStatus(OFFENSE);
+            this.teams.get(1).changeTeamStatus(DEFENSE);
+        }
     }
 }
