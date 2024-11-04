@@ -117,7 +117,7 @@ public class MultiQuizWebSocketController {
         String destination = String.format(
                 "/topic/game/%d/%s",
                 requestDto.getRoomId(),
-                result.defenseTeamColor()
+                result.defenseTeamColor().toString().toLowerCase()
         );
 
         messagingTemplate.convertAndSend(destination, result.responseDto());
