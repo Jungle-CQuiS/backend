@@ -429,10 +429,31 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     // 수비 팀 팀원들이 제출한 답안을 roomId를 key로 저장
     @Override
     public void submitPersonal(RequestSubmitPersonalDto requestDto) {
-        log.info("ws - 수비 팀 답안 제출: {}", requestDto);
-        roomAnswers.computeIfAbsent(requestDto.getRoomId(),
+        log.info("ws - 수비팀 답안 제출: {}", requestDto);
+
+        GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("ws - 수비팀 답안 제출 - 존재하지 않는 방입니다."));
+
+        roomAnswers.computeIfAbsent(foundRoom.getId(),
                 k -> Collections.synchronizedList(new ArrayList<>()))   // roomAnswers에 roomId가 없는 경우 동기화된 리스트를 새로 만듦
                 .add(new UserAnswer(requestDto.getRoomUserId(), requestDto.getAnswer()));
+
+        if(roomAnswers.get(foundRoom.getId()).size() == foundRoom.getDefenseTeamUserCount()) {
+            submitAll(foundRoom.getDefenseTeam().getTeamColor(), foundRoom.getId());
+        }
+    }
+
+    // 수비팀 전체가 답안을 제출하면 알림을 보냄
+    private void submitAll(RoomUserTeam teamColor, Long roomId) {
+        ResponseSubmitAllDto responseDto = ResponseSubmitAllDto.builder()
+                .responseStatus(ResponseStatus.ALL_SUBMIT)
+                .build();
+
+        String destination = String.format("/topic/game/%d/%s",
+                roomId,
+                teamColor.toString().toLowerCase());
+
+        messagingTemplate.convertAndSend(destination, responseDto);
     }
 
     // // 수비 팀 리더가 최종 답안을 제출, 채점 및 다음 문제를 위한 세팅, hp 변경 알림, 게임 종료 알림 수행

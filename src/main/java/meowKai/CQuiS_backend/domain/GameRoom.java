@@ -120,4 +120,20 @@ public class GameRoom extends BaseEntity {
             this.teams.get(1).changeTeamStatus(DEFENSE);
         }
     }
+
+    // 수비팀을 찾아 반환
+    public Team getDefenseTeam() {
+        return this.teams.get(0).getTeamStatus() == OFFENSE
+                ? this.teams.get(0) : this.teams.get(1);
+    }
+
+    // 수비팀 인원수를 반환
+    public Integer getDefenseTeamUserCount() {
+        Team defenseTeam = getDefenseTeam();
+        return (int) roomUsers.stream()
+                .filter(user -> user.getTeam().equals(defenseTeam.getTeamColor()))
+                .count();
+    }
+
+
 }
