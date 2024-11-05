@@ -14,4 +14,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
     List<Quiz> findRandomQuizByCategoryId(@Param("categoryId") Long categoryId, @Param("count") int count);
 
     List<Quiz> findAllByCategoryIdAndType(Long categoryId, QuizType type);
+
+    List<Quiz> findAllByCategoryId(Long categoryId);
 }
