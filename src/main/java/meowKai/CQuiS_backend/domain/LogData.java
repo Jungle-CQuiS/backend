@@ -28,6 +28,7 @@ public class LogData extends BaseEntity {
     private User user;
 
     @OneToMany(mappedBy = "logData", cascade = PERSIST)
+    @Builder.Default
     private List<UserQuizLog> userQuizLogs = new ArrayList<>();
 
     /**
