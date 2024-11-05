@@ -458,6 +458,8 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                 roomId,
                 teamColor.toString().toLowerCase());
 
+        log.info("ws - 수비팀 전원 답안 제출 경로 : {}", destination);
+
         messagingTemplate.convertAndSend(destination, responseDto);
     }
 
