@@ -33,12 +33,15 @@ public class User extends BaseEntity {
     private UserStatistics userStatistics;
 
     @OneToMany(mappedBy = "user", cascade = PERSIST)
+    @Builder.Default
     private List<UserQuizLog> userQuizLogs = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = ALL)
+    @Builder.Default
     private List<UserCategoryLevel> userCategoryLevels = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = ALL)
+    @Builder.Default
     private List<QuizWrong> quizWrongs = new ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = PERSIST)
