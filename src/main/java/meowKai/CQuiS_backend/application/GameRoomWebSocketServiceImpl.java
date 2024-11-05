@@ -438,6 +438,8 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                 k -> Collections.synchronizedList(new ArrayList<>()))   // roomAnswers에 roomId가 없는 경우 동기화된 리스트를 새로 만듦
                 .add(new UserAnswer(requestDto.getRoomUserId(), requestDto.getAnswer()));
 
+        log.info("ws - 수비팀 답안 제출 - 답안 리스트: {}", roomAnswers.get(foundRoom.getId()));
+        log.info("ws - 수비팀 답안 제출 - 제출된 답안의 수: {}, 수비팀 유저 수: {}", roomAnswers.get(foundRoom.getId()).size(), foundRoom.getDefenseTeamUserCount());
         if(roomAnswers.get(foundRoom.getId()).size() >= foundRoom.getDefenseTeamUserCount()) {
             submitAll(foundRoom.getDefenseTeam().getTeamColor(), foundRoom.getId());
         }
@@ -445,9 +447,12 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
     // 수비팀 전체가 답안을 제출하면 알림을 보냄
     private void submitAll(RoomUserTeam teamColor, Long roomId) {
+
         ResponseSubmitAllDto responseDto = ResponseSubmitAllDto.builder()
                 .responseStatus(ResponseStatus.ALL_SUBMIT)
                 .build();
+
+        log.info("ws - 수비팀 전원 답안 제출 : {}", responseDto);
 
         String destination = String.format("/topic/game/%d/%s",
                 roomId,
