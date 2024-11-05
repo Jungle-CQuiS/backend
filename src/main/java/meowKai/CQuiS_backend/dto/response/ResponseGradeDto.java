@@ -9,4 +9,5 @@ import lombok.*;
 @ToString
 public class ResponseGradeDto {
     private Boolean isCorrect;
+    private String answer;
 }
