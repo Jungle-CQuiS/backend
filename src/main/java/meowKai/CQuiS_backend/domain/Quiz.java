@@ -41,4 +41,14 @@ public class Quiz {
     @Enumerated(STRING)
     private QuizType type;
 
+    // 비추천 횟수
+    @Column
+    private Integer downvoteCount;
+
+    /**
+     * 도메인 비즈니스 로직
+     */
+    public void downvote() {
+        this.downvoteCount++;
+    }
 }

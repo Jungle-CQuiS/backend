@@ -49,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
         categories.forEach(
                 category -> userCategoryLevelRepository.save(UserCategoryLevel.createUserCategoryLevel(savedUser, category))
         );
+
         ResponseSignUpDto responseDto = ResponseSignUpDto
                 .builder()
                 .email(savedUser.getEmail())

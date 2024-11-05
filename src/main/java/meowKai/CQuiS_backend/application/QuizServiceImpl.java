@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.application.quiz.KoreanAnalyzer;
 import meowKai.CQuiS_backend.application.quiz.SimilarityCalculator;
 import meowKai.CQuiS_backend.domain.*;
-import meowKai.CQuiS_backend.dto.*;
+import meowKai.CQuiS_backend.dto.GetCategoryDto;
+import meowKai.CQuiS_backend.dto.GetChoiceAnsQuizDto;
+import meowKai.CQuiS_backend.dto.GetShortAnsQuizDto;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.*;
@@ -537,5 +539,16 @@ public class QuizServiceImpl implements QuizService {
         }
         roomQuizzes.put(gameRoom.getId(), Collections.synchronizedList(quizzes));
         log.info("문제 리스트 저장 완료");
+    }
+
+    // 문제 비추천하기(triggered by 별로에요 버튼)
+    @Override
+    public void downvoteQuiz(RequestDownvoteDto requestDto) {
+        log.info("문제 비추천하기 요청 : {}", requestDto);
+        Quiz foundQuiz = quizRepository.findById(requestDto.getQuizId()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 퀴즈입니다.")
+        );
+        foundQuiz.downvote();
+        log.info("문제 비추천하기 완료");
     }
 }
