@@ -63,7 +63,7 @@ public class UserController {
     }
 
     @Tag(name = "유저 정보")
-    @Operation(summary = "게임이 끝난 후 유저의 카테고리 별 레벨 데이터 업데이트")
+    @Operation(summary = "싱글모드 게임이 끝난 후 유저의 카테고리 별 레벨 데이터 업데이트")
     @PostMapping("/category-levels/after-game")
     public ApiResponse<Object> updateUserCategoryLevelsAfterGame(@Valid @RequestBody RequestUpdateUserCategoryLevelsDto requestDto) {
         try {
