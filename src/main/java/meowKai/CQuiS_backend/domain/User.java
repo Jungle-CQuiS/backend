@@ -6,6 +6,7 @@ import meowKai.CQuiS_backend.global.base.BaseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,14 +32,14 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user", cascade = ALL)
     private UserStatistics userStatistics;
 
-    @OneToMany(mappedBy = "user")
-    private List<UserQuizLog> userQuizLogs;
+    @OneToMany(mappedBy = "user", cascade = PERSIST)
+    private List<UserQuizLog> userQuizLogs = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = ALL)
-    private List<UserCategoryLevel> userCategoryLevels;
+    private List<UserCategoryLevel> userCategoryLevels = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
-    private List<QuizWrong> quizWrongs;
+    @OneToMany(mappedBy = "user", cascade = ALL)
+    private List<QuizWrong> quizWrongs = new ArrayList<>();
 
     // 유저의 email
     @Column

@@ -45,6 +45,7 @@ public class UserStatistics {
                 .solvedCount(0)
                 .wrongCount(0)
                 .honorCount(0)
+                .correctRate("0.00%")
                 .build();
     }
 
