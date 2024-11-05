@@ -41,6 +41,9 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = ALL)
     private List<QuizWrong> quizWrongs = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user", cascade = PERSIST)
+    private LogData logData;
+
     // 유저의 email
     @Column
     private String email;
@@ -80,6 +83,7 @@ public class User extends BaseEntity {
 
         // UserStatistics 생성 및 연관관계 설정
         user.userStatistics = UserStatistics.createUserStatistics(user);
+        user.logData = LogData.createLogData(user);
 
         return user;
     }

@@ -1,12 +1,15 @@
 package meowKai.CQuiS_backend.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import meowKai.CQuiS_backend.global.base.BaseEntity;
 
-import static jakarta.persistence.FetchType.*;
-import static jakarta.persistence.GenerationType.*;
-import static lombok.AccessLevel.*;
+import static jakarta.persistence.FetchType.LAZY;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
@@ -19,24 +22,31 @@ public class UserQuizLog extends BaseEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
-    // user와 매핑
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "log_data_id")
+    private LogData logData;
 
-    // 전체 문제 갯수
+    // 퀴즈의 id
     @Column
-    private Integer quizCount;
+    private Long quizId;
 
-    // 틀린 문제 갯수
+    // 퀴즈의 질문
     @Column
-    private Integer wrongCount;
+    private String quizName;
 
-    // 멀티 모드 여부
+    // 퀴즈의 타입(객관식, 주관식)
     @Column
-    private Boolean multimode;
+    private String quizType;
 
-    // 받은 명예 수
+    // 카테고리의 아이디
     @Column
-    private Integer honorCount;
+    private Long categoryId;
+
+    // 카테고리 명
+    @Column
+    private String categoryName;
+
+    // 정답 여부
+    @Column
+    private Boolean isCorrect;
 }
