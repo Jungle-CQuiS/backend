@@ -438,7 +438,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                 k -> Collections.synchronizedList(new ArrayList<>()))   // roomAnswers에 roomId가 없는 경우 동기화된 리스트를 새로 만듦
                 .add(new UserAnswer(requestDto.getRoomUserId(), requestDto.getAnswer()));
 
-        if(roomAnswers.get(foundRoom.getId()).size() == foundRoom.getDefenseTeamUserCount()) {
+        if(roomAnswers.get(foundRoom.getId()).size() >= foundRoom.getDefenseTeamUserCount()) {
             submitAll(foundRoom.getDefenseTeam().getTeamColor(), foundRoom.getId());
         }
     }
