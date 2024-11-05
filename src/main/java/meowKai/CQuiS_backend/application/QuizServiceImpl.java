@@ -323,16 +323,24 @@ public class QuizServiceImpl implements QuizService {
 
         GameRoom foundRoom = gameRoomRepository.findById(roomId).orElseThrow(
                 () -> new NoSuchElementException("랜덤 문제 두 문제씩 가져오기 - 존재하지 않는 방입니다."));
-        Integer roundIndex = foundRoom.getQuizCount(); // 현재까지 진행된 문제 수를 인덱스로 사용
+        Integer roundIdx = foundRoom.getQuizCount(); // 현재까지 진행된 문제 수를 인덱스로 사용
 
         List<Object> allQuizzes = roomQuizzes.get(foundRoom.getId());
         if (allQuizzes == null || allQuizzes.isEmpty()) {
             throw new IllegalStateException("퀴즈를 불러오는데 실패했습니다.");
         }
 
+        List<Category> categories = categoryRepository.findAll();
+
         List<Object> transferQuizzes = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            int startIdx = i * 20 + roundIndex * 2;
+        for (int i = 0; i < categories.size(); i++) {
+            int startIdx = i * 20 + roundIdx * 2;
+
+            if(startIdx + 1 >= allQuizzes.size()) {
+                log.error("카테고리 별로 랜덤 문제 두 문제씩 가져오기 - 인덱스 범위 초과 roundIdx: {}, startIdx: {}", roundIdx, startIdx);
+                throw new IllegalStateException("카테고리 별로 랜덤 문제 두 문제씩 가져오기 - 사용할 수 있는 문제가 없습니다.");
+            }
+
             transferQuizzes.add(allQuizzes.get(startIdx));
             transferQuizzes.add(allQuizzes.get(startIdx + 1));
         }
