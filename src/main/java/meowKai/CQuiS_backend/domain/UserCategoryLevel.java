@@ -2,7 +2,7 @@ package meowKai.CQuiS_backend.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
+import meowKai.CQuiS_backend.global.base.BaseEntity;
 
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
@@ -13,7 +13,7 @@ import static lombok.AccessLevel.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class UserCategoryLevel {
+public class UserCategoryLevel extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -30,11 +30,11 @@ public class UserCategoryLevel {
     private Category category;
 
     // 레벨
-    @ColumnDefault("1")
+    @Column
     private Integer level;
 
     // 맞춘 문제 수
-    @ColumnDefault("0")
+    @Column
     private Integer correctCount;
 
     /**
