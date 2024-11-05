@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ResponseGetUserCategoryLevelsDto {
+public class ResponseUpdateUserCategoryLevelsDto {
     private List<CategoryLevelData> categoryLevels;
 
     @Builder
