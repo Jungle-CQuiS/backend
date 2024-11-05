@@ -22,9 +22,34 @@ public class MultiQuizController {
     @Tag(name = "멀티모드 퀴즈")
     @Operation(summary = "퀴즈방 목록 조회")
     @GetMapping("/rooms")
-    public ApiResponse<Object> getMultiRoomList() {
-        ResponseGetMultiRoomListDto responseDto = gameRoomService.getMultiRoomList();
-        return ApiResponse.ofSuccess(responseDto);
+    public ApiResponse<Object> getMultiRoomList(
+            @RequestParam(defaultValue = "0") int start, // start 값부터
+            @RequestParam(required = false, defaultValue = "15") int limit) // limit 값 만큼 리턴
+    {
+        try {
+            ResponseGetMultiRoomListDto responseDto = gameRoomService.getMultiRoomList(start, limit);
+            return ApiResponse.ofSuccess(responseDto);
+        }
+        catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "멀티모드 퀴즈")
+    @Operation(summary = "퀴즈방 제목으로 검색하기")
+    @GetMapping("/rooms/search")
+    public ApiResponse<Object> searchMultiRoomByRoomName(
+            @RequestParam String roomName,
+            @RequestParam(defaultValue = "0") int start, // start 값부터
+            @RequestParam(required = false, defaultValue = "15") int limit) // limit 값 만큼 리턴
+    {
+        try {
+            ResponseSearchMultiRoomByRoomNameDto responseDto = gameRoomService.searchMultiRoomByRoomName(roomName, start, limit);
+            return ApiResponse.ofSuccess(responseDto);
+        }
+        catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
     }
 
     @Tag(name = "멀티모드 퀴즈")

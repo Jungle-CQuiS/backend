@@ -5,13 +5,16 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.domain.*;
-import meowKai.CQuiS_backend.dto.MultiRoomListDto;
+import meowKai.CQuiS_backend.dto.MultiRoomDto;
 import meowKai.CQuiS_backend.dto.MultiRoomUserDto;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,12 +36,13 @@ public class GameRoomServiceImpl implements GameRoomService {
 
     private final GameRoomWebSocketServiceImpl gameRoomWebSocketService;
 
-    // TODO: 페이지네이션 | 무한스크롤로 구현하기
     // 입장할 수 있는 멀티 게임 방 조회하기
     @Override
-    public ResponseGetMultiRoomListDto getMultiRoomList() {
+    public ResponseGetMultiRoomListDto getMultiRoomList(int start, int limit) {
         log.info("멀티 게임 방 리스트 조회 요청");
-        List<GameRoom> gameRoomList = gameRoomRepository.findByGameStatus(GameStatus.WAITING); // gameStatus가 WAITING인 방만 가져옴
+
+        Pageable pageable = PageRequest.of(start, limit);
+        Page<GameRoom> gameRoomList = gameRoomRepository.findByGameStatus(GameStatus.WAITING, pageable); // gameStatus가 WAITING인 방만 가져옴
 
         if(gameRoomList.isEmpty()) {
             ResponseGetMultiRoomListDto responseDto = ResponseGetMultiRoomListDto.builder()
@@ -49,8 +53,8 @@ public class GameRoomServiceImpl implements GameRoomService {
             return responseDto;
         }
 
-        List<MultiRoomListDto> multiRoomList = gameRoomList.stream()
-                .map(gameRoom -> MultiRoomListDto.builder()
+        List<MultiRoomDto> multiRoomList = gameRoomList.stream()
+                .map(gameRoom -> MultiRoomDto.builder()
                         .gameRoomId(gameRoom.getId())
                         .name(gameRoom.getName())
                         .currentUsers(gameRoom.getCurrentUsers())
@@ -61,6 +65,7 @@ public class GameRoomServiceImpl implements GameRoomService {
 
         ResponseGetMultiRoomListDto responseDto = ResponseGetMultiRoomListDto.builder()
                 .rooms(multiRoomList)
+                .nextPageNumber(start + gameRoomList.getTotalPages()) // 마지막 페이지 번호(프론트 입장에서 다음 페이지 로드 시 해당 번호부터 limit 갯수만큼 불러오면 됨)
                 .build();
 
         log.info("멀티 게임 방 리스트 조회 결과: {}", responseDto);
@@ -447,6 +452,33 @@ public class GameRoomServiceImpl implements GameRoomService {
                 .build();
 
         log.info("제출된 답안 리스트: {}", responseDto);
+        return responseDto;
+    }
+
+    // 방 제목으로 방 검색하기
+    @Override
+    public ResponseSearchMultiRoomByRoomNameDto searchMultiRoomByRoomName(String roomName, int start, int limit) {
+        log.info("방 검색 - 방 이름으로 방 검색 요청: {}", roomName);
+
+        Pageable pageable = PageRequest.of(start, limit);
+        Page<GameRoom> gameRooms = gameRoomRepository.findByNameContaining(roomName, pageable);
+
+        List<MultiRoomDto> multiRooms = gameRooms.stream()
+                .map(gameRoom -> MultiRoomDto.builder()
+                        .gameRoomId(gameRoom.getId())
+                        .name(gameRoom.getName())
+                        .currentUsers(gameRoom.getCurrentUsers())
+                        .maxUsers(gameRoom.getMaxUsers())
+                        .isLocked(gameRoom.getPassword() != null)
+                        .build())
+                .toList();
+
+        ResponseSearchMultiRoomByRoomNameDto responseDto = ResponseSearchMultiRoomByRoomNameDto.builder()
+                .multiRooms(multiRooms)
+                .nextPageNumber(start + gameRooms.getTotalPages()) // 마지막 페이지 번호(프론트 입장에서 다음 페이지 로드 시 해당 번호부터 limit 갯수만큼 불러오면 됨)
+                .build();
+
+        log.info("방 검색 - 방 이름으로 방 검색 결과: {}", responseDto);
         return responseDto;
     }
 
