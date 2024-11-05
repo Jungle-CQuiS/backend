@@ -32,10 +32,6 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user", cascade = ALL)
     private UserStatistics userStatistics;
 
-    @OneToMany(mappedBy = "user", cascade = PERSIST)
-    @Builder.Default
-    private List<UserQuizLog> userQuizLogs = new ArrayList<>();
-
     @OneToMany(mappedBy = "user", cascade = ALL)
     @Builder.Default
     private List<UserCategoryLevel> userCategoryLevels = new ArrayList<>();
