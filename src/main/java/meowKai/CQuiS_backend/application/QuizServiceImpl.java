@@ -67,12 +67,16 @@ public class QuizServiceImpl implements QuizService {
             }
         }
 
+        String answer = getAnswer(foundQuiz, isChoice);
+
         ResponseGradeDto responseDto = similarity >= 0.9 ?
                 ResponseGradeDto.builder()
                         .isCorrect(true)
+                        .answer(answer)
                         .build()
                 : ResponseGradeDto.builder()
                         .isCorrect(false)
+                        .answer(answer)
                         .build();
 
         log.info("채점 완료 : {}", responseDto);
@@ -88,6 +92,24 @@ public class QuizServiceImpl implements QuizService {
         return isEnglish ?
                 quiz.getShortAnsQuiz().getEnglishAnswer().replace(" ", "").toLowerCase() :
                 quiz.getShortAnsQuiz().getKoreanAnswer().replace(" ", "");
+    }
+
+    // 화면에 출력하기 위한 형태로 문제의 정답을 반환하기 위한 메소드, 문제의 타입에 따라 형태가 달라짐
+    private String getAnswer(Quiz quiz, boolean isChoice) {
+        if(isChoice) {
+            return quiz.getChoiceAnsQuiz().getAnswer().toString();
+        }
+
+        String koreanAnswer = quiz.getShortAnsQuiz().getKoreanAnswer();
+        String englishAnswer = quiz.getShortAnsQuiz().getEnglishAnswer();
+
+        // 정답 null 체크
+        if(koreanAnswer == null) {
+            return englishAnswer;
+        } else if(englishAnswer == null) {
+            return koreanAnswer;
+        }
+        return String.format("%s (%s)", koreanAnswer, englishAnswer);
     }
 
     // 카테고리 정보 가져오기

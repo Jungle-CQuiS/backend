@@ -448,11 +448,6 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                 () -> new NoSuchElementException("ws - 최종 답안 제출 - 존재하지 않는 퀴즈입니다."));
         UserAnswer userAnswer = roomAnswers.get(requestDto.getRoomId()).get(requestDto.getNumber().intValue());
 
-        // 문제의 정답을 가져옴(반환용)
-        String answer = foundQuiz.getType() == QuizType.CHOICE ?
-                String.valueOf(foundQuiz.getChoiceAnsQuiz().getAnswer())
-                : foundQuiz.getShortAnsQuiz().getKoreanAnswer() + "(" + foundQuiz.getShortAnsQuiz().getEnglishAnswer() + ")";
-
         // 채점
         RequestGradeDto requestGradeDto = RequestGradeDto.builder().quizId(foundQuiz.getId()).userInput(userAnswer.getAnswer()).build();
         ResponseGradeDto responseGradeDto = quizService.checkGrade(requestGradeDto);
@@ -471,7 +466,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         // responseDto 만들어 반환
         ResponseSubmitTeamDto responseDto = ResponseSubmitTeamDto.builder()
                 .isCorrect(responseGradeDto.getIsCorrect())
-                .answer(answer)
+                .answer(responseGradeDto.getAnswer())
                 .teamHp(defenseTeam.getTeamHp())
                 .build();
 
