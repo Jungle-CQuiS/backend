@@ -6,12 +6,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.application.QuizService;
 import meowKai.CQuiS_backend.dto.request.RequestGetChoiceAnswerQuizzesDto;
+import meowKai.CQuiS_backend.dto.request.RequestGetMixAnswerQuizzesDto;
 import meowKai.CQuiS_backend.dto.request.RequestGetShortAnswerQuizzesDto;
 import meowKai.CQuiS_backend.dto.request.RequestSaveSingleGameStatisticsDto;
-import meowKai.CQuiS_backend.dto.response.ResponseGetCategoriesDto;
-import meowKai.CQuiS_backend.dto.response.ResponseGetChoiceAnswerQuizzesDto;
-import meowKai.CQuiS_backend.dto.response.ResponseGetShortAnswerQuizzesDto;
-import meowKai.CQuiS_backend.dto.response.ResponseSaveSingleGameStatisticsDto;
+import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +47,19 @@ public class SingleQuizController {
     public ApiResponse<Object> getChoiceQuizzesByConditions(@Valid @RequestBody RequestGetChoiceAnswerQuizzesDto requestDto) {
         try {
             ResponseGetChoiceAnswerQuizzesDto responseDto = quizService.getChoiceAnswerQuizzesByConditions(requestDto);
+            return ApiResponse.ofSuccess(responseDto);
+        }
+        catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "싱글모드 퀴즈")
+    @Operation(summary = "퀴즈 설정 조건에 따른 주관식 + 객관식 문제 요청하기")
+    @PostMapping("/mix")
+    public ApiResponse<Object> getMixQuizzesByConditions(@Valid @RequestBody RequestGetMixAnswerQuizzesDto requestDto) {
+        try {
+            ResponseGetMixAnswerQuizzesDto responseDto = quizService.getMixAnswerQuizzesByConditions(requestDto);
             return ApiResponse.ofSuccess(responseDto);
         }
         catch (Exception e) {

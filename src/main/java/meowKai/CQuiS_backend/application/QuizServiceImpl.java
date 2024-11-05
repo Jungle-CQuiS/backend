@@ -5,13 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.application.quiz.KoreanAnalyzer;
 import meowKai.CQuiS_backend.application.quiz.SimilarityCalculator;
 import meowKai.CQuiS_backend.domain.*;
-import meowKai.CQuiS_backend.dto.GetCategoryDto;
-import meowKai.CQuiS_backend.dto.GetChoiceAnsQuizDto;
-import meowKai.CQuiS_backend.dto.GetShortAnsQuizDto;
-import meowKai.CQuiS_backend.dto.request.RequestGetChoiceAnswerQuizzesDto;
-import meowKai.CQuiS_backend.dto.request.RequestGetShortAnswerQuizzesDto;
-import meowKai.CQuiS_backend.dto.request.RequestGradeDto;
-import meowKai.CQuiS_backend.dto.request.RequestSaveSingleGameStatisticsDto;
+import meowKai.CQuiS_backend.dto.*;
+import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.*;
 import org.springframework.stereotype.Service;
@@ -307,6 +302,121 @@ public class QuizServiceImpl implements QuizService {
                                     .choice3(quiz.getChoiceAnsQuiz().getChoice3())
                                     .choice4(quiz.getChoiceAnsQuiz().getChoice4())
                                     .answer(quiz.getChoiceAnsQuiz().getAnswer())
+                                    .build()
+                    );
+                }
+            }
+        });
+        log.info("객관식 문제 요청 응답 : {}", responseDto);
+        return responseDto;
+    }
+
+    @Override
+    public ResponseGetMixAnswerQuizzesDto getMixAnswerQuizzesByConditions(RequestGetMixAnswerQuizzesDto requestDto) {
+        log.info("주관식 + 객관식 문제 요청 : {}", requestDto);
+
+        // 카테고리 별로 할당할 문제 갯수를 저장하는 map
+        Map<Long, Integer> quizzesPerCategory = new HashMap<>();
+        List<Long> categoryIds = requestDto.getCategoryIds();
+        int categoryIdsCount = categoryIds.size();
+        int quizCount = requestDto.getQuizCount();
+
+        for (Long categoryId : categoryIds) {
+            quizzesPerCategory.put(categoryId, 0); // {카테고리 아이디: 문제 갯수}
+        }
+
+        // 카테고리 갯수와 문제 갯수가 같으면 카테고리 별로 1문제 씩 가져옴
+        if (categoryIdsCount == quizCount) {
+            quizzesPerCategory.keySet().forEach(id -> quizzesPerCategory.put(id, 1));
+        }
+        // 카테고리 갯수 < 퀴즈 갯수면 카테고리 별로 n개 뽑아서 합이 퀴즈 갯수가 되도록
+        else if (categoryIdsCount < quizCount) {
+            int baseCount = quizCount / categoryIdsCount;
+            int remainCount = quizCount % categoryIdsCount;
+
+            for (int i = 0; i < categoryIdsCount; i++) {
+                Long categoryId = requestDto.getCategoryIds().get(i);
+                quizzesPerCategory.put(categoryId, baseCount + (i < remainCount ? 1 : 0));
+            }
+        }
+        // 카테고리 갯수 > 퀴즈 갯수면 퀴즈 0개가 할당되는 카테고리가 최소화 되도록
+        else {
+            for (int i = 0; i < quizCount; i++) {
+                Long categoryId = requestDto.getCategoryIds().get(i);
+                quizzesPerCategory.put(categoryId, 1);
+            }
+        }
+
+        ResponseGetMixAnswerQuizzesDto responseDto = ResponseGetMixAnswerQuizzesDto.builder()
+                .quizList(new ArrayList<>())
+                .build();
+
+        quizzesPerCategory.forEach((key, value) -> {
+
+            // 카테고리 별로 가져와야 할 문제 갯수
+            long categoryId = key;
+            int count = value;
+
+            // 조건에 해당하는 문제 모두 불러오기
+            List<Quiz> quizzesFitConditions = quizRepository.findAllByCategoryId(categoryId);
+
+            // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
+            if (count >= quizzesFitConditions.size()) {
+                quizzesFitConditions.forEach(quiz -> {
+                    responseDto.getQuizList().add(
+                            quiz.getType() == QuizType.CHOICE ? GetRandomChoiceQuizDto.builder()
+                                    .categoryId(quiz.getCategory().getId())
+                                    .categoryType(quiz.getCategory().getCategory())
+                                    .quizId(quiz.getId())
+                                    .quizType(quiz.getType())
+                                    .name(quiz.getName())
+                                    .choice1(quiz.getChoiceAnsQuiz().getChoice1())
+                                    .choice2(quiz.getChoiceAnsQuiz().getChoice2())
+                                    .choice3(quiz.getChoiceAnsQuiz().getChoice3())
+                                    .choice4(quiz.getChoiceAnsQuiz().getChoice4())
+                                    .choiceAnswer(quiz.getChoiceAnsQuiz().getAnswer())
+                                    .build()
+                                    : GetRandomShortQuizDto.builder()
+                                    .categoryId(quiz.getCategory().getId())
+                                    .categoryType(quiz.getCategory().getCategory())
+                                    .quizId(quiz.getId())
+                                    .quizType(quiz.getType())
+                                    .name(quiz.getName())
+                                    .shortEnglishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
+                                    .shortKoreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
+                                    .build()
+                    );
+                });
+            } else {
+                // 문제를 랜덤하게 섞어서 count만큼 가져옴
+                Collections.shuffle(quizzesFitConditions);
+
+                List<Quiz> randomQuizzes = quizzesFitConditions.stream()
+                        .limit(count)
+                        .toList();
+
+                for (Quiz quiz : randomQuizzes) {
+                    responseDto.getQuizList().add(
+                            quiz.getType() == QuizType.CHOICE ? GetRandomChoiceQuizDto.builder()
+                                    .categoryId(quiz.getCategory().getId())
+                                    .categoryType(quiz.getCategory().getCategory())
+                                    .quizId(quiz.getId())
+                                    .quizType(quiz.getType())
+                                    .name(quiz.getName())
+                                    .choice1(quiz.getChoiceAnsQuiz().getChoice1())
+                                    .choice2(quiz.getChoiceAnsQuiz().getChoice2())
+                                    .choice3(quiz.getChoiceAnsQuiz().getChoice3())
+                                    .choice4(quiz.getChoiceAnsQuiz().getChoice4())
+                                    .choiceAnswer(quiz.getChoiceAnsQuiz().getAnswer())
+                                    .build()
+                                    : GetRandomShortQuizDto.builder()
+                                    .categoryId(quiz.getCategory().getId())
+                                    .categoryType(quiz.getCategory().getCategory())
+                                    .quizId(quiz.getId())
+                                    .quizType(quiz.getType())
+                                    .name(quiz.getName())
+                                    .shortEnglishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
+                                    .shortKoreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
                                     .build()
                     );
                 }
