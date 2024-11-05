@@ -48,8 +48,6 @@ public class UserStatistics {
                 .build();
     }
 
-    // TODO: 한 번씩 메서드를 호출하기 보다 인자를 받아서 한 번에 추가하는게 좋지 않나? 웹소켓이라서 기존 방식 사용해야 하나?
-    //  만약 위의 방식을 사용한다면 updateHonorCount로 변경하는게 좋을 것 같음
     public void addHonorCount() {
         this.honorCount++;
     }

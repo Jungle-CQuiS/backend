@@ -34,7 +34,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     private List<UserQuizLog> userQuizLogs;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = ALL)
     private List<UserCategoryLevel> userCategoryLevels;
 
     @OneToMany(mappedBy = "user")

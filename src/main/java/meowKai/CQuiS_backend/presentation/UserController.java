@@ -8,9 +8,11 @@ import meowKai.CQuiS_backend.application.UserService;
 import meowKai.CQuiS_backend.dto.request.RequestGetPersonalUserDataDto;
 import meowKai.CQuiS_backend.dto.request.RequestGetUserCategoryLevelsDto;
 import meowKai.CQuiS_backend.dto.request.RequestGetUserStatisticsDto;
+import meowKai.CQuiS_backend.dto.request.RequestUpdateUserCategoryLevelsDto;
 import meowKai.CQuiS_backend.dto.response.ResponseGetPersonalUserDataDto;
 import meowKai.CQuiS_backend.dto.response.ResponseGetUserCategoryLevelsDto;
 import meowKai.CQuiS_backend.dto.response.ResponseGetUserStatisticsDto;
+import meowKai.CQuiS_backend.dto.response.ResponseUpdateUserCategoryLevelsDto;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,8 +33,7 @@ public class UserController {
         try {
             ResponseGetPersonalUserDataDto responseDto = userService.getPersonalData(requestDto);
             return ApiResponse.ofSuccess(responseDto);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ApiResponse.ofFail(e.getMessage());
         }
     }
@@ -44,8 +45,7 @@ public class UserController {
         try {
             ResponseGetUserStatisticsDto responseDto = userService.getUserQuizStatistics(requestDto);
             return ApiResponse.ofSuccess(responseDto);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ApiResponse.ofFail(e.getMessage());
         }
     }
@@ -56,6 +56,18 @@ public class UserController {
     public ApiResponse<Object> getUserCategoryLevels(@Valid @RequestBody RequestGetUserCategoryLevelsDto requestDto) {
         try {
             ResponseGetUserCategoryLevelsDto responseDto = userService.getUserCategoryLevels(requestDto);
+            return ApiResponse.ofSuccess(responseDto);
+        } catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "유저 정보")
+    @Operation(summary = "싱글모드 게임이 끝난 후 유저의 카테고리 별 레벨 데이터 업데이트")
+    @PostMapping("/category-levels/after-game")
+    public ApiResponse<Object> updateUserCategoryLevelsAfterGame(@Valid @RequestBody RequestUpdateUserCategoryLevelsDto requestDto) {
+        try {
+            ResponseUpdateUserCategoryLevelsDto responseDto = userService.updateUserCategoryLevelsAfterGame(requestDto);
             return ApiResponse.ofSuccess(responseDto);
         }
         catch (Exception e) {

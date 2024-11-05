@@ -2,17 +2,21 @@ package meowKai.CQuiS_backend.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import meowKai.CQuiS_backend.domain.Category;
 import meowKai.CQuiS_backend.domain.User;
-import meowKai.CQuiS_backend.dto.request.RequestLoginDto;
+import meowKai.CQuiS_backend.domain.UserCategoryLevel;
 import meowKai.CQuiS_backend.dto.request.RequestSignUpDto;
 import meowKai.CQuiS_backend.dto.response.ResponseDuplicateCheckEmailDto;
 import meowKai.CQuiS_backend.dto.response.ResponseDuplicateCheckUsernameDto;
-import meowKai.CQuiS_backend.dto.response.ResponseLoginDto;
 import meowKai.CQuiS_backend.dto.response.ResponseSignUpDto;
+import meowKai.CQuiS_backend.infrastructure.CategoryRepository;
+import meowKai.CQuiS_backend.infrastructure.UserCategoryLevelRepository;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +26,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CategoryRepository categoryRepository;
+    private final UserCategoryLevelRepository userCategoryLevelRepository;
 
     // 회원가입
     @Override
@@ -34,14 +40,22 @@ public class AuthServiceImpl implements AuthService {
                 requestSignUpDto.getPassword()
         );
         createdUser.encodePassword(passwordEncoder);
-        log.info("생성된 유저 : {}", createdUser.toString());
         User savedUser = userRepository.save(createdUser);
+
+        // 존재하는 모든 카테고리 가져오기
+        List<Category> categories = categoryRepository.findAll();
+
+        // 유저 카테고리 레벨 데이터 생성하기
+        categories.forEach(
+                category -> userCategoryLevelRepository.save(UserCategoryLevel.createUserCategoryLevel(savedUser, category))
+        );
         ResponseSignUpDto responseDto = ResponseSignUpDto
                 .builder()
                 .email(savedUser.getEmail())
                 .username(savedUser.getUsername())
                 .uuid(savedUser.getUuid())
                 .build();
+        log.info("회원가입 결과 : {}", responseDto);
         return responseDto;
     }
 
