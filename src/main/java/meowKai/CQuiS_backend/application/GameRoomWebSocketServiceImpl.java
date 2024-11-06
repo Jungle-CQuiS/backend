@@ -473,6 +473,22 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         Quiz foundQuiz = quizRepository.findById(foundRoom.getCurrentQuizId()).orElseThrow(
                 () -> new NoSuchElementException("ws - 최종 답안 제출 - 존재하지 않는 퀴즈입니다."));
+
+        log.info("roomAnswers: {}", roomAnswers);
+
+        if(requestDto.getRoomId() == null) {
+            log.info("roomId 없음");
+        } else {
+            log.info("roomAnswers.get(requestDto.getRoomId()): {}", roomAnswers.get(requestDto.getRoomId()));
+        }
+
+        if(requestDto.getNumber() == null) {
+            log.info("number 없음");
+        } else {
+            log.info("requestDto.getNumber().intValue(): {} roomAnswers.get(requestDto.getRoomId()).get(requestDto.getNumber().intValue()): {}",
+                    requestDto.getNumber().intValue(), roomAnswers.get(requestDto.getRoomId()).get(requestDto.getNumber().intValue()));
+        }
+
         UserAnswer userAnswer = roomAnswers.get(requestDto.getRoomId()).get(requestDto.getNumber().intValue());
 
         // 채점
