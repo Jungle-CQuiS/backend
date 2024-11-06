@@ -14,7 +14,7 @@ public class GetChoiceAnsQuizDto {
 
     private Long categoryId;
     private Long quizId;
-    private CategoryType categoryName;
+    private CategoryType categoryType;
     private String name;
     private String choice1;
     private String choice2;
@@ -26,7 +26,7 @@ public class GetChoiceAnsQuizDto {
         return GetChoiceAnsQuizDto.builder()
                 .categoryId(foundQuiz.getCategory().getId())
                 .quizId(foundQuiz.getId())
-                .categoryName(foundQuiz.getCategory().getCategory())
+                .categoryType(foundQuiz.getCategory().getCategory())
                 .name(foundQuiz.getName())
                 .choice1(foundChoiceAnsQuiz.getChoice1())
                 .choice2(foundChoiceAnsQuiz.getChoice2())

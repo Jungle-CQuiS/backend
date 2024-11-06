@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
         // 카테고리 별 레벨 데이터를 DTO로 변환
         List<ResponseGetUserCategoryLevelsDto.CategoryLevelData> categoryLevelDataList = userCategoryLevels.stream()
                 .map(userCategoryLevel -> ResponseGetUserCategoryLevelsDto.CategoryLevelData.builder()
-                        .categoryName(userCategoryLevel.getCategory().getCategory())
+                        .categoryType(userCategoryLevel.getCategory().getCategory())
                         .categoryLevel(userCategoryLevel.getLevel())
                         .build())
                 .toList();
@@ -106,7 +106,7 @@ public class UserServiceImpl implements UserService {
 
                     foundCategoryLevelData.updateCorrectCount(gameData.getCorrectQuizCount()); // 맞은 문제 수 & 카테고리 레벨 업데이트
                     return ResponseUpdateUserCategoryLevelsDto.CategoryLevelData.builder()
-                            .categoryName(foundCategoryLevelData.getCategory().getCategory())
+                            .categoryType(foundCategoryLevelData.getCategory().getCategory())
                             .categoryLevel(foundCategoryLevelData.getLevel())
                             .build();
                 }
