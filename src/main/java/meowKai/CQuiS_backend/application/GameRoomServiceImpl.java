@@ -414,12 +414,16 @@ public class GameRoomServiceImpl implements GameRoomService {
 
         try {
             gameStartLock.lock(); // 락을 획득할 때까지 대기
+            log.info("락 획득 - 게임 상태: {}", requestDto.getGameStatus());
 
             if(foundRoom.getGameStatus() == GameStatus.WAITING) {
                 foundRoom.changeGameStatus(requestDto.getGameStatus()); // 입력으로 들어온 대로 방 상태 변경
+                log.info("123 - 방상태 변경: {}", foundRoom.getGameStatus());
 
                 Team blueTeam = Team.createTeam(foundRoom, RoomUserTeam.BLUE);
                 Team redTeam = Team.createTeam(foundRoom, RoomUserTeam.RED);
+                log.info("123 - 팀생성: {}", blueTeam);
+                log.info("123 - 팀생성: {}", redTeam);
 
                 gameRoomRepository.save(foundRoom);
                 teamRepository.save(blueTeam);
@@ -427,21 +431,28 @@ public class GameRoomServiceImpl implements GameRoomService {
                 entityManager.flush();
                 entityManager.clear();
 
+                log.info("123 - 영속성 컨텍스트 비움");
+
                 // firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
                 firstOffenseTeam = foundRoom.getTeams().get(0); //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
                 foundRoom.getTeams().get(0).changeTeamStatus(TeamStatus.OFFENSE);
                 foundRoom.getTeams().get(1).changeTeamStatus(TeamStatus.DEFENSE);
 
+                log.info("123 - 공격 수비 설정");
+
                 quizService.storeQuizzes(foundRoom); // 게임 시작 전 랜덤으로 100문제를 저장해 둠
+                log.info("123 - 문제 추가");
 
                 gameRoomRepository.save(foundRoom);
 
 
             } else {
+                log.info("123 - 공격팀 조회");
                 firstOffenseTeam = foundRoom.getTeams().get(0).getTeamStatus() == OFFENSE
                         ? foundRoom.getTeams().get(0) : foundRoom.getTeams().get(1);
             }
         } finally {
+            log.info("123 - 락 반환");
             gameStartLock.unlock();
         }
 
