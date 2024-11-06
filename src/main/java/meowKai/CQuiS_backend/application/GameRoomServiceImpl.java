@@ -418,9 +418,6 @@ public class GameRoomServiceImpl implements GameRoomService {
             if(foundRoom.getGameStatus() == GameStatus.WAITING) {
                 foundRoom.changeGameStatus(requestDto.getGameStatus()); // 입력으로 들어온 대로 방 상태 변경
 
-                Arrays.stream(RoomUserTeam.values())
-                        .forEach(teamColor -> Team.createTeam(foundRoom, teamColor)); // 레드팀, 블루팀 생성
-
                 Team blueTeam = Team.createTeam(foundRoom, RoomUserTeam.BLUE);
                 Team redTeam = Team.createTeam(foundRoom, RoomUserTeam.RED);
 
