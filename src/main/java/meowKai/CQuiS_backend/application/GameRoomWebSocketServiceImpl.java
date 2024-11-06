@@ -508,6 +508,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
     // (SUB)게임 종료 조건을 체크
     @Override
+    @Transactional
     public Boolean isGameover(Long roomId) {
         log.info("ws - 게임 종료 조건 체크 - roomId: {}", roomId);
 
