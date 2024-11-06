@@ -19,7 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
+
+import static meowKai.CQuiS_backend.domain.TeamStatus.OFFENSE;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +39,8 @@ public class GameRoomServiceImpl implements GameRoomService {
 
     private final GameRoomWebSocketServiceImpl gameRoomWebSocketService;
     private final QuizService quizService;
+
+    private final ReentrantLock gameStartLock = new ReentrantLock(); // 게임 시작 시 팀 생성을 포함한 세팅이 한 번만 발생하도록 하기 위한 락
 
     // 입장할 수 있는 멀티 게임 방 조회하기
     @Override
@@ -403,17 +408,32 @@ public class GameRoomServiceImpl implements GameRoomService {
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
                 () -> new NoSuchElementException("멀티 게임 시작 - 존재하지 않는 방입니다."));
 
-        foundRoom.changeGameStatus(requestDto.getGameStatus()); // 입력으로 들어온 대로 방 상태 변경
+        Team firstOffenseTeam = null;
 
-        Arrays.stream(RoomUserTeam.values())
-                .forEach(teamColor -> Team.createTeam(foundRoom, teamColor)); // 레드팀, 블루팀 생성
+        try {
+            gameStartLock.lock(); // 락을 획득할 때까지 대기
 
-        // Team firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
-        Team firstOffenseTeam = foundRoom.getTeams().get(0); //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
+            if(foundRoom.getGameStatus() == GameStatus.WAITING) {
+                foundRoom.changeGameStatus(requestDto.getGameStatus()); // 입력으로 들어온 대로 방 상태 변경
 
-        quizService.storeQuizzes(foundRoom); // 게임 시작 전 랜덤으로 100문제를 저장해 둠
+                Arrays.stream(RoomUserTeam.values())
+                        .forEach(teamColor -> Team.createTeam(foundRoom, teamColor)); // 레드팀, 블루팀 생성
 
-        gameRoomRepository.save(foundRoom);
+                // firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
+                firstOffenseTeam = foundRoom.getTeams().get(0); //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
+                foundRoom.getTeams().get(0).changeTeamStatus(TeamStatus.OFFENSE);
+                foundRoom.getTeams().get(1).changeTeamStatus(TeamStatus.DEFENSE);
+
+                quizService.storeQuizzes(foundRoom); // 게임 시작 전 랜덤으로 100문제를 저장해 둠
+
+                gameRoomRepository.save(foundRoom);
+            } else {
+                firstOffenseTeam = foundRoom.getTeams().get(0).getTeamStatus() == OFFENSE
+                        ? foundRoom.getTeams().get(0) : foundRoom.getTeams().get(1);
+            }
+        } finally {
+            gameStartLock.unlock();
+        }
 
         ResponseGameStartDto responseDto = ResponseGameStartDto.builder()
                 .teamColor(firstOffenseTeam.getTeamColor())
