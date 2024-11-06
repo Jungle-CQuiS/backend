@@ -37,6 +37,7 @@ public class Quiz {
 
     // 오답 퀴즈와 매핑
     @OneToMany(mappedBy = "quiz")
+    @Builder.Default
     private List<QuizWrong> quizWrongs = new ArrayList<>();
 
     // 문제 질문
