@@ -41,15 +41,12 @@ public class Team {
 
     // 팀 생성
     public static Team createTeam(GameRoom gameRoom, RoomUserTeam teamColor) {
-        Team team = Team.builder()
+        return Team.builder()
                 .gameRoom(gameRoom)
                 .teamColor(teamColor)
                 .teamHp(3)
                 .correctCount(0)
                 .build();
-
-        gameRoom.getTeams().add(team); // 양방향 관계 설정
-        return team;
     }
 
     //  수비 팀이 방어에 실패하면 체력 감소
