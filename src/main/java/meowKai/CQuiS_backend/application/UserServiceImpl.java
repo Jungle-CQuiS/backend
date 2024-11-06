@@ -2,20 +2,12 @@ package meowKai.CQuiS_backend.application;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import meowKai.CQuiS_backend.domain.User;
-import meowKai.CQuiS_backend.domain.UserCategoryLevel;
-import meowKai.CQuiS_backend.domain.UserStatistics;
-import meowKai.CQuiS_backend.dto.request.RequestGetPersonalUserDataDto;
-import meowKai.CQuiS_backend.dto.request.RequestGetUserCategoryLevelsDto;
-import meowKai.CQuiS_backend.dto.request.RequestGetUserStatisticsDto;
-import meowKai.CQuiS_backend.dto.request.RequestUpdateUserCategoryLevelsDto;
-import meowKai.CQuiS_backend.dto.response.ResponseGetPersonalUserDataDto;
-import meowKai.CQuiS_backend.dto.response.ResponseGetUserCategoryLevelsDto;
-import meowKai.CQuiS_backend.dto.response.ResponseGetUserStatisticsDto;
-import meowKai.CQuiS_backend.dto.response.ResponseUpdateUserCategoryLevelsDto;
-import meowKai.CQuiS_backend.infrastructure.UserCategoryLevelRepository;
-import meowKai.CQuiS_backend.infrastructure.UserRepository;
-import meowKai.CQuiS_backend.infrastructure.UserStatisticsRepository;
+import meowKai.CQuiS_backend.domain.*;
+import meowKai.CQuiS_backend.dto.GetChoiceAnsQuizDto;
+import meowKai.CQuiS_backend.dto.GetShortAnsQuizDto;
+import meowKai.CQuiS_backend.dto.request.*;
+import meowKai.CQuiS_backend.dto.response.*;
+import meowKai.CQuiS_backend.infrastructure.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +22,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserStatisticsRepository userStatisticsRepository;
     private final UserCategoryLevelRepository userCategoryLevelRepository;
+    private final QuizWrongRepository quizWrongRepository;
+    private final QuizRepository quizRepository;
 
     // 유저의 개인 정보(이메일, 유저네임)를 반환
     @Override
@@ -122,6 +116,91 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         log.info("게임 종료 후 유저 카테고리 레벨 업데이트 완료: {}", responseDto);
+        return responseDto;
+    }
+
+    // 유저의 틀린 문제 데이터를 업데이트
+    @Override
+    @Transactional
+    public ResponseUpdateUserWrongQuizzesDto updateUserWrongQuizzes(RequestUpdateUserWrongQuizzesDto requestDto) {
+        log.info("유저 틀린 문제 업데이트 요청: {}", requestDto);
+
+        User foundUser = userRepository.findByUuid(requestDto.getUuid())
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+        List<Long> wrongQuizIds = requestDto.getWrongQuizIds();
+
+        List<ResponseUpdateUserWrongQuizzesDto.UpdateWrongQuizDto> responseList = wrongQuizIds.stream().map(
+                wrongQuizId -> {
+                    Quiz foundQuiz = quizRepository.findById(wrongQuizId)
+                            .orElseThrow(() -> new IllegalArgumentException("해당 퀴즈가 존재하지 않습니다."));
+                    quizWrongRepository.save(QuizWrong.builder()
+                            .user(foundUser)
+                            .quiz(foundQuiz)
+                            .build());
+                    return ResponseUpdateUserWrongQuizzesDto.UpdateWrongQuizDto.builder()
+                            .wrongQuizId(wrongQuizId)
+                            .wrongQuizName(foundQuiz.getName())
+                            .build();
+                }
+        ).toList();
+
+        ResponseUpdateUserWrongQuizzesDto responseDto = ResponseUpdateUserWrongQuizzesDto.builder()
+                .wrongQuizzes(responseList)
+                .build();
+        log.info("유저 틀린 문제 업데이트 완료: {}", responseDto);
+        return responseDto;
+    }
+
+    // 유저의 틀린 문제 데이터를 반환
+    @Override
+    public ResponseGetUserWrongQuizzesDto getUserWrongQuizzes(RequestGetUserWrongQuizzesDto requestDto) {
+        log.info("유저 틀린 문제 정보 반환 요청: {}", requestDto);
+
+        User foundUser = userRepository.findByUuid(requestDto.getUuid())
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        List<QuizWrong> userWrongQuizzes = quizWrongRepository.findByUser(foundUser);
+
+        List<Object> responseList = userWrongQuizzes.stream().map(
+                wrongQuiz -> {
+                    Quiz foundQuiz = quizRepository.findById(wrongQuiz.getQuiz().getId())
+                            .orElseThrow(() -> new IllegalArgumentException("해당 퀴즈가 존재하지 않습니다."));
+                    QuizType foundQuizType = foundQuiz.getType();
+                    switch (foundQuizType) {
+                        case SHORT -> {
+                            ShortAnsQuiz foundShortAnsQuiz = foundQuiz.getShortAnsQuiz();
+                            return GetShortAnsQuizDto.builder()
+                                    .quizId(foundQuiz.getId())
+                                    .name(foundQuiz.getName())
+                                    .categoryId(foundQuiz.getCategory().getId())
+                                    .categoryType(foundQuiz.getCategory().getCategory())
+                                    .englishAnswer(foundShortAnsQuiz.getEnglishAnswer())
+                                    .koreanAnswer(foundShortAnsQuiz.getKoreanAnswer())
+                                    .build();
+                        }
+                        case CHOICE -> {
+                            ChoiceAnsQuiz foundChoiceAnsQuiz = foundQuiz.getChoiceAnsQuiz();
+                            return GetChoiceAnsQuizDto.builder()
+                                    .quizId(foundQuiz.getId())
+                                    .name(foundQuiz.getName())
+                                    .categoryId(foundQuiz.getCategory().getId())
+                                    .categoryType(foundQuiz.getCategory().getCategory())
+                                    .choice1(foundChoiceAnsQuiz.getChoice1())
+                                    .choice2(foundChoiceAnsQuiz.getChoice2())
+                                    .choice3(foundChoiceAnsQuiz.getChoice3())
+                                    .choice4(foundChoiceAnsQuiz.getChoice4())
+                                    .answer(foundChoiceAnsQuiz.getAnswer())
+                                    .build();
+                        }
+                        default -> throw new IllegalArgumentException("해당 퀴즈 타입이 존재하지 않습니다: " + foundQuizType);
+                    }
+                }
+        ).toList();
+
+        ResponseGetUserWrongQuizzesDto responseDto = ResponseGetUserWrongQuizzesDto.builder()
+                .wrongQuizzes(responseList)
+                .build();
+        log.info("유저 틀린 문제 정보 반환 완료: {}", responseDto);
         return responseDto;
     }
 }
