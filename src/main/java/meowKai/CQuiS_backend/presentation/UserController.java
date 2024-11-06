@@ -70,6 +70,19 @@ public class UserController {
     }
 
     @Tag(name = "유저 정보")
+    @Operation(summary = "유저의 게임 로그 저장")
+    @PostMapping("/log-data/quiz")
+    public ApiResponse<Object> saveUserQuizLog(@Valid @RequestBody RequestSaveUserQuizLogDto requestDto) {
+        try {
+            userService.saveUserQuizLog(requestDto);
+            return ApiResponse.ofSuccess("유저의 게임 로그 저장 완료");
+        }
+        catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "유저 정보")
     @Operation(summary = "유저의 오답 퀴즈 데이터 업데이트")
     @PostMapping("/quiz-wrong/after-game")
     public ApiResponse<Object> updateUserWrongQuiz(@Valid @RequestBody RequestUpdateUserWrongQuizzesDto requestDto) {

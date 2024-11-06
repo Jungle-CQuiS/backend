@@ -62,25 +62,15 @@ public class ProdSecurityConfig {
                 // 인증 없이 접근 가능한 요청
                 // TODO: 개발 끝나면 swagger-ui 지우기
                 .authorizeHttpRequests(requests -> requests.requestMatchers(
-//                                "/", // 메인 페이지
-//                                "/index.html", // 메인 페이지
-//                                "/*.html", // HTML 파일들
-//                                "/*.js", // JS 파일들
-//                                "/*.css", // CSS 파일들
-//                                "/*.ico", // favicon
-//                                "/assets/**", // 정적 리소스들
-//                                "/static/**", // 정적 리소스들
-//                                "/images/**", // 이미지 파일들
                                 "ws/**", // 웹 소켓 기본
                                 "/ws/**", // 웹 소켓 하위 경로
                                 "/topic/**", // 구독
                                 "/queue/**", // 개인 메시지
                                 "/app/**", // 메시지 발행
                                 "/user/**", // 사용자별 메시지
-                                "/api/util",
+                                "/api/util/**", // TODO: 임시, 지워주기
                                 "/api/auth/login",
                                 "/api/auth/signup",
-                                "/api/util", // TODO: 임시, 지워주기
                                 "/api/util/health-check",
                                 "/api/auth/username/**",
                                 "/api/auth/email/**",

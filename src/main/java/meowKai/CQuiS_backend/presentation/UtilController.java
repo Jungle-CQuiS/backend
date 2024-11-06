@@ -29,7 +29,7 @@ public class UtilController {
     @Operation(summary = "서버 상태 체크")
     @GetMapping("/health-check")
     public ApiResponse<Object> healthCheck() {
-        return ApiResponse.ofSuccess();
+        return ApiResponse.ofSuccess("서버가 정상적으로 작동 중입니다.");
     }
 
     @Tag(name = "유틸리티")

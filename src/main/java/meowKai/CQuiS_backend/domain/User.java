@@ -80,7 +80,7 @@ public class User extends BaseEntity {
                 .lastAccessed(LocalDateTime.now())
                 .build();
 
-        // UserStatistics 생성 및 연관관계 설정
+        // UserStatistics, LogData 생성 및 연관관계 설정
         user.userStatistics = UserStatistics.createUserStatistics(user);
         user.logData = LogData.createLogData(user);
 

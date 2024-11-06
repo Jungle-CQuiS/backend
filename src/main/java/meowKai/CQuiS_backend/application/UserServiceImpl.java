@@ -8,6 +8,7 @@ import meowKai.CQuiS_backend.dto.GetShortAnsQuizDto;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.*;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +23,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserStatisticsRepository userStatisticsRepository;
     private final UserCategoryLevelRepository userCategoryLevelRepository;
-    private final QuizWrongRepository quizWrongRepository;
+    private final LogDataRepository logDataRepository;
     private final QuizRepository quizRepository;
+    private final QuizWrongRepository quizWrongRepository;
 
     // 유저의 개인 정보(이메일, 유저네임)를 반환
     @Override
@@ -202,5 +204,32 @@ public class UserServiceImpl implements UserService {
                 .build();
         log.info("유저 틀린 문제 정보 반환 완료: {}", responseDto);
         return responseDto;
+    }
+
+    // 게임이 끝난 후 유저의 퀴즈 로그 저장
+    @Override
+    @Transactional
+    public void saveUserQuizLog(RequestSaveUserQuizLogDto requestDto) {
+        log.info("유저 퀴즈 로그 저장 요청: {}", requestDto);
+
+        User foundUser = userRepository.findByUuid(requestDto.getUuid())
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
+        LogData foundLogData = logDataRepository.findByUser(foundUser)
+                .orElseThrow(() -> new IllegalArgumentException("해당 유저의 로그 데이터가 존재하지 않습니다."));
+
+        // UserQuizLog와 연관관계 맺는 LogData 엔티티의 UserQuizLog 리스트
+        List<UserQuizLog> userQuizLogList = foundLogData.getUserQuizLogs();
+
+        // 새로 추가할 로그 데이터
+        List<RequestSaveUserQuizLogDto.QuizLogData> inputQuizLog = requestDto.getQuizLogDataList();
+
+        inputQuizLog.forEach(
+                quizLogData -> {
+                    UserQuizLog createdLog = UserQuizLog.createUserQuizLog(quizLogData, foundLogData);
+                    userQuizLogList.add(createdLog);
+                }
+        );
+        log.info("유저 퀴즈 로그 저장 완료: {}", inputQuizLog);
     }
 }
