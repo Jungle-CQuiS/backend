@@ -420,8 +420,9 @@ public class GameRoomServiceImpl implements GameRoomService {
             if(foundRoom.getGameStatus() == GameStatus.ALL_READY) {
                 foundRoom.changeGameStatus(requestDto.getGameStatus()); // 입력으로 들어온 대로 방 상태 변경
 
-                Team.createTeam(foundRoom, RoomUserTeam.BLUE); // 블루팀 생성
-                Team.createTeam(foundRoom, RoomUserTeam.RED); // 레드팀 생성
+                Team blueTeam = Team.createTeam(foundRoom, RoomUserTeam.BLUE);// 블루팀 생성
+                Team redTeam = Team.createTeam(foundRoom, RoomUserTeam.RED);// 레드팀 생성
+                foundRoom.getTeams().addAll(Arrays.asList(blueTeam, redTeam));
 
                 // firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
                 firstOffenseTeam = foundRoom.getTeams().get(0); //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
@@ -429,8 +430,6 @@ public class GameRoomServiceImpl implements GameRoomService {
                 foundRoom.getTeams().get(1).changeTeamStatus(TeamStatus.DEFENSE); // 임시
 
                 quizService.storeQuizzes(foundRoom); // 게임 시작 전 랜덤으로 100문제를 저장해 둠
-
-                gameRoomRepository.save(foundRoom);
 
             } else {
                 firstOffenseTeam = foundRoom.getTeams().get(0).getTeamStatus() == OFFENSE
