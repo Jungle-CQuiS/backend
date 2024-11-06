@@ -60,7 +60,7 @@ public class UserStatistics {
 
     // 유저의 정답률 업데이트
     public void updateCorrectRate() {
-        this.correctRate = String.format("%.2f", (double)((solvedCount - wrongCount) / solvedCount * 100)).concat("%");
+        this.correctRate = String.format("%.2f", (double)((this.solvedCount - this.wrongCount) / this.solvedCount * 100)).concat("%");
     }
 
     // 유저가 틀린 문제 수를 업데이트
