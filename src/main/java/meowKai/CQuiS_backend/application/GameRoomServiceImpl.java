@@ -417,13 +417,16 @@ public class GameRoomServiceImpl implements GameRoomService {
             if(foundRoom.getGameStatus() == GameStatus.WAITING) {
                 foundRoom.changeGameStatus(requestDto.getGameStatus()); // 입력으로 들어온 대로 방 상태 변경
 
-                Team blueTeam = Team.createTeam(foundRoom, RoomUserTeam.BLUE); // 팀 생성
-                Team redTeam = Team.createTeam(foundRoom, RoomUserTeam.RED);
+                Arrays.stream(RoomUserTeam.values())
+                        .forEach(teamColor -> Team.createTeam(foundRoom, teamColor)); // 레드팀, 블루팀 생성
 
-                // firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정 -> 메소드 사용하지 말고 객체 직접 참조하도록 할 것
-                firstOffenseTeam = blueTeam; //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
-                blueTeam.changeTeamStatus(OFFENSE);
-                redTeam.changeTeamStatus(DEFENSE);
+                gameRoomRepository.save(foundRoom);
+                gameRoomRepository.flush();
+
+                // firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
+                firstOffenseTeam = foundRoom.getTeams().get(0); //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
+                foundRoom.getTeams().get(0).changeTeamStatus(TeamStatus.OFFENSE);
+                foundRoom.getTeams().get(1).changeTeamStatus(TeamStatus.DEFENSE);
 
                 quizService.storeQuizzes(foundRoom); // 게임 시작 전 랜덤으로 100문제를 저장해 둠
 
