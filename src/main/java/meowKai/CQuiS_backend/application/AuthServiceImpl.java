@@ -50,12 +50,7 @@ public class AuthServiceImpl implements AuthService {
                 category -> userCategoryLevelRepository.save(UserCategoryLevel.createUserCategoryLevel(savedUser, category))
         );
 
-        ResponseSignUpDto responseDto = ResponseSignUpDto
-                .builder()
-                .email(savedUser.getEmail())
-                .username(savedUser.getUsername())
-                .uuid(savedUser.getUuid())
-                .build();
+        ResponseSignUpDto responseDto = ResponseSignUpDto.createDto(savedUser);
         log.info("회원가입 결과 : {}", responseDto);
         return responseDto;
     }

@@ -2,6 +2,7 @@ package meowKai.CQuiS_backend.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import meowKai.CQuiS_backend.global.base.BaseEntity;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ import static lombok.AccessLevel.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class Category {
+public class Category extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
