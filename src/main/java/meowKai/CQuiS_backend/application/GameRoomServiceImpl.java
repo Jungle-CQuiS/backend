@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-import static meowKai.CQuiS_backend.domain.TeamStatus.DEFENSE;
 import static meowKai.CQuiS_backend.domain.TeamStatus.OFFENSE;
 
 @Service
@@ -421,7 +420,8 @@ public class GameRoomServiceImpl implements GameRoomService {
                         .forEach(teamColor -> Team.createTeam(foundRoom, teamColor)); // 레드팀, 블루팀 생성
 
                 gameRoomRepository.save(foundRoom);
-                gameRoomRepository.flush();
+                entityManager.flush();
+                entityManager.clear();
 
                 // firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
                 firstOffenseTeam = foundRoom.getTeams().get(0); //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
