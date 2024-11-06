@@ -441,12 +441,12 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         log.info("ws - 수비팀 답안 제출 - 답안 리스트: {}", roomAnswers.get(foundRoom.getId()));
         log.info("ws - 수비팀 답안 제출 - 제출된 답안의 수: {}, 수비팀 유저 수: {}", roomAnswers.get(foundRoom.getId()).size(), foundRoom.getDefenseTeamUserCount());
         if(roomAnswers.get(foundRoom.getId()).size() >= foundRoom.getDefenseTeamUserCount()) {
-            submitAll(foundRoom.getDefenseTeam().getTeamColor(), foundRoom.getId());
+            submitAll(foundRoom.getId());
         }
     }
 
     // 수비팀 전체가 답안을 제출하면 알림을 보냄
-    private void submitAll(RoomUserTeam teamColor, Long roomId) {
+    private void submitAll(Long roomId) {
 
         ResponseSubmitAllDto responseDto = ResponseSubmitAllDto.builder()
                 .responseStatus(ResponseStatus.ALL_SUBMIT)
@@ -454,17 +454,17 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         log.info("ws - 수비팀 전원 답안 제출 : {}", responseDto);
 
-        String destination = String.format("/topic/game/%d/%s",
-                roomId,
-                teamColor.toString().toLowerCase());
-
-        log.info("ws - 수비팀 전원 답안 제출 경로 : {}", destination);
-
-        messagingTemplate.convertAndSend(destination, responseDto);
+        for (RoomUserTeam teamColor : RoomUserTeam.values()) {
+            messagingTemplate.convertAndSend(
+                    "/topic/game/" + roomId + "/" + teamColor.toString().toLowerCase(),
+                    responseDto
+            );
+        }
     }
 
     // // 수비 팀 리더가 최종 답안을 제출, 채점 및 다음 문제를 위한 세팅, hp 변경 알림, 게임 종료 알림 수행
     @Override
+    @Transactional
     public ResponseSubmitTeamDto submitTeam(RequestSubmitTeamDto requestDto) {
         log.info("ws - 최종 답안 제출 요청: {}", requestDto);
 
@@ -472,30 +472,8 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
                 () -> new NoSuchElementException("ws - 최종 답안 제출 - 존재하지 않는 방입니다."));
 
-        if(foundRoom.getCurrentQuizId() == null) {
-            log.error("currentQuizId 없음");
-        } else {
-            log.info("foundRoom.getCurrentQuizId(): {}", foundRoom.getCurrentQuizId());
-        }
-
-
         Quiz foundQuiz = quizRepository.findById(foundRoom.getCurrentQuizId()).orElseThrow(
                 () -> new NoSuchElementException("ws - 최종 답안 제출 - 존재하지 않는 퀴즈입니다."));
-
-        log.info("roomAnswers: {}", roomAnswers);
-
-        if(requestDto.getRoomId() == null) {
-            log.info("roomId 없음");
-        } else {
-            log.info("roomAnswers.get(requestDto.getRoomId()): {}", roomAnswers.get(requestDto.getRoomId()));
-        }
-
-        if(requestDto.getNumber() == null) {
-            log.info("number 없음");
-        } else {
-            log.info("requestDto.getNumber().intValue(): {} roomAnswers.get(requestDto.getRoomId()).get(requestDto.getNumber().intValue()): {}",
-                    requestDto.getNumber().intValue(), roomAnswers.get(requestDto.getRoomId()).get(requestDto.getNumber().intValue()));
-        }
 
         UserAnswer userAnswer = roomAnswers.get(requestDto.getRoomId()).get(requestDto.getNumber().intValue());
 
@@ -519,6 +497,8 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                 .isCorrect(responseGradeDto.getIsCorrect())
                 .answer(responseGradeDto.getAnswer())
                 .teamHp(defenseTeam.getTeamHp())
+                .responseStatus(ResponseStatus.ROUND_END)
+                .nextOffenseTeam(defenseTeam.getTeamColor())
                 .build();
 
         log.info("ws - 최종 답안 제출 결과: {}", requestDto);
@@ -563,6 +543,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
             gameRoomRepository.save(foundRoom);
 
             ResponseIsGameoverDto responseDto = ResponseIsGameoverDto.builder()
+                    .responseStatus(ResponseStatus.GAME_END)
                     .teamColor(winningTeamColor)
                     .gameStatus(foundRoom.getGameStatus())
                     .build();
