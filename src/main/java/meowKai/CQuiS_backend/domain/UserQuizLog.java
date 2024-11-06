@@ -45,7 +45,7 @@ public class UserQuizLog extends BaseEntity {
 
     // 카테고리 명
     @Column
-    private String categoryName;
+    private String categoryType;
 
     // 정답 여부
     @Column
@@ -61,7 +61,7 @@ public class UserQuizLog extends BaseEntity {
                 .quizName(dto.getQuizName())
                 .quizType(dto.getQuizType())
                 .categoryId(dto.getCategoryId())
-                .categoryName(dto.getCategoryName())
+                .categoryType(dto.getCategoryType())
                 .isCorrect(dto.getIsCorrect())
                 .build();
         return createdUserQuizLog;

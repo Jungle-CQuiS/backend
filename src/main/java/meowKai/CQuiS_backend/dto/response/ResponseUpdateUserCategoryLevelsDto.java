@@ -19,7 +19,7 @@ public class ResponseUpdateUserCategoryLevelsDto {
     @NoArgsConstructor
     @ToString
     public static class CategoryLevelData {
-        private CategoryType categoryName;
+        private CategoryType categoryType;
         private Integer categoryLevel;
     }
 }

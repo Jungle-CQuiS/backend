@@ -11,5 +11,5 @@ import meowKai.CQuiS_backend.domain.CategoryType;
 public class GetCategoryDto {
 
     private Long categoryId;
-    private CategoryType categoryName;
+    private CategoryType categoryType;
 }
