@@ -11,4 +11,10 @@ import java.util.List;
 @Builder
 public class ResponseGetUserWrongQuizzesDto {
     private List<Object> wrongQuizzes;
+
+    public static ResponseGetUserWrongQuizzesDto createResponseDto(List<Object> wrongQuizzes) {
+        return ResponseGetUserWrongQuizzesDto.builder()
+                .wrongQuizzes(wrongQuizzes)
+                .build();
+    }
 }

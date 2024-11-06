@@ -8,7 +8,6 @@ import meowKai.CQuiS_backend.dto.GetShortAnsQuizDto;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.*;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -161,47 +160,34 @@ public class UserServiceImpl implements UserService {
         User foundUser = userRepository.findByUuid(requestDto.getUuid())
                 .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
+        // 유저가 틀린 문제 리스트
         List<QuizWrong> userWrongQuizzes = quizWrongRepository.findByUser(foundUser);
 
-        List<Object> responseList = userWrongQuizzes.stream().map(
-                wrongQuiz -> {
-                    Quiz foundQuiz = quizRepository.findById(wrongQuiz.getQuiz().getId())
-                            .orElseThrow(() -> new IllegalArgumentException("해당 퀴즈가 존재하지 않습니다."));
-                    QuizType foundQuizType = foundQuiz.getType();
-                    switch (foundQuizType) {
-                        case SHORT -> {
-                            ShortAnsQuiz foundShortAnsQuiz = foundQuiz.getShortAnsQuiz();
-                            return GetShortAnsQuizDto.builder()
-                                    .quizId(foundQuiz.getId())
-                                    .name(foundQuiz.getName())
-                                    .categoryId(foundQuiz.getCategory().getId())
-                                    .categoryType(foundQuiz.getCategory().getCategory())
-                                    .englishAnswer(foundShortAnsQuiz.getEnglishAnswer())
-                                    .koreanAnswer(foundShortAnsQuiz.getKoreanAnswer())
-                                    .build();
+        List<Object> responseList = userWrongQuizzes.stream()
+                .filter(wrongQuiz -> {
+                    Quiz foundQuiz = wrongQuiz.getQuiz();
+                    return foundQuiz.getCategory().getCategory().equals(requestDto.getCategoryType());
+                })
+                .map(
+                        wrongQuiz -> {
+                            Quiz foundQuiz = quizRepository.findById(wrongQuiz.getQuiz().getId())
+                                    .orElseThrow(() -> new IllegalArgumentException("해당 퀴즈가 존재하지 않습니다."));
+                            QuizType foundQuizType = foundQuiz.getType();
+                            switch (foundQuizType) {
+                                case SHORT -> {
+                                    ShortAnsQuiz foundShortAnsQuiz = foundQuiz.getShortAnsQuiz();
+                                    return GetShortAnsQuizDto.createDto(foundQuiz, foundShortAnsQuiz);
+                                }
+                                case CHOICE -> {
+                                    ChoiceAnsQuiz foundChoiceAnsQuiz = foundQuiz.getChoiceAnsQuiz();
+                                    return GetChoiceAnsQuizDto.createDto(foundQuiz, foundChoiceAnsQuiz);
+                                }
+                                default -> throw new IllegalArgumentException("해당 퀴즈 타입이 존재하지 않습니다: " + foundQuizType);
+                            }
                         }
-                        case CHOICE -> {
-                            ChoiceAnsQuiz foundChoiceAnsQuiz = foundQuiz.getChoiceAnsQuiz();
-                            return GetChoiceAnsQuizDto.builder()
-                                    .quizId(foundQuiz.getId())
-                                    .name(foundQuiz.getName())
-                                    .categoryId(foundQuiz.getCategory().getId())
-                                    .categoryType(foundQuiz.getCategory().getCategory())
-                                    .choice1(foundChoiceAnsQuiz.getChoice1())
-                                    .choice2(foundChoiceAnsQuiz.getChoice2())
-                                    .choice3(foundChoiceAnsQuiz.getChoice3())
-                                    .choice4(foundChoiceAnsQuiz.getChoice4())
-                                    .answer(foundChoiceAnsQuiz.getAnswer())
-                                    .build();
-                        }
-                        default -> throw new IllegalArgumentException("해당 퀴즈 타입이 존재하지 않습니다: " + foundQuizType);
-                    }
-                }
-        ).toList();
+                ).toList();
 
-        ResponseGetUserWrongQuizzesDto responseDto = ResponseGetUserWrongQuizzesDto.builder()
-                .wrongQuizzes(responseList)
-                .build();
+        ResponseGetUserWrongQuizzesDto responseDto = ResponseGetUserWrongQuizzesDto.createResponseDto(responseList);
         log.info("유저 틀린 문제 정보 반환 완료: {}", responseDto);
         return responseDto;
     }

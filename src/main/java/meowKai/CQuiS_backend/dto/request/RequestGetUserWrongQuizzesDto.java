@@ -1,6 +1,7 @@
 package meowKai.CQuiS_backend.dto.request;
 
 import lombok.*;
+import meowKai.CQuiS_backend.domain.CategoryType;
 
 import java.util.UUID;
 
@@ -11,4 +12,5 @@ import java.util.UUID;
 @ToString
 public class RequestGetUserWrongQuizzesDto {
     private UUID uuid;
+    private CategoryType categoryType;
 }

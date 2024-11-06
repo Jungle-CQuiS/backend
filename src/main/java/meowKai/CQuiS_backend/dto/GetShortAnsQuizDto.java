@@ -2,6 +2,8 @@ package meowKai.CQuiS_backend.dto;
 
 import lombok.*;
 import meowKai.CQuiS_backend.domain.CategoryType;
+import meowKai.CQuiS_backend.domain.Quiz;
+import meowKai.CQuiS_backend.domain.ShortAnsQuiz;
 
 @Builder
 @NoArgsConstructor
@@ -16,4 +18,15 @@ public class GetShortAnsQuizDto {
     private String name;
     private String englishAnswer;
     private String koreanAnswer;
+
+    public static GetShortAnsQuizDto createDto(Quiz foundQuiz, ShortAnsQuiz foundShortAnsQuiz) {
+        return GetShortAnsQuizDto.builder()
+                .categoryId(foundQuiz.getCategory().getId())
+                .quizId(foundQuiz.getId())
+                .categoryType(foundQuiz.getCategory().getCategory())
+                .name(foundQuiz.getName())
+                .englishAnswer(foundShortAnsQuiz.getEnglishAnswer())
+                .koreanAnswer(foundShortAnsQuiz.getKoreanAnswer())
+                .build();
+    }
 }
