@@ -25,7 +25,7 @@ public class RequestSaveUserQuizLogDto {
         private String quizName;
         private String quizType;
         private Long categoryId;
-        private String categoryName;
+        private String categoryType;
         private String createdDate; // YYYYMMDD 형식
         private Boolean isCorrect;
     }

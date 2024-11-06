@@ -14,7 +14,7 @@ public class GetShortAnsQuizDto {
 
     private Long categoryId;
     private Long quizId;
-    private CategoryType categoryName;
+    private CategoryType categoryType;
     private String name;
     private String englishAnswer;
     private String koreanAnswer;
@@ -23,7 +23,7 @@ public class GetShortAnsQuizDto {
         return GetShortAnsQuizDto.builder()
                 .categoryId(foundQuiz.getCategory().getId())
                 .quizId(foundQuiz.getId())
-                .categoryName(foundQuiz.getCategory().getCategory())
+                .categoryType(foundQuiz.getCategory().getCategory())
                 .name(foundQuiz.getName())
                 .englishAnswer(foundShortAnsQuiz.getEnglishAnswer())
                 .koreanAnswer(foundShortAnsQuiz.getKoreanAnswer())

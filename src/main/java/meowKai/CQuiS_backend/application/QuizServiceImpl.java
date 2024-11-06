@@ -114,7 +114,7 @@ public class QuizServiceImpl implements QuizService {
         List<GetCategoryDto> categories = categoryRepository.findAll().stream()
                 .map(category -> GetCategoryDto.builder()
                         .categoryId(category.getId())
-                        .categoryName(category.getCategory())
+                        .categoryType(category.getCategory())
                         .build())
                 .toList();
 
@@ -176,18 +176,16 @@ public class QuizServiceImpl implements QuizService {
 
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
-                quizzesFitConditions.forEach(quiz -> {
-                    responseDto.getQuizList().add(
-                            GetShortAnsQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .quizId(quiz.getId())
-                                    .categoryName(quiz.getCategory().getCategory())
-                                    .name(quiz.getName())
-                                    .englishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
-                                    .koreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
-                                    .build()
-                    );
-                });
+                quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
+                        GetShortAnsQuizDto.builder()
+                                .categoryId(quiz.getCategory().getId())
+                                .quizId(quiz.getId())
+                                .categoryType(quiz.getCategory().getCategory())
+                                .name(quiz.getName())
+                                .englishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
+                                .koreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
+                                .build()
+                ));
             }
             else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
@@ -202,7 +200,7 @@ public class QuizServiceImpl implements QuizService {
                             GetShortAnsQuizDto.builder()
                                     .categoryId(quiz.getCategory().getId())
                                     .quizId(quiz.getId())
-                                    .categoryName(quiz.getCategory().getCategory())
+                                    .categoryType(quiz.getCategory().getCategory())
                                     .name(quiz.getName())
                                     .englishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
                                     .koreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
@@ -267,21 +265,19 @@ public class QuizServiceImpl implements QuizService {
 
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
-                quizzesFitConditions.forEach(quiz -> {
-                    responseDto.getQuizList().add(
-                            GetChoiceAnsQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .quizId(quiz.getId())
-                                    .categoryName(quiz.getCategory().getCategory())
-                                    .name(quiz.getName())
-                                    .choice1(quiz.getChoiceAnsQuiz().getChoice1())
-                                    .choice2(quiz.getChoiceAnsQuiz().getChoice2())
-                                    .choice3(quiz.getChoiceAnsQuiz().getChoice3())
-                                    .choice4(quiz.getChoiceAnsQuiz().getChoice4())
-                                    .answer(quiz.getChoiceAnsQuiz().getAnswer())
-                                    .build()
-                    );
-                });
+                quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
+                        GetChoiceAnsQuizDto.builder()
+                                .categoryId(quiz.getCategory().getId())
+                                .quizId(quiz.getId())
+                                .categoryType(quiz.getCategory().getCategory())
+                                .name(quiz.getName())
+                                .choice1(quiz.getChoiceAnsQuiz().getChoice1())
+                                .choice2(quiz.getChoiceAnsQuiz().getChoice2())
+                                .choice3(quiz.getChoiceAnsQuiz().getChoice3())
+                                .choice4(quiz.getChoiceAnsQuiz().getChoice4())
+                                .answer(quiz.getChoiceAnsQuiz().getAnswer())
+                                .build()
+                ));
             } else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
                 Collections.shuffle(quizzesFitConditions);
@@ -295,7 +291,7 @@ public class QuizServiceImpl implements QuizService {
                             GetChoiceAnsQuizDto.builder()
                                     .categoryId(quiz.getCategory().getId())
                                     .quizId(quiz.getId())
-                                    .categoryName(quiz.getCategory().getCategory())
+                                    .categoryType(quiz.getCategory().getCategory())
                                     .name(quiz.getName())
                                     .choice1(quiz.getChoiceAnsQuiz().getChoice1())
                                     .choice2(quiz.getChoiceAnsQuiz().getChoice2())
@@ -362,31 +358,29 @@ public class QuizServiceImpl implements QuizService {
 
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
-                quizzesFitConditions.forEach(quiz -> {
-                    responseDto.getQuizList().add(
-                            quiz.getType() == QuizType.CHOICE ? GetRandomChoiceQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .categoryType(quiz.getCategory().getCategory())
-                                    .quizId(quiz.getId())
-                                    .quizType(quiz.getType())
-                                    .name(quiz.getName())
-                                    .choice1(quiz.getChoiceAnsQuiz().getChoice1())
-                                    .choice2(quiz.getChoiceAnsQuiz().getChoice2())
-                                    .choice3(quiz.getChoiceAnsQuiz().getChoice3())
-                                    .choice4(quiz.getChoiceAnsQuiz().getChoice4())
-                                    .choiceAnswer(quiz.getChoiceAnsQuiz().getAnswer())
-                                    .build()
-                                    : GetRandomShortQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .categoryType(quiz.getCategory().getCategory())
-                                    .quizId(quiz.getId())
-                                    .quizType(quiz.getType())
-                                    .name(quiz.getName())
-                                    .shortEnglishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
-                                    .shortKoreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
-                                    .build()
-                    );
-                });
+                quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
+                        quiz.getType() == QuizType.CHOICE ? GetRandomChoiceQuizDto.builder()
+                                .categoryId(quiz.getCategory().getId())
+                                .categoryType(quiz.getCategory().getCategory())
+                                .quizId(quiz.getId())
+                                .quizType(quiz.getType())
+                                .name(quiz.getName())
+                                .choice1(quiz.getChoiceAnsQuiz().getChoice1())
+                                .choice2(quiz.getChoiceAnsQuiz().getChoice2())
+                                .choice3(quiz.getChoiceAnsQuiz().getChoice3())
+                                .choice4(quiz.getChoiceAnsQuiz().getChoice4())
+                                .choiceAnswer(quiz.getChoiceAnsQuiz().getAnswer())
+                                .build()
+                                : GetRandomShortQuizDto.builder()
+                                .categoryId(quiz.getCategory().getId())
+                                .categoryType(quiz.getCategory().getCategory())
+                                .quizId(quiz.getId())
+                                .quizType(quiz.getType())
+                                .name(quiz.getName())
+                                .shortEnglishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
+                                .shortKoreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
+                                .build()
+                ));
             } else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
                 Collections.shuffle(quizzesFitConditions);
@@ -515,7 +509,7 @@ public class QuizServiceImpl implements QuizService {
                     quizzes.add(GetChoiceAnsQuizDto.builder()
                                     .categoryId(randomQuiz.getCategory().getId())
                                     .quizId(randomQuiz.getId())
-                                    .categoryName(randomQuiz.getCategory().getCategory())
+                                    .categoryType(randomQuiz.getCategory().getCategory())
                                     .name(randomQuiz.getName())
                                     .choice1(randomQuiz.getChoiceAnsQuiz().getChoice1())
                                     .choice2(randomQuiz.getChoiceAnsQuiz().getChoice2())
@@ -527,7 +521,7 @@ public class QuizServiceImpl implements QuizService {
                     quizzes.add(GetShortAnsQuizDto.builder()
                                     .categoryId(randomQuiz.getCategory().getId())
                                     .quizId(randomQuiz.getId())
-                                    .categoryName(randomQuiz.getCategory().getCategory())
+                                    .categoryType(randomQuiz.getCategory().getCategory())
                                     .name(randomQuiz.getName())
                                     .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
                                     .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
