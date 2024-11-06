@@ -416,7 +416,7 @@ public class GameRoomServiceImpl implements GameRoomService {
             gameStartLock.lock(); // 락을 획득할 때까지 대기
             log.info("락 획득 - 게임 상태: {}", foundRoom.getGameStatus());
 
-            if(foundRoom.getGameStatus() == GameStatus.WAITING) {
+            if(foundRoom.getGameStatus() == GameStatus.ALL_READY) {
                 foundRoom.changeGameStatus(requestDto.getGameStatus()); // 입력으로 들어온 대로 방 상태 변경
                 log.info("123 - 방상태 변경: {}", foundRoom.getGameStatus());
 
