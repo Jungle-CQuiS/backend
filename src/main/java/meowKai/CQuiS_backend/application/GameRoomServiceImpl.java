@@ -11,6 +11,7 @@ import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
+import meowKai.CQuiS_backend.infrastructure.TeamRepository;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +37,7 @@ public class GameRoomServiceImpl implements GameRoomService {
     private final GameRoomRepository gameRoomRepository;
     private final RoomUserRepository roomUserRepository;
     private final UserRepository userRepository;
+    private final TeamRepository teamRepository;
 
     private final GameRoomWebSocketServiceImpl gameRoomWebSocketService;
     private final QuizService quizService;
@@ -419,7 +421,12 @@ public class GameRoomServiceImpl implements GameRoomService {
                 Arrays.stream(RoomUserTeam.values())
                         .forEach(teamColor -> Team.createTeam(foundRoom, teamColor)); // 레드팀, 블루팀 생성
 
+                Team blueTeam = Team.createTeam(foundRoom, RoomUserTeam.BLUE);
+                Team redTeam = Team.createTeam(foundRoom, RoomUserTeam.RED);
+
                 gameRoomRepository.save(foundRoom);
+                teamRepository.save(blueTeam);
+                teamRepository.save(redTeam);
                 entityManager.flush();
                 entityManager.clear();
 
