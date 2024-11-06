@@ -40,6 +40,5 @@ public class QuizController {
         catch (Exception e) {
             return ApiResponse.ofFail("문제 비추천 실패");
         }
-
     }
 }

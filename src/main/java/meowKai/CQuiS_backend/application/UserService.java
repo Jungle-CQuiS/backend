@@ -10,4 +10,5 @@ public interface UserService {
     ResponseUpdateUserCategoryLevelsDto updateUserCategoryLevelsAfterGame(RequestUpdateUserCategoryLevelsDto requestDto); // 게임이 끝난 후 유저의 카테고리 별 레벨 데이터 업데이트
     ResponseUpdateUserWrongQuizzesDto updateUserWrongQuizzes(RequestUpdateUserWrongQuizzesDto requestDto); // 유저의 틀린 문제 업데이트
     ResponseGetUserWrongQuizzesDto getUserWrongQuizzes(RequestGetUserWrongQuizzesDto requestDto); // 유저의 틀린 문제 받기
+    void saveUserQuizLog(RequestSaveUserQuizLogDto requestDto); // 유저의 퀴즈 로그 저장
 }

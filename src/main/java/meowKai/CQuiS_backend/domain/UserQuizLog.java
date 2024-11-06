@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import meowKai.CQuiS_backend.dto.request.RequestSaveUserQuizLogDto;
 import meowKai.CQuiS_backend.global.base.BaseEntity;
 
 import static jakarta.persistence.FetchType.LAZY;
@@ -49,4 +50,20 @@ public class UserQuizLog extends BaseEntity {
     // 정답 여부
     @Column
     private Boolean isCorrect;
+
+    /**
+     * 엔티티 비즈니스 로직
+     */
+    public static UserQuizLog createUserQuizLog(RequestSaveUserQuizLogDto.QuizLogData dto, LogData logData) {
+        UserQuizLog createdUserQuizLog = UserQuizLog.builder()
+                .logData(logData)
+                .quizId(dto.getQuizId())
+                .quizName(dto.getQuizName())
+                .quizType(dto.getQuizType())
+                .categoryId(dto.getCategoryId())
+                .categoryName(dto.getCategoryName())
+                .isCorrect(dto.getIsCorrect())
+                .build();
+        return createdUserQuizLog;
+    }
 }
