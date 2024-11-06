@@ -23,8 +23,8 @@ public class QuizWrong {
     @JoinColumn(name = "user_id")
     private User user;
 
-    // category와 매핑
+    // quiz와 매핑
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    @JoinColumn(name = "quiz_id")
+    private Quiz quiz;
 }

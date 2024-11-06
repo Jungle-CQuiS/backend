@@ -5,14 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.application.UserService;
-import meowKai.CQuiS_backend.dto.request.RequestGetPersonalUserDataDto;
-import meowKai.CQuiS_backend.dto.request.RequestGetUserCategoryLevelsDto;
-import meowKai.CQuiS_backend.dto.request.RequestGetUserStatisticsDto;
-import meowKai.CQuiS_backend.dto.request.RequestUpdateUserCategoryLevelsDto;
-import meowKai.CQuiS_backend.dto.response.ResponseGetPersonalUserDataDto;
-import meowKai.CQuiS_backend.dto.response.ResponseGetUserCategoryLevelsDto;
-import meowKai.CQuiS_backend.dto.response.ResponseGetUserStatisticsDto;
-import meowKai.CQuiS_backend.dto.response.ResponseUpdateUserCategoryLevelsDto;
+import meowKai.CQuiS_backend.dto.request.*;
+import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,6 +62,32 @@ public class UserController {
     public ApiResponse<Object> updateUserCategoryLevelsAfterGame(@Valid @RequestBody RequestUpdateUserCategoryLevelsDto requestDto) {
         try {
             ResponseUpdateUserCategoryLevelsDto responseDto = userService.updateUserCategoryLevelsAfterGame(requestDto);
+            return ApiResponse.ofSuccess(responseDto);
+        }
+        catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "유저 정보")
+    @Operation(summary = "유저의 오답 퀴즈 데이터 업데이트")
+    @PostMapping("/quiz-wrong/after-game")
+    public ApiResponse<Object> updateUserWrongQuiz(@Valid @RequestBody RequestUpdateUserWrongQuizzesDto requestDto) {
+        try {
+            ResponseUpdateUserWrongQuizzesDto responseDto = userService.updateUserWrongQuizzes(requestDto);
+            return ApiResponse.ofSuccess(responseDto);
+        }
+        catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "유저 정보")
+    @Operation(summary = "유저의 오답 퀴즈 데이터 받기")
+    @PostMapping("/quiz-wrong")
+    public ApiResponse<Object> getUserWrongQuiz(@Valid @RequestBody RequestGetUserWrongQuizzesDto requestDto) {
+        try {
+            ResponseGetUserWrongQuizzesDto responseDto = userService.getUserWrongQuizzes(requestDto);
             return ApiResponse.ofSuccess(responseDto);
         }
         catch (Exception e) {

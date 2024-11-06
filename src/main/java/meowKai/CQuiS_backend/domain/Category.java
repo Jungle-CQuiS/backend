@@ -25,9 +25,6 @@ public class Category {
     private List<UserCategoryLevel> userCategoryLevels;
 
     @OneToMany(fetch = LAZY, mappedBy = "category")
-    private List<QuizWrong> quizWrongs;
-
-    @OneToMany(fetch = LAZY, mappedBy = "category")
     private List<Quiz> quizzes;
 
     // 문제 카테고리명

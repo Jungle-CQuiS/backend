@@ -3,6 +3,9 @@ package meowKai.CQuiS_backend.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static jakarta.persistence.EnumType.*;
 import static jakarta.persistence.FetchType.*;
 import static jakarta.persistence.GenerationType.*;
@@ -31,6 +34,10 @@ public class Quiz {
     // 주관식 퀴즈와 매핑
     @OneToOne(fetch = LAZY, mappedBy = "quiz")
     private ShortAnsQuiz shortAnsQuiz;
+
+    // 오답 퀴즈와 매핑
+    @OneToMany(mappedBy = "quiz")
+    private List<QuizWrong> quizWrongs = new ArrayList<>();
 
     // 문제 질문
     @Column
