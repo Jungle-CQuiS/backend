@@ -382,6 +382,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
     // 수비 팀 리더가 선택한 퀴즈를 수비 팀 전원에게 전달
     @Override
+    @Transactional
     public SelectQuizResult<ResponseSelectQuizDto> selectQuiz(RequestSelectQuizDto requestDto) {
         log.info("ws - 퀴즈 선택 & 전달 요청: {}", requestDto);
 
