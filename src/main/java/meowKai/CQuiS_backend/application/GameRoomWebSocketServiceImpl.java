@@ -523,7 +523,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                 ? foundRoom.getTeams().get(0)
                 : foundRoom.getTeams().get(1)).getTeamHp() <= 0;
 
-        boolean isMaxQuizReached = foundRoom.getQuizCount() >= 10;
+        boolean isMaxQuizReached = foundRoom.getQuizCount() >= 2;
 
         if(isDefenseTeamDead || isMaxQuizReached) {
             RoomUserTeam winningTeamColor;
