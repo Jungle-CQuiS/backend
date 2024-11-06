@@ -18,7 +18,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -544,10 +543,13 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
                     .gameStatus(foundRoom.getGameStatus())
                     .build();
 
-            messagingTemplate.convertAndSend(
-                    "/topic/game/" + foundRoom.getId() + "/game-end",
-                    responseDto
-            );
+            for (RoomUserTeam teamColor : RoomUserTeam.values()) {
+                messagingTemplate.convertAndSend(
+                        "/topic/game/" + foundRoom.getId() + "/" + teamColor.toString().toLowerCase(),
+                        responseDto
+                );
+            }
+
         }
 
         log.info("ws - 게임 종료 조건 체크 결과 - isGameover: {}", (isDefenseTeamDead || isMaxQuizReached));
