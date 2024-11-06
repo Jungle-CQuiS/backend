@@ -13,6 +13,7 @@ import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
 import meowKai.CQuiS_backend.infrastructure.TeamRepository;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -428,10 +429,10 @@ public class GameRoomServiceImpl implements GameRoomService {
                 gameRoomRepository.save(foundRoom);
                 teamRepository.save(blueTeam);
                 teamRepository.save(redTeam);
-                entityManager.flush();
-                entityManager.clear();
 
-                log.info("123 - 영속성 컨텍스트 비움");
+                entityManager.flush();
+
+                Hibernate.initialize(foundRoom.getTeams());
 
                 // firstOffenseTeam = foundRoom.assignRandomTeamStatus(); // 랜덤으로 선공팀 결정
                 firstOffenseTeam = foundRoom.getTeams().get(0); //TODO: 프론트 요청으로 임시 수정, 되돌려 놔야 함
