@@ -19,11 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
-import static meowKai.CQuiS_backend.domain.TeamStatus.DEFENSE;
 import static meowKai.CQuiS_backend.domain.TeamStatus.OFFENSE;
 
 @Service
@@ -42,7 +40,7 @@ public class GameRoomServiceImpl implements GameRoomService {
     private final GameRoomWebSocketServiceImpl gameRoomWebSocketService;
     private final QuizService quizService;
 
-    private final Semaphore gameStartSemaphore = new Semaphore(1); // 게임 시작 시 팀 생성을 포함한 세팅이 한 번만 발생하도록 하기 위한 락
+    private final ReentrantLock gameStartLock = new ReentrantLock(); // 게임 시작 시 팀 생성을 포함한 세팅이 한 번만 발생하도록 하기 위한 락
 
     // 입장할 수 있는 멀티 게임 방 조회하기
     @Override
@@ -413,7 +411,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         Team firstOffenseTeam = null;
 
         try {
-            gameStartSemaphore.acquire(); // 세마포어를 획득할 때까지 대기
+            gameStartLock.lock(); // 락을 획득할 때까지 대기
 
             if(foundRoom.getGameStatus() == GameStatus.WAITING) {
                 foundRoom.changeGameStatus(requestDto.getGameStatus()); // 입력으로 들어온 대로 방 상태 변경
@@ -433,11 +431,8 @@ public class GameRoomServiceImpl implements GameRoomService {
                 firstOffenseTeam = foundRoom.getTeams().get(0).getTeamStatus() == OFFENSE
                         ? foundRoom.getTeams().get(0) : foundRoom.getTeams().get(1);
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // 인터럽트 상태 복구
-            throw new RuntimeException("게임 시작이 중단되었습니다.", e);
         } finally {
-            gameStartSemaphore.release();
+            gameStartLock.unlock();
         }
 
         ResponseGameStartDto responseDto = ResponseGameStartDto.builder()
