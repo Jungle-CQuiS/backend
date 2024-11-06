@@ -123,7 +123,7 @@ public class GameRoom extends BaseEntity {
 
     // 수비팀을 찾아 반환
     public Team getDefenseTeam() {
-        return this.teams.get(0).getTeamStatus() == OFFENSE
+        return this.teams.get(0).getTeamStatus() == DEFENSE
                 ? this.teams.get(0) : this.teams.get(1);
     }
 
