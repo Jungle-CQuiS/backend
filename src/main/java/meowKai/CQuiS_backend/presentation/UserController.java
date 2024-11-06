@@ -96,7 +96,7 @@ public class UserController {
     }
 
     @Tag(name = "유저 정보")
-    @Operation(summary = "유저의 오답 퀴즈 데이터 받기")
+    @Operation(summary = "유저의 카테고리 별 오답 퀴즈 데이터 받기")
     @PostMapping("/quiz-wrong")
     public ApiResponse<Object> getUserWrongQuiz(@Valid @RequestBody RequestGetUserWrongQuizzesDto requestDto) {
         try {
