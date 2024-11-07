@@ -19,14 +19,15 @@ public class GetShortAnsQuizDto {
     private String englishAnswer;
     private String koreanAnswer;
 
-    public static GetShortAnsQuizDto createDto(Quiz foundQuiz, ShortAnsQuiz foundShortAnsQuiz) {
+    public static GetShortAnsQuizDto createDto(ShortAnsQuiz shortAnsQuiz) {
+        Quiz mappedQuiz = shortAnsQuiz.getQuiz();
         return GetShortAnsQuizDto.builder()
-                .categoryId(foundQuiz.getCategory().getId())
-                .quizId(foundQuiz.getId())
-                .categoryType(foundQuiz.getCategory().getCategory())
-                .name(foundQuiz.getName())
-                .englishAnswer(foundShortAnsQuiz.getEnglishAnswer())
-                .koreanAnswer(foundShortAnsQuiz.getKoreanAnswer())
+                .categoryId(mappedQuiz.getCategory().getId())
+                .quizId(mappedQuiz.getId())
+                .categoryType(mappedQuiz.getCategory().getCategory())
+                .name(mappedQuiz.getName())
+                .englishAnswer(shortAnsQuiz.getEnglishAnswer())
+                .koreanAnswer(shortAnsQuiz.getKoreanAnswer())
                 .build();
     }
 }

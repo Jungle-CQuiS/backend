@@ -55,7 +55,7 @@ public class SingleQuizController {
     }
 
     @Tag(name = "싱글모드 퀴즈")
-    @Operation(summary = "퀴즈 설정 조건에 따른 주관식 + 객관식 문제 요청하기")
+    @Operation(summary = "퀴즈 설정 조건에 따른 주관식 + 객관식 문제 요청하기") // TODO: 이동희: 이건 타임어택용인가요?
     @PostMapping("/mix")
     public ApiResponse<Object> getMixQuizzesByConditions(@Valid @RequestBody RequestGetMixAnswerQuizzesDto requestDto) {
         try {
