@@ -12,8 +12,15 @@ import java.util.List;
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
-    @Query(value = "SELECT * FROM quiz WHERE category_id = :categoryId ORDER BY RAND() LIMIT :count", nativeQuery = true)
-    List<Quiz> findRandomQuizByCategoryId(@Param("categoryId") Long categoryId, @Param("count") int count);
     List<Quiz> findAllByCategoryIdAndType(Long categoryId, QuizType type);
     List<Quiz> findAllByCategoryId(Long categoryId);
+
+    @Query ("SELECT q FROM Quiz q " +
+            "LEFT JOIN FETCH q.choiceAnsQuiz " +
+            "LEFT JOIN FETCH q.shortAnsQuiz " +
+            "LEFT JOIN FETCH q.category " +
+            "WHERE q.category.id = :categoryId " +
+            "ORDER BY RAND() " +
+            "LIMIT :count")
+    List<Quiz> findRandomQuizByCategoryId(@Param("categoryId") Long categoryId, @Param("count") int count);
 }
