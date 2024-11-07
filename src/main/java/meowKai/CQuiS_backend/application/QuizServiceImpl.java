@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static meowKai.CQuiS_backend.domain.MultiConstants.MULTI_QUIZZES_PER_CATEGORY;
+import static meowKai.CQuiS_backend.domain.MultiConstants.MULTI_QUIZZES_PER_ROUND;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -258,6 +261,7 @@ public class QuizServiceImpl implements QuizService {
 
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
+
                 quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
                         GetChoiceAnsQuizDto.createDto(quiz.getChoiceAnsQuiz())));
             } else {
@@ -355,7 +359,7 @@ public class QuizServiceImpl implements QuizService {
         return responseDto;
     }
 
-    // 카테고리 별로 랜덤 문제 두 문제씩 가져오기
+    // (멀티 게임 전용) 카테고리 별로 랜덤 문제 두 문제씩 가져오기
     @Override
     public ResponseGetRandomQuizzesByCategoriesDto getRandomQuizzesByCategories(Long roomId) {
         log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 요청 - roomId: {}", roomId);
@@ -373,7 +377,7 @@ public class QuizServiceImpl implements QuizService {
 
         List<Object> transferQuizzes = new ArrayList<>();
         for (int i = 0; i < categories.size(); i++) {
-            int startIdx = i * 20 + roundIdx * 2;
+            int startIdx = i * MULTI_QUIZZES_PER_CATEGORY + roundIdx * MULTI_QUIZZES_PER_ROUND;
 
             if (startIdx + 1 >= allQuizzes.size()) {
                 log.error("카테고리 별로 랜덤 문제 두 문제씩 가져오기 - 인덱스 범위 초과 roundIdx: {}, startIdx: {}", roundIdx, startIdx);
@@ -403,7 +407,7 @@ public class QuizServiceImpl implements QuizService {
         for (Category category : categories) {
 
             // 카테고리 별로 랜덤 문제 20문제씩 가져오기
-            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), 20);
+            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), MULTI_QUIZZES_PER_CATEGORY);
 
             for (Quiz randomQuiz : randomQuizzes) {
 
