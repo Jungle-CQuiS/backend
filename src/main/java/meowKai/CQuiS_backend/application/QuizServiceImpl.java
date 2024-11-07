@@ -23,9 +23,9 @@ public class QuizServiceImpl implements QuizService {
 
     private final QuizRepository quizRepository;
     private final CategoryRepository categoryRepository;
-    private final UserStatisticsRepository userStatisticsRepository;
-    private final UserRepository userRepository;
+    private final QuizUserVotedownRepository quizUserVotedownRepository;
     private final GameRoomRepository gameRoomRepository;
+    private final UserRepository userRepository;
 
     private final Map<Long, List<Object>> roomQuizzes = new ConcurrentHashMap<>(); // 방별로 미리 퀴즈를 할당받아 저장해놓기 위한 ConcurrentHashMap
 
@@ -47,13 +47,13 @@ public class QuizServiceImpl implements QuizService {
         String correctAnswer = getCorrectAnswer(foundQuiz, isEnglish);
 
         double similarity;
-        if(isChoice || isEnglish || !isTrans) {
+        if (isChoice || isEnglish || !isTrans) {
             similarity = correctAnswer.equals(userInput) ? 1.0 : 0.0;   // 음차 표기가 아니라면 정확하게 일치해야 정답
         } else {
             int length = Math.min(correctAnswer.length(), userInput.length());
             boolean isShort = length <= 2;
 
-            if(isShort) {       // 문자열이 짧으면 가중치를 조절해 Jaro-Winkler 거리를 반영하지 않음
+            if (isShort) {       // 문자열이 짧으면 가중치를 조절해 Jaro-Winkler 거리를 반영하지 않음
                 double[] weights = {0.2125, 0.0, 0.4375, 0.2125, 0.1375};
                 similarity = SimilarityCalculator.comprehensiveSimilarity(correctAnswer, userInput, weights);
             } else {
@@ -70,9 +70,9 @@ public class QuizServiceImpl implements QuizService {
                         .answer(answer)
                         .build()
                 : ResponseGradeDto.builder()
-                        .isCorrect(false)
-                        .answer(answer)
-                        .build();
+                .isCorrect(false)
+                .answer(answer)
+                .build();
 
         log.info("채점 완료 : {}", responseDto);
         return responseDto;
@@ -80,7 +80,7 @@ public class QuizServiceImpl implements QuizService {
 
     // 문제의 타입과 유저의 입력에 따라 다른 정답을 가져옴
     private String getCorrectAnswer(Quiz quiz, boolean isEnglish) {
-        if(quiz.getType() == QuizType.CHOICE) {
+        if (quiz.getType() == QuizType.CHOICE) {
             return quiz.getChoiceAnsQuiz().getAnswer().toString();
         }
 
@@ -91,7 +91,7 @@ public class QuizServiceImpl implements QuizService {
 
     // 화면에 출력하기 위한 형태로 문제의 정답을 반환하기 위한 메소드, 문제의 타입에 따라 형태가 달라짐
     private String getAnswer(Quiz quiz, boolean isChoice) {
-        if(isChoice) {
+        if (isChoice) {
             return quiz.getChoiceAnsQuiz().getAnswer().toString();
         }
 
@@ -99,9 +99,9 @@ public class QuizServiceImpl implements QuizService {
         String englishAnswer = quiz.getShortAnsQuiz().getEnglishAnswer();
 
         // 정답 null 체크
-        if(koreanAnswer == null) {
+        if (koreanAnswer == null) {
             return englishAnswer;
-        } else if(englishAnswer == null) {
+        } else if (englishAnswer == null) {
             return koreanAnswer;
         }
         return String.format("%s (%s)", koreanAnswer, englishAnswer);
@@ -131,6 +131,10 @@ public class QuizServiceImpl implements QuizService {
     public ResponseGetShortAnswerQuizzesDto getShortAnswerQuizzesByConditions(RequestGetShortAnswerQuizzesDto requestDto) {
         log.info("주관식 문제 요청 : {}", requestDto);
 
+        User foundUser = userRepository.findByUuid(requestDto.getUuid()).orElseThrow(
+                () -> new NoSuchElementException("주관식 문제 요청 - 존재하지 않는 유저입니다.")
+        );
+
         // 카테고리 별로 할당할 문제 갯수를 저장하는 map
         Map<Long, Integer> quizzesPerCategory = new HashMap<>();
         List<Long> categoryIds = requestDto.getCategoryIds();
@@ -152,7 +156,7 @@ public class QuizServiceImpl implements QuizService {
 
             for (int i = 0; i < categoryIdsCount; i++) {
                 Long categoryId = requestDto.getCategoryIds().get(i);
-                quizzesPerCategory.put(categoryId, baseCount + (i < remainCount ? 1: 0));
+                quizzesPerCategory.put(categoryId, baseCount + (i < remainCount ? 1 : 0));
             }
         }
         // 카테고리 갯수 > 퀴즈 갯수면 퀴즈 0개가 할당되는 카테고리가 최소화 되도록
@@ -172,22 +176,14 @@ public class QuizServiceImpl implements QuizService {
             int count = value;
 
             // 조건에 해당하는 문제 모두 불러오기
-            List<Quiz> quizzesFitConditions = quizRepository.findAllByCategoryIdAndType(categoryId, QuizType.SHORT);
+            List<Quiz> quizzesFitConditions = quizRepository
+                    .findAllByCategoryIdAndQuizTypeExcludingDownvote(categoryId, foundUser.getId(), count, QuizType.SHORT.toString());
 
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
                 quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
-                        GetShortAnsQuizDto.builder()
-                                .categoryId(quiz.getCategory().getId())
-                                .quizId(quiz.getId())
-                                .categoryType(quiz.getCategory().getCategory())
-                                .name(quiz.getName())
-                                .englishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
-                                .koreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
-                                .build()
-                ));
-            }
-            else {
+                        GetShortAnsQuizDto.createDto(quiz.getShortAnsQuiz())));
+            } else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
                 Collections.shuffle(quizzesFitConditions);
 
@@ -197,15 +193,7 @@ public class QuizServiceImpl implements QuizService {
 
                 for (Quiz quiz : randomQuizzes) {
                     responseDto.getQuizList().add(
-                            GetShortAnsQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .quizId(quiz.getId())
-                                    .categoryType(quiz.getCategory().getCategory())
-                                    .name(quiz.getName())
-                                    .englishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
-                                    .koreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
-                                    .build()
-                    );
+                            GetShortAnsQuizDto.createDto(quiz.getShortAnsQuiz()));
                 }
             }
         });
@@ -217,6 +205,10 @@ public class QuizServiceImpl implements QuizService {
     @Override
     public ResponseGetChoiceAnswerQuizzesDto getChoiceAnswerQuizzesByConditions(RequestGetChoiceAnswerQuizzesDto requestDto) {
         log.info("객관식 문제 요청 : {}", requestDto);
+
+        User foundUser = userRepository.findByUuid(requestDto.getUuid()).orElseThrow(
+                () -> new NoSuchElementException("주관식 문제 요청 - 존재하지 않는 유저입니다.")
+        );
 
         // 카테고리 별로 할당할 문제 갯수를 저장하는 map
         Map<Long, Integer> quizzesPerCategory = new HashMap<>();
@@ -261,23 +253,13 @@ public class QuizServiceImpl implements QuizService {
             int count = value;
 
             // 조건에 해당하는 문제 모두 불러오기
-            List<Quiz> quizzesFitConditions = quizRepository.findAllByCategoryIdAndType(categoryId, QuizType.CHOICE);
+            List<Quiz> quizzesFitConditions = quizRepository
+                    .findAllByCategoryIdAndQuizTypeExcludingDownvote(categoryId, foundUser.getId(), count, QuizType.CHOICE.toString());
 
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
                 quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
-                        GetChoiceAnsQuizDto.builder()
-                                .categoryId(quiz.getCategory().getId())
-                                .quizId(quiz.getId())
-                                .categoryType(quiz.getCategory().getCategory())
-                                .name(quiz.getName())
-                                .choice1(quiz.getChoiceAnsQuiz().getChoice1())
-                                .choice2(quiz.getChoiceAnsQuiz().getChoice2())
-                                .choice3(quiz.getChoiceAnsQuiz().getChoice3())
-                                .choice4(quiz.getChoiceAnsQuiz().getChoice4())
-                                .answer(quiz.getChoiceAnsQuiz().getAnswer())
-                                .build()
-                ));
+                        GetChoiceAnsQuizDto.createDto(quiz.getChoiceAnsQuiz())));
             } else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
                 Collections.shuffle(quizzesFitConditions);
@@ -288,18 +270,7 @@ public class QuizServiceImpl implements QuizService {
 
                 for (Quiz quiz : randomQuizzes) {
                     responseDto.getQuizList().add(
-                            GetChoiceAnsQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .quizId(quiz.getId())
-                                    .categoryType(quiz.getCategory().getCategory())
-                                    .name(quiz.getName())
-                                    .choice1(quiz.getChoiceAnsQuiz().getChoice1())
-                                    .choice2(quiz.getChoiceAnsQuiz().getChoice2())
-                                    .choice3(quiz.getChoiceAnsQuiz().getChoice3())
-                                    .choice4(quiz.getChoiceAnsQuiz().getChoice4())
-                                    .answer(quiz.getChoiceAnsQuiz().getAnswer())
-                                    .build()
-                    );
+                            GetChoiceAnsQuizDto.createDto(quiz.getChoiceAnsQuiz()));
                 }
             }
         });
@@ -359,27 +330,9 @@ public class QuizServiceImpl implements QuizService {
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
                 quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
-                        quiz.getType() == QuizType.CHOICE ? GetRandomChoiceQuizDto.builder()
-                                .categoryId(quiz.getCategory().getId())
-                                .categoryType(quiz.getCategory().getCategory())
-                                .quizId(quiz.getId())
-                                .quizType(quiz.getType())
-                                .name(quiz.getName())
-                                .choice1(quiz.getChoiceAnsQuiz().getChoice1())
-                                .choice2(quiz.getChoiceAnsQuiz().getChoice2())
-                                .choice3(quiz.getChoiceAnsQuiz().getChoice3())
-                                .choice4(quiz.getChoiceAnsQuiz().getChoice4())
-                                .choiceAnswer(quiz.getChoiceAnsQuiz().getAnswer())
-                                .build()
-                                : GetRandomShortQuizDto.builder()
-                                .categoryId(quiz.getCategory().getId())
-                                .categoryType(quiz.getCategory().getCategory())
-                                .quizId(quiz.getId())
-                                .quizType(quiz.getType())
-                                .name(quiz.getName())
-                                .shortEnglishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
-                                .shortKoreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
-                                .build()
+                        quiz.getType() == QuizType.CHOICE
+                                ? GetRandomChoiceQuizDto.createDto(quiz.getChoiceAnsQuiz())
+                                : GetRandomShortQuizDto.createDto(quiz.getShortAnsQuiz())
                 ));
             } else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
@@ -391,27 +344,9 @@ public class QuizServiceImpl implements QuizService {
 
                 for (Quiz quiz : randomQuizzes) {
                     responseDto.getQuizList().add(
-                            quiz.getType() == QuizType.CHOICE ? GetRandomChoiceQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .categoryType(quiz.getCategory().getCategory())
-                                    .quizId(quiz.getId())
-                                    .quizType(quiz.getType())
-                                    .name(quiz.getName())
-                                    .choice1(quiz.getChoiceAnsQuiz().getChoice1())
-                                    .choice2(quiz.getChoiceAnsQuiz().getChoice2())
-                                    .choice3(quiz.getChoiceAnsQuiz().getChoice3())
-                                    .choice4(quiz.getChoiceAnsQuiz().getChoice4())
-                                    .choiceAnswer(quiz.getChoiceAnsQuiz().getAnswer())
-                                    .build()
-                                    : GetRandomShortQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .categoryType(quiz.getCategory().getCategory())
-                                    .quizId(quiz.getId())
-                                    .quizType(quiz.getType())
-                                    .name(quiz.getName())
-                                    .shortEnglishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
-                                    .shortKoreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
-                                    .build()
+                            quiz.getType() == QuizType.CHOICE
+                                    ? GetRandomChoiceQuizDto.createDto(quiz.getChoiceAnsQuiz())
+                                    : GetRandomShortQuizDto.createDto(quiz.getShortAnsQuiz())
                     );
                 }
             }
@@ -440,7 +375,7 @@ public class QuizServiceImpl implements QuizService {
         for (int i = 0; i < categories.size(); i++) {
             int startIdx = i * 20 + roundIdx * 2;
 
-            if(startIdx + 1 >= allQuizzes.size()) {
+            if (startIdx + 1 >= allQuizzes.size()) {
                 log.error("카테고리 별로 랜덤 문제 두 문제씩 가져오기 - 인덱스 범위 초과 roundIdx: {}, startIdx: {}", roundIdx, startIdx);
                 throw new IllegalStateException("카테고리 별로 랜덤 문제 두 문제씩 가져오기 - 사용할 수 있는 문제가 없습니다.");
             }
@@ -473,26 +408,9 @@ public class QuizServiceImpl implements QuizService {
             for (Quiz randomQuiz : randomQuizzes) {
 
                 if (randomQuiz.getType() == QuizType.CHOICE) {
-                    quizzes.add(GetChoiceAnsQuizDto.builder()
-                                    .categoryId(randomQuiz.getCategory().getId())
-                                    .quizId(randomQuiz.getId())
-                                    .categoryType(randomQuiz.getCategory().getCategory())
-                                    .name(randomQuiz.getName())
-                                    .choice1(randomQuiz.getChoiceAnsQuiz().getChoice1())
-                                    .choice2(randomQuiz.getChoiceAnsQuiz().getChoice2())
-                                    .choice3(randomQuiz.getChoiceAnsQuiz().getChoice3())
-                                    .choice4(randomQuiz.getChoiceAnsQuiz().getChoice4())
-                                    .answer(randomQuiz.getChoiceAnsQuiz().getAnswer())
-                                    .build());
+                    quizzes.add(GetChoiceAnsQuizDto.createDto(randomQuiz.getChoiceAnsQuiz()));
                 } else {
-                    quizzes.add(GetShortAnsQuizDto.builder()
-                                    .categoryId(randomQuiz.getCategory().getId())
-                                    .quizId(randomQuiz.getId())
-                                    .categoryType(randomQuiz.getCategory().getCategory())
-                                    .name(randomQuiz.getName())
-                                    .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
-                                    .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
-                                    .build());
+                    quizzes.add(GetShortAnsQuizDto.createDto(randomQuiz.getShortAnsQuiz()));
                 }
             }
         }
@@ -502,12 +420,24 @@ public class QuizServiceImpl implements QuizService {
 
     // 문제 비추천하기(triggered by 별로에요 버튼)
     @Override
+    @Transactional
     public void downvoteQuiz(RequestDownvoteDto requestDto) {
         log.info("문제 비추천하기 요청 : {}", requestDto);
         Quiz foundQuiz = quizRepository.findById(requestDto.getQuizId()).orElseThrow(
                 () -> new NoSuchElementException("존재하지 않는 퀴즈입니다.")
         );
+        User foundUser = userRepository.findByUuid(requestDto.getUuid()).orElseThrow(
+                () -> new NoSuchElementException("존재하지 않는 유저입니다.")
+        );
+
+        quizUserVotedownRepository.findByUserAndQuiz(foundUser, foundQuiz).ifPresent(
+                quizUserVotedown -> {
+                    throw new IllegalStateException("이미 비추천한 문제입니다.");
+                }
+        );
         foundQuiz.downvote();
+        QuizUserVotedown quizUserVotedown = QuizUserVotedown.createEntity(foundQuiz, foundUser);
+        quizUserVotedownRepository.save(quizUserVotedown);
         log.info("문제 비추천하기 완료");
     }
 }

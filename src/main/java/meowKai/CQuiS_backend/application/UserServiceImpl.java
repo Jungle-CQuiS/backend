@@ -25,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final LogDataRepository logDataRepository;
     private final QuizRepository quizRepository;
     private final QuizWrongRepository quizWrongRepository;
+    private final UserQuizLogRepository userQuizLogRepository;
 
     // 유저의 개인 정보(이메일, 유저네임)를 반환
     @Override
@@ -240,14 +241,15 @@ public class UserServiceImpl implements UserService {
         List<UserQuizLog> userQuizLogList = foundLogData.getUserQuizLogs();
 
         // 새로 추가할 로그 데이터
-        List<RequestSaveUserQuizLogDto.QuizLogData> inputQuizLog = requestDto.getQuizLogDataList();
+        List<RequestSaveUserQuizLogDto.QuizLogData> inputQuizLogs = requestDto.getQuizLogDataList();
 
-        inputQuizLog.forEach(
+        inputQuizLogs.forEach(
                 quizLogData -> {
                     UserQuizLog createdLog = UserQuizLog.createUserQuizLog(quizLogData, foundLogData);
+                    userQuizLogRepository.save(createdLog);
                     userQuizLogList.add(createdLog);
                 }
         );
-        log.info("유저 퀴즈 로그 저장 완료: {}", inputQuizLog);
+        log.info("유저 퀴즈 로그 저장 완료: {}", inputQuizLogs);
     }
 }

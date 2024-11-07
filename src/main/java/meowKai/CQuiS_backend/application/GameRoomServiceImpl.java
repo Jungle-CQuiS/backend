@@ -120,10 +120,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         foundRoomUser.changeTeam();
         roomUserRepository.save(foundRoomUser);
 
-        ResponseSwitchTeamDto responseDto = ResponseSwitchTeamDto.builder()
-                .roomUserId(foundRoomUser.getId())
-                .team(foundRoomUser.getTeam())
-                .build();
+        ResponseSwitchTeamDto responseDto = ResponseSwitchTeamDto.createDto(foundRoomUser);
         log.info("팀 변경 - 유저의 팀 바꾸기 결과: {}", responseDto);
         return responseDto;
     }
@@ -367,6 +364,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         return responseDto;
     }
 
+    // 방 입장을 위한 방의 비밀번호 확인
     @Override
     public ResposeCheckPasswordDto checkPassword(RequestCheckPasswordDto requestDto) {
         log.info("비밀번호 - 비밀 방 비밀번호 입력: {}", requestDto);
@@ -381,6 +379,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         return responseDto;
     }
 
+    // 타 유저에게 명예 주기
     @Override
     @Transactional
     public ResponseGiveHonorDto giveHonor(RequestGiveHonorDto requestDto) {
