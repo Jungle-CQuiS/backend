@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static meowKai.CQuiS_backend.domain.MultiConstants.MULTI_QUIZZES_PER_CATEGORY;
+import static meowKai.CQuiS_backend.domain.MultiConstants.MULTI_QUIZZES_PER_ROUND;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -177,15 +180,7 @@ public class QuizServiceImpl implements QuizService {
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
                 quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
-                        GetShortAnsQuizDto.builder()
-                                .categoryId(quiz.getCategory().getId())
-                                .quizId(quiz.getId())
-                                .categoryType(quiz.getCategory().getCategory())
-                                .name(quiz.getName())
-                                .englishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
-                                .koreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
-                                .build()
-                ));
+                        GetShortAnsQuizDto.createDto(quiz, quiz.getShortAnsQuiz())));
             }
             else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
@@ -197,14 +192,7 @@ public class QuizServiceImpl implements QuizService {
 
                 for (Quiz quiz : randomQuizzes) {
                     responseDto.getQuizList().add(
-                            GetShortAnsQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .quizId(quiz.getId())
-                                    .categoryType(quiz.getCategory().getCategory())
-                                    .name(quiz.getName())
-                                    .englishAnswer(quiz.getShortAnsQuiz().getEnglishAnswer())
-                                    .koreanAnswer(quiz.getShortAnsQuiz().getKoreanAnswer())
-                                    .build()
+                            GetShortAnsQuizDto.createDto(quiz, quiz.getShortAnsQuiz())
                     );
                 }
             }
@@ -265,19 +253,9 @@ public class QuizServiceImpl implements QuizService {
 
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
+
                 quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
-                        GetChoiceAnsQuizDto.builder()
-                                .categoryId(quiz.getCategory().getId())
-                                .quizId(quiz.getId())
-                                .categoryType(quiz.getCategory().getCategory())
-                                .name(quiz.getName())
-                                .choice1(quiz.getChoiceAnsQuiz().getChoice1())
-                                .choice2(quiz.getChoiceAnsQuiz().getChoice2())
-                                .choice3(quiz.getChoiceAnsQuiz().getChoice3())
-                                .choice4(quiz.getChoiceAnsQuiz().getChoice4())
-                                .answer(quiz.getChoiceAnsQuiz().getAnswer())
-                                .build()
-                ));
+                        GetChoiceAnsQuizDto.createDto(quiz, quiz.getChoiceAnsQuiz())));
             } else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
                 Collections.shuffle(quizzesFitConditions);
@@ -287,19 +265,7 @@ public class QuizServiceImpl implements QuizService {
                         .toList();
 
                 for (Quiz quiz : randomQuizzes) {
-                    responseDto.getQuizList().add(
-                            GetChoiceAnsQuizDto.builder()
-                                    .categoryId(quiz.getCategory().getId())
-                                    .quizId(quiz.getId())
-                                    .categoryType(quiz.getCategory().getCategory())
-                                    .name(quiz.getName())
-                                    .choice1(quiz.getChoiceAnsQuiz().getChoice1())
-                                    .choice2(quiz.getChoiceAnsQuiz().getChoice2())
-                                    .choice3(quiz.getChoiceAnsQuiz().getChoice3())
-                                    .choice4(quiz.getChoiceAnsQuiz().getChoice4())
-                                    .answer(quiz.getChoiceAnsQuiz().getAnswer())
-                                    .build()
-                    );
+                    responseDto.getQuizList().add(GetChoiceAnsQuizDto.createDto(quiz, quiz.getChoiceAnsQuiz()));
                 }
             }
         });
@@ -420,7 +386,7 @@ public class QuizServiceImpl implements QuizService {
         return responseDto;
     }
 
-    // 카테고리 별로 랜덤 문제 두 문제씩 가져오기
+    // (멀티 게임 전용) 카테고리 별로 랜덤 문제 두 문제씩 가져오기
     @Override
     public ResponseGetRandomQuizzesByCategoriesDto getRandomQuizzesByCategories(Long roomId) {
         log.info("카테고리 별로 랜덤 문제 두 문제씩 가져오기 요청 - roomId: {}", roomId);
@@ -438,7 +404,7 @@ public class QuizServiceImpl implements QuizService {
 
         List<Object> transferQuizzes = new ArrayList<>();
         for (int i = 0; i < categories.size(); i++) {
-            int startIdx = i * 20 + roundIdx * 2;
+            int startIdx = i * MULTI_QUIZZES_PER_CATEGORY + roundIdx * MULTI_QUIZZES_PER_ROUND;
 
             if(startIdx + 1 >= allQuizzes.size()) {
                 log.error("카테고리 별로 랜덤 문제 두 문제씩 가져오기 - 인덱스 범위 초과 roundIdx: {}, startIdx: {}", roundIdx, startIdx);
@@ -490,7 +456,7 @@ public class QuizServiceImpl implements QuizService {
     }
 
 
-    // 게임 시작 직전 호출되어 카테고리별로 20개의 문제를 저장해 둠
+    // 멀티 게임 시작 직전 호출되어 카테고리별로 20개의 문제를 저장해 둠
     @Override
     public void storeQuizzes(GameRoom gameRoom) {
         log.info("문제 리스트 저장 호출 : {}", gameRoom);
@@ -501,31 +467,14 @@ public class QuizServiceImpl implements QuizService {
         for (Category category : categories) {
 
             // 카테고리 별로 랜덤 문제 20문제씩 가져오기
-            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), 20);
+            List<Quiz> randomQuizzes = quizRepository.findRandomQuizByCategoryId(category.getId(), MULTI_QUIZZES_PER_CATEGORY);
 
             for (Quiz randomQuiz : randomQuizzes) {
 
                 if (randomQuiz.getType() == QuizType.CHOICE) {
-                    quizzes.add(GetChoiceAnsQuizDto.builder()
-                                    .categoryId(randomQuiz.getCategory().getId())
-                                    .quizId(randomQuiz.getId())
-                                    .categoryType(randomQuiz.getCategory().getCategory())
-                                    .name(randomQuiz.getName())
-                                    .choice1(randomQuiz.getChoiceAnsQuiz().getChoice1())
-                                    .choice2(randomQuiz.getChoiceAnsQuiz().getChoice2())
-                                    .choice3(randomQuiz.getChoiceAnsQuiz().getChoice3())
-                                    .choice4(randomQuiz.getChoiceAnsQuiz().getChoice4())
-                                    .answer(randomQuiz.getChoiceAnsQuiz().getAnswer())
-                                    .build());
+                    quizzes.add(GetChoiceAnsQuizDto.createDto(randomQuiz, randomQuiz.getChoiceAnsQuiz()));
                 } else {
-                    quizzes.add(GetShortAnsQuizDto.builder()
-                                    .categoryId(randomQuiz.getCategory().getId())
-                                    .quizId(randomQuiz.getId())
-                                    .categoryType(randomQuiz.getCategory().getCategory())
-                                    .name(randomQuiz.getName())
-                                    .englishAnswer(randomQuiz.getShortAnsQuiz().getEnglishAnswer())
-                                    .koreanAnswer(randomQuiz.getShortAnsQuiz().getKoreanAnswer())
-                                    .build());
+                    quizzes.add(GetShortAnsQuizDto.createDto(randomQuiz, randomQuiz.getShortAnsQuiz()));
                 }
             }
         }
