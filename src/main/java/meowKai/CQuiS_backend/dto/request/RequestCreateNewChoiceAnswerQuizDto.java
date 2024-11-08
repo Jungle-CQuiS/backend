@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RequestCreateNewChoiceAnswerQuiz {
+public class RequestCreateNewChoiceAnswerQuizDto {
 
     private UUID uuid;
     private List<NewChoiceAnswerQuizDto> quizList;

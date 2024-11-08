@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.config.openai.OpenAiConfig;
 import meowKai.CQuiS_backend.domain.*;
 import meowKai.CQuiS_backend.dto.request.RequestCreateChoiceQuizzesFromTextDto;
-import meowKai.CQuiS_backend.dto.request.RequestCreateNewChoiceAnswerQuiz;
+import meowKai.CQuiS_backend.dto.request.RequestCreateNewChoiceAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.request.RequestCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.request.RequestCreateShortQuizzesFromTextDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateChoiceQuizFromTextDto;
@@ -87,7 +87,7 @@ public class UtilServiceImpl implements UtilService {
 
     // 객관식 퀴즈 생성하기
     @Override
-    public ResponseCreateNewChoiceAnswerQuizDto createNewChoiceQuiz(RequestCreateNewChoiceAnswerQuiz.NewChoiceAnswerQuizDto requestDto, UUID uuid) {
+    public ResponseCreateNewChoiceAnswerQuizDto createNewChoiceQuiz(RequestCreateNewChoiceAnswerQuizDto.NewChoiceAnswerQuizDto requestDto, UUID uuid) {
         log.info("객관식 퀴즈 생성 요청 : {}", requestDto);
         Category foundCategory = categoryRepository.findByCategory(requestDto.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
@@ -135,8 +135,8 @@ public class UtilServiceImpl implements UtilService {
     }
 
     @Override
-    public void createNewMultipleChoiceQuiz(RequestCreateNewChoiceAnswerQuiz requestDto) {
-        for (RequestCreateNewChoiceAnswerQuiz.NewChoiceAnswerQuizDto request : requestDto.getQuizList()) {
+    public void createNewMultipleChoiceQuiz(RequestCreateNewChoiceAnswerQuizDto requestDto) {
+        for (RequestCreateNewChoiceAnswerQuizDto.NewChoiceAnswerQuizDto request : requestDto.getQuizList()) {
             createNewChoiceQuiz(request, requestDto.getUuid());
         }
     }
