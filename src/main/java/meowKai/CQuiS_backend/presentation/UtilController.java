@@ -51,7 +51,6 @@ public class UtilController {
     @PostMapping("/quiz-creation/choice-answer")
     public ApiResponse<Object> createChoiceAnsQuizFromText(@Valid @RequestBody RequestCreateChoiceQuizzesFromTextDto requestDto) {
         try {
-            log.info("generatedChoiceAnswerQuizzesFromText 메서드 호출됨");
             List<ResponseCreateChoiceQuizFromTextDto> response = utilService.generateChoiceAnswerQuizzesFromText(requestDto);
             return ApiResponse.ofSuccess(response);
         }
