@@ -231,7 +231,7 @@ public class UtilServiceImpl implements UtilService {
             JsonNode rootNode = objectMapper.readTree(jsonData);
             JsonNode quizzesNode = rootNode.get("quizzes");
 
-            // quizzes 배열을 List<ResponseCreateChoiceQuizFromTextDto>로 변환
+            // quizzes 배열을 List<ResponseCreateShortQuizFromTextDto>로 변환
             return objectMapper.convertValue(
                     quizzesNode,
                     objectMapper.getTypeFactory().constructCollectionType(List.class, ResponseCreateShortQuizFromTextDto.class)
