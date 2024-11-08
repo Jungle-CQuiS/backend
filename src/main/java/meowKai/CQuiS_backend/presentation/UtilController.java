@@ -63,16 +63,16 @@ public class UtilController {
     @Tag(name = "유틸리티")
     @Operation(summary = "주관식 퀴즈 저장하기")
     @PostMapping("/quiz-insertion/short-answer/multiple")
-    public ApiResponse<Object> createNewMultipleShortAnswerQuiz(@Valid @RequestBody List<RequestCreateNewShortAnswerQuizDto> requestList) {
-        utilService.createNewMultipleShortQuiz(requestList);
+    public ApiResponse<Object> createNewMultipleShortAnswerQuiz(@Valid @RequestBody RequestCreateNewShortAnswerQuizDto requestDto) {
+        utilService.createNewMultipleShortQuiz(requestDto);
         return ApiResponse.ofSuccess();
     }
 
     @Tag(name = "유틸리티")
     @Operation(summary = "객관식 퀴즈 저장하기")
     @PostMapping("/quiz-insertion/multiple-choice/multiple")
-    public ApiResponse<Object> createNewMultipleChoiceAnswerQuiz(@Valid @RequestBody List<RequestCreateNewChoiceAnswerQuiz> requestList) {
-        utilService.createNewMultipleChoiceQuiz(requestList);
+    public ApiResponse<Object> createNewMultipleChoiceAnswerQuiz(@Valid @RequestBody RequestCreateNewChoiceAnswerQuiz requestDto) {
+        utilService.createNewMultipleChoiceQuiz(requestDto);
         return ApiResponse.ofSuccess();
     }
 }

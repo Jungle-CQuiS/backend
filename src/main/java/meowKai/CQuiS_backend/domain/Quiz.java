@@ -46,6 +46,12 @@ public class Quiz extends BaseEntity {
     @Builder.Default
     private List<QuizUserVotedown> quizUserVotedowns = new ArrayList<>();
 
+    // 퀴즈를 제작한 유저와 매핑
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
     // 문제 질문
     @Column
     private String name;

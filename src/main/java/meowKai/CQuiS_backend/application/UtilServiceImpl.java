@@ -15,10 +15,7 @@ import meowKai.CQuiS_backend.dto.response.ResponseCreateChoiceQuizFromTextDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewChoiceAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateShortQuizFromTextDto;
-import meowKai.CQuiS_backend.infrastructure.CategoryRepository;
-import meowKai.CQuiS_backend.infrastructure.ChoiceAnsQuizRepository;
-import meowKai.CQuiS_backend.infrastructure.QuizRepository;
-import meowKai.CQuiS_backend.infrastructure.ShortAnsQuizRepository;
+import meowKai.CQuiS_backend.infrastructure.*;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
@@ -28,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import static meowKai.CQuiS_backend.config.openai.OpenAiConfig.DEFAULT_CHAT_URL;
 import static meowKai.CQuiS_backend.config.openai.QuizPrompts.CHOICE_QUIZ_PROMPT;
@@ -43,21 +42,25 @@ public class UtilServiceImpl implements UtilService {
     private final QuizRepository quizRepository;
     private final ShortAnsQuizRepository shortAnsQuizRepository;
     private final ChoiceAnsQuizRepository choiceAnsQuizRepository;
+    private final UserRepository userRepository;
     private final OpenAiConfig openAiConfig;
 
     // 주관식 퀴즈 생성하기
     @Override
-    public ResponseCreateNewShortAnswerQuizDto createNewShortQuiz(RequestCreateNewShortAnswerQuizDto requestDto) {
+    public ResponseCreateNewShortAnswerQuizDto createNewShortQuiz(RequestCreateNewShortAnswerQuizDto.NewShortAnswerQuizDto requestDto, UUID uuid) {
         log.info("주관식 퀴즈 생성 요청 : {}", requestDto);
         Category foundCategory = categoryRepository.findByCategory(requestDto.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
+
+        User user = userRepository.findByUuid(uuid).orElseThrow(
+                () -> new NoSuchElementException("주관식 퀴즈 생성 - 존재하지 않는 유저입니다."));
 
         // 퀴즈 생성
         Quiz quiz = Quiz.builder()
                 .name(requestDto.getName())
                 .category(foundCategory)
                 .type(requestDto.getType())
-                .downvoteCount(0)
+                .user(user)
                 .build();
         Quiz savedQuiz = quizRepository.save(quiz);
         foundCategory.addQuiz(savedQuiz);
@@ -84,17 +87,20 @@ public class UtilServiceImpl implements UtilService {
 
     // 객관식 퀴즈 생성하기
     @Override
-    public ResponseCreateNewChoiceAnswerQuizDto createNewChoiceQuiz(RequestCreateNewChoiceAnswerQuiz requestDto) {
+    public ResponseCreateNewChoiceAnswerQuizDto createNewChoiceQuiz(RequestCreateNewChoiceAnswerQuiz.NewChoiceAnswerQuizDto requestDto, UUID uuid) {
         log.info("객관식 퀴즈 생성 요청 : {}", requestDto);
         Category foundCategory = categoryRepository.findByCategory(requestDto.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
+
+        User user = userRepository.findByUuid(uuid).orElseThrow(
+                () -> new NoSuchElementException("주관식 퀴즈 생성 - 존재하지 않는 유저입니다."));
 
         // 퀴즈 생성
         Quiz quiz = Quiz.builder()
                 .name(requestDto.getName())
                 .category(foundCategory)
                 .type(requestDto.getType())
-                .downvoteCount(0)
+                .user(user)
                 .build();
         Quiz savedQuiz = quizRepository.save(quiz);
         foundCategory.addQuiz(savedQuiz);
@@ -122,16 +128,16 @@ public class UtilServiceImpl implements UtilService {
     }
 
     @Override
-    public void createNewMultipleShortQuiz(List<RequestCreateNewShortAnswerQuizDto> requestList) {
-        for (RequestCreateNewShortAnswerQuizDto request : requestList) {
-            createNewShortQuiz(request);
+    public void createNewMultipleShortQuiz(RequestCreateNewShortAnswerQuizDto requestDto) {
+        for (RequestCreateNewShortAnswerQuizDto.NewShortAnswerQuizDto request : requestDto.getQuizList()) {
+            createNewShortQuiz(request, requestDto.getUuid());
         }
     }
 
     @Override
-    public void createNewMultipleChoiceQuiz(List<RequestCreateNewChoiceAnswerQuiz> requestList) {
-        for (RequestCreateNewChoiceAnswerQuiz request : requestList) {
-            createNewChoiceQuiz(request);
+    public void createNewMultipleChoiceQuiz(RequestCreateNewChoiceAnswerQuiz requestDto) {
+        for (RequestCreateNewChoiceAnswerQuiz.NewChoiceAnswerQuizDto request : requestDto.getQuizList()) {
+            createNewChoiceQuiz(request, requestDto.getUuid());
         }
     }
 

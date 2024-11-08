@@ -11,12 +11,13 @@ import meowKai.CQuiS_backend.dto.response.ResponseCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateShortQuizFromTextDto;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface UtilService {
-    ResponseCreateNewShortAnswerQuizDto createNewShortQuiz(RequestCreateNewShortAnswerQuizDto requestDto);
-    ResponseCreateNewChoiceAnswerQuizDto createNewChoiceQuiz(RequestCreateNewChoiceAnswerQuiz requestDto);
-    void createNewMultipleShortQuiz(List<RequestCreateNewShortAnswerQuizDto> requestList);
-    void createNewMultipleChoiceQuiz(List<RequestCreateNewChoiceAnswerQuiz> requestList);
+    ResponseCreateNewShortAnswerQuizDto createNewShortQuiz(RequestCreateNewShortAnswerQuizDto.NewShortAnswerQuizDto requestDto, UUID uuid);
+    ResponseCreateNewChoiceAnswerQuizDto createNewChoiceQuiz(RequestCreateNewChoiceAnswerQuiz.NewChoiceAnswerQuizDto requestDto, UUID uuid);
+    void createNewMultipleShortQuiz(RequestCreateNewShortAnswerQuizDto requestDto);
+    void createNewMultipleChoiceQuiz(RequestCreateNewChoiceAnswerQuiz requestDto);
     List<ResponseCreateShortQuizFromTextDto> generateShortAnswerQuizzesFromText(RequestCreateShortQuizzesFromTextDto requestDto) throws JsonProcessingException;
     List<ResponseCreateChoiceQuizFromTextDto> generateChoiceAnswerQuizzesFromText(RequestCreateChoiceQuizzesFromTextDto requestDto) throws JsonProcessingException;
 }
