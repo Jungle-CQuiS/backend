@@ -21,6 +21,7 @@ public class GetChoiceAnsQuizDto {
     private String choice3;
     private String choice4;
     private Integer answer;
+    private String username;
 
     public static GetChoiceAnsQuizDto createDto(ChoiceAnsQuiz choiceAnsQuiz) {
         Quiz mappedQuiz = choiceAnsQuiz.getQuiz();
@@ -34,6 +35,7 @@ public class GetChoiceAnsQuizDto {
                 .choice3(choiceAnsQuiz.getChoice3())
                 .choice4(choiceAnsQuiz.getChoice4())
                 .answer(choiceAnsQuiz.getAnswer())
+                .username(mappedQuiz.getUser().getUsername())
                 .build();
     }
 }

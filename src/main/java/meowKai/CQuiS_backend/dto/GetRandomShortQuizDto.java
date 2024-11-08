@@ -2,6 +2,7 @@ package meowKai.CQuiS_backend.dto;
 
 import lombok.*;
 import meowKai.CQuiS_backend.domain.CategoryType;
+import meowKai.CQuiS_backend.domain.Quiz;
 import meowKai.CQuiS_backend.domain.QuizType;
 import meowKai.CQuiS_backend.domain.ShortAnsQuiz;
 
@@ -19,16 +20,19 @@ public class GetRandomShortQuizDto {
     private String name;
     private String shortKoreanAnswer;
     private String shortEnglishAnswer;
+    private String username;
 
     public static GetRandomShortQuizDto createDto(ShortAnsQuiz shortAnsQuiz) {
+        Quiz mappedQuiz = shortAnsQuiz.getQuiz();
         return GetRandomShortQuizDto.builder()
-                .quizId(shortAnsQuiz.getQuiz().getId())
+                .quizId(mappedQuiz.getId())
                 .quizType(QuizType.SHORT)
-                .categoryId(shortAnsQuiz.getQuiz().getCategory().getId())
-                .categoryType(shortAnsQuiz.getQuiz().getCategory().getCategory())
+                .categoryId(mappedQuiz.getCategory().getId())
+                .categoryType(mappedQuiz.getCategory().getCategory())
                 .name(shortAnsQuiz.getQuiz().getName())
                 .shortKoreanAnswer(shortAnsQuiz.getKoreanAnswer())
                 .shortEnglishAnswer(shortAnsQuiz.getEnglishAnswer())
+                .username(mappedQuiz.getUser().getUsername())
                 .build();
     }
 }
