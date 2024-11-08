@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.application.UtilService;
 import meowKai.CQuiS_backend.dto.request.RequestCreateChoiceQuizzesFromTextDto;
-import meowKai.CQuiS_backend.dto.request.RequestCreateNewChoiceAnswerQuiz;
+import meowKai.CQuiS_backend.dto.request.RequestCreateNewChoiceAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.request.RequestCreateNewShortAnswerQuizDto;
 import meowKai.CQuiS_backend.dto.request.RequestCreateShortQuizzesFromTextDto;
 import meowKai.CQuiS_backend.dto.response.ResponseCreateChoiceQuizFromTextDto;
@@ -63,16 +63,16 @@ public class UtilController {
     @Tag(name = "유틸리티")
     @Operation(summary = "주관식 퀴즈 저장하기")
     @PostMapping("/quiz-insertion/short-answer/multiple")
-    public ApiResponse<Object> createNewMultipleShortAnswerQuiz(@Valid @RequestBody List<RequestCreateNewShortAnswerQuizDto> requestList) {
-        utilService.createNewMultipleShortQuiz(requestList);
+    public ApiResponse<Object> createNewMultipleShortAnswerQuiz(@Valid @RequestBody RequestCreateNewShortAnswerQuizDto requestDto) {
+        utilService.createNewMultipleShortQuiz(requestDto);
         return ApiResponse.ofSuccess();
     }
 
     @Tag(name = "유틸리티")
     @Operation(summary = "객관식 퀴즈 저장하기")
     @PostMapping("/quiz-insertion/multiple-choice/multiple")
-    public ApiResponse<Object> createNewMultipleChoiceAnswerQuiz(@Valid @RequestBody List<RequestCreateNewChoiceAnswerQuiz> requestList) {
-        utilService.createNewMultipleChoiceQuiz(requestList);
+    public ApiResponse<Object> createNewMultipleChoiceAnswerQuiz(@Valid @RequestBody RequestCreateNewChoiceAnswerQuizDto requestDto) {
+        utilService.createNewMultipleChoiceQuiz(requestDto);
         return ApiResponse.ofSuccess();
     }
 }

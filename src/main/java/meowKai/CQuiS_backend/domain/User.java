@@ -47,6 +47,10 @@ public class User extends BaseEntity {
     @OneToOne(mappedBy = "user", cascade = PERSIST)
     private LogData logData;
 
+    @OneToMany(mappedBy = "user", cascade = ALL)
+    @Builder.Default
+    private List<Quiz> createdQuizzes = new ArrayList<>();
+
     // 유저의 email
     @Column
     private String email;

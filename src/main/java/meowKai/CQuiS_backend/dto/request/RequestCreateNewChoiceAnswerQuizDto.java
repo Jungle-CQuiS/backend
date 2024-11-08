@@ -12,21 +12,24 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RequestCreateNewShortAnswerQuizDto {
+public class RequestCreateNewChoiceAnswerQuizDto {
 
     private UUID uuid;
-    private List<NewShortAnswerQuizDto> quizList;
+    private List<NewChoiceAnswerQuizDto> quizList;
 
     @Builder
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor
     @ToString
-    public static class NewShortAnswerQuizDto {
+    public static class NewChoiceAnswerQuizDto {
         private CategoryType category;
         private String name;
         private QuizType type;
-        private String englishAnswer;
-        private String koreanAnswer;
+        private String choice1;
+        private String choice2;
+        private String choice3;
+        private String choice4;
+        private Integer answer;
     }
 }
