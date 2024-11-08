@@ -51,7 +51,6 @@ public class Quiz extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-
     // 문제 질문
     @Column
     private String name;
@@ -63,7 +62,8 @@ public class Quiz extends BaseEntity {
 
     // 비추천 횟수
     @Column
-    private Integer downvoteCount;
+    @Builder.Default
+    private Integer downvoteCount = 0;
 
     /**
      * 도메인 비즈니스 로직
