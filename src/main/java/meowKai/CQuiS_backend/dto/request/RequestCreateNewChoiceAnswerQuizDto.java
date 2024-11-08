@@ -23,7 +23,7 @@ public class RequestCreateNewChoiceAnswerQuizDto {
     @NoArgsConstructor
     @ToString
     public static class NewChoiceAnswerQuizDto {
-        private CategoryType category;
+        private CategoryType categoryType;
         private String name;
         private QuizType type;
         private String choice1;
