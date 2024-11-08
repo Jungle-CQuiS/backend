@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/util") // TODO: 추후에 admin 권한 가진 계정만 접근 가능하도록 수정
+@RequestMapping("/api/util")
 public class UtilController {
 
     private final UtilService utilService;
@@ -41,6 +41,7 @@ public class UtilController {
             return ApiResponse.ofSuccess(response);
         }
         catch (Exception e) {
+            log.info("에러 발생: " + e.getMessage());
             return ApiResponse.ofFail("입력한 텍스트가 너무 길어요! 텍스트를 줄여서 다시 시도해주세요.");
         }
     }
@@ -56,7 +57,7 @@ public class UtilController {
         }
         catch (Exception e) {
             log.info("에러 발생: " + e.getMessage());
-            return ApiResponse.ofFail(e.getMessage());
+            return ApiResponse.ofFail("입력한 텍스트가 너무 길어요! 텍스트를 줄여서 다시 시도해주세요.");
         }
     }
 
