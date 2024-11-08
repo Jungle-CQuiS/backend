@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static jakarta.persistence.CascadeType.*;
+import static jakarta.persistence.EnumType.STRING;
 import static jakarta.persistence.GenerationType.*;
 import static lombok.AccessLevel.*;
 
@@ -51,6 +52,9 @@ public class User extends BaseEntity {
     @Builder.Default
     private List<Quiz> createdQuizzes = new ArrayList<>();
 
+    @Enumerated(STRING)
+    private Role role;
+
     // 유저의 email
     @Column
     private String email;
@@ -86,6 +90,7 @@ public class User extends BaseEntity {
                 .password(password)
                 .uuid(java.util.UUID.randomUUID())
                 .lastAccessed(LocalDateTime.now())
+                .role(Role.USER)
                 .build();
 
         // UserStatistics, LogData 생성 및 연관관계 설정
@@ -110,6 +115,11 @@ public class User extends BaseEntity {
         this.refreshToken = null;
     }
 
+    // 유저의 닉네임 업데이트
+    public User updateUsernameAndReturnEntity(String username) {
+        this.username = username;
+        return this;
+    }
 
     // 비밀번호 암호화
     public void encodePassword(PasswordEncoder passwordEncoder) {
