@@ -28,8 +28,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
             @Param("quizType") String quizType
     );
 
-    @Query(value = "SELECT * FROM quiz WHERE category_id = :categoryId ORDER BY RAND() LIMIT :count", nativeQuery = true)
-    List<Quiz> findRandomQuizByCategoryId(@Param("categoryId") Long categoryId, @Param("count") int count);
     List<Quiz> findAllByCategoryId(Long categoryId);
 
     @Query ("SELECT q FROM Quiz q " +
