@@ -379,13 +379,17 @@ public class QuizServiceImpl implements QuizService {
         for (int i = 0; i < categories.size(); i++) {
             int startIdx = i * MULTI_QUIZZES_PER_CATEGORY + roundIdx * MULTI_QUIZZES_PER_ROUND;
 
+            // TODO: 추후 제거할 것, 문제 수가 부족할 경우 처음 문제부터 가져오도록 함 (카테고리가 지켜지지 않거나 나왔던 문제가 다시 나올 수 있음)
+            startIdx = startIdx % allQuizzes.size();
+            int nextIdx = (startIdx + 1) % allQuizzes.size();
+
             if (startIdx + 1 >= allQuizzes.size()) {
                 log.error("카테고리 별로 랜덤 문제 두 문제씩 가져오기 - 인덱스 범위 초과 roundIdx: {}, startIdx: {}", roundIdx, startIdx);
                 throw new IllegalStateException("카테고리 별로 랜덤 문제 두 문제씩 가져오기 - 사용할 수 있는 문제가 없습니다.");
             }
 
             transferQuizzes.add(allQuizzes.get(startIdx));
-            transferQuizzes.add(allQuizzes.get(startIdx + 1));
+            transferQuizzes.add(allQuizzes.get(nextIdx));
         }
 
         ResponseGetRandomQuizzesByCategoriesDto responseDto = ResponseGetRandomQuizzesByCategoriesDto.builder()
