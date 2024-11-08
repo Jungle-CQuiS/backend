@@ -49,7 +49,7 @@ public class UtilServiceImpl implements UtilService {
     @Override
     public ResponseCreateNewShortAnswerQuizDto createNewShortQuiz(RequestCreateNewShortAnswerQuizDto.NewShortAnswerQuizDto requestDto, UUID uuid) {
         log.info("주관식 퀴즈 생성 요청 : {}", requestDto);
-        Category foundCategory = categoryRepository.findByCategory(requestDto.getCategory())
+        Category foundCategory = categoryRepository.findByCategory(requestDto.getCategoryType())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
 
         User user = userRepository.findByUuid(uuid).orElseThrow(
@@ -89,7 +89,7 @@ public class UtilServiceImpl implements UtilService {
     @Override
     public ResponseCreateNewChoiceAnswerQuizDto createNewChoiceQuiz(RequestCreateNewChoiceAnswerQuizDto.NewChoiceAnswerQuizDto requestDto, UUID uuid) {
         log.info("객관식 퀴즈 생성 요청 : {}", requestDto);
-        Category foundCategory = categoryRepository.findByCategory(requestDto.getCategory())
+        Category foundCategory = categoryRepository.findByCategory(requestDto.getCategoryType())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리가 존재하지 않습니다."));
 
         User user = userRepository.findByUuid(uuid).orElseThrow(
