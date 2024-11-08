@@ -20,11 +20,15 @@ public class OpenAiConfig {
                         "items": {
                             "type": "object",
                             "properties": {
+                                "categoryType": {
+                                    "type": "array",
+                                    "items": { "type": "string" }
+                                },
                                 "quizName": { "type": "string" },
                                 "koreanAnswer": { "type": "string" },
                                 "englishAnswer": { "type": "string" }
                             },
-                            "required": ["quizName", "koreanAnswer", "englishAnswer"],
+                            "required": ["categoryType", "quizName", "koreanAnswer", "englishAnswer"],
                             "additionalProperties": false
                         }
                     }
@@ -43,6 +47,10 @@ public class OpenAiConfig {
                         "items": {
                             "type": "object",
                             "properties": {
+                                "categoryType": {
+                                    "type": "array",
+                                    "items": { "type": "string" }
+                                },
                                 "quizName": { "type": "string" },
                                 "choice1": { "type": "string" },
                                 "choice2": { "type": "string" },
@@ -50,7 +58,7 @@ public class OpenAiConfig {
                                 "choice4": { "type": "string" },
                                 "answer": { "type": "integer" }
                             },
-                            "required": ["quizName", "choice1", "choice2", "choice3", "choice4", "answer"],
+                            "required": ["categoryType", "quizName", "choice1", "choice2", "choice3", "choice4", "answer"],
                             "additionalProperties": false
                         }
                     }

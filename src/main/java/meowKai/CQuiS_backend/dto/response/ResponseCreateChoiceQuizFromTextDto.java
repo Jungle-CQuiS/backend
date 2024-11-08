@@ -2,12 +2,15 @@ package meowKai.CQuiS_backend.dto.response;
 
 import lombok.*;
 
+import java.util.List;
+
 @Builder
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 public class ResponseCreateChoiceQuizFromTextDto {
+    private List<String> categoryType;
     private String quizName;
     private String choice1;
     private String choice2;
