@@ -52,6 +52,7 @@ public class UtilServiceImpl implements UtilService {
                 .name(requestDto.getName())
                 .category(foundCategory)
                 .type(requestDto.getType())
+                .downvoteCount(0)
                 .build();
         Quiz savedQuiz = quizRepository.save(quiz);
         foundCategory.addQuiz(savedQuiz);
@@ -88,6 +89,7 @@ public class UtilServiceImpl implements UtilService {
                 .name(requestDto.getName())
                 .category(foundCategory)
                 .type(requestDto.getType())
+                .downvoteCount(0)
                 .build();
         Quiz savedQuiz = quizRepository.save(quiz);
         foundCategory.addQuiz(savedQuiz);
@@ -244,6 +246,7 @@ public class UtilServiceImpl implements UtilService {
 
     // 텍스트 데이터에서 주관식 퀴즈 추출
     @Override
+    @Transactional(readOnly = true)
     public List<ResponseCreateShortQuizFromTextDto> generateShortAnswerQuizzesFromText(RequestCreateShortQuizzesFromTextDto requestDto) throws JsonProcessingException {
 
         int quizCount = requestDto.getQuizCount();
@@ -296,6 +299,7 @@ public class UtilServiceImpl implements UtilService {
 
     // 텍스트 데이터에서 객관식 퀴즈 추출
     @Override
+    @Transactional(readOnly = true)
     public List<ResponseCreateChoiceQuizFromTextDto> generateChoiceAnswerQuizzesFromText(RequestCreateChoiceQuizzesFromTextDto requestDto) throws JsonProcessingException {
 
         int quizCount = requestDto.getQuizCount();

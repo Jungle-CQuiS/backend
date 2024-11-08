@@ -2,6 +2,7 @@ package meowKai.CQuiS_backend.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import meowKai.CQuiS_backend.global.base.BaseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ import static lombok.AccessLevel.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = PROTECTED)
-public class Quiz {
+public class Quiz extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -39,6 +40,11 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz")
     @Builder.Default
     private List<QuizWrong> quizWrongs = new ArrayList<>();
+
+    // 비추천 퀴즈와 매핑
+    @OneToMany(mappedBy = "quiz")
+    @Builder.Default
+    private List<QuizUserVotedown> quizUserVotedowns = new ArrayList<>();
 
     // 문제 질문
     @Column

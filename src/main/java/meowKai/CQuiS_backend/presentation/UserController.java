@@ -45,6 +45,19 @@ public class UserController {
     }
 
     @Tag(name = "유저 정보")
+    @Operation(summary = "진행한 게임에 대한 통계 정보 저장")
+    @PostMapping("/statistics")
+    public ApiResponse<Object> saveStatisticsForGame(@Valid @RequestBody RequestSaveSingleGameStatisticsDto requestDto) {
+        try {
+            ResponseSaveSingleGameStatisticsDto responseDto = userService.saveStatisticsForSingleGame(requestDto);
+            return ApiResponse.ofSuccess(responseDto);
+        }
+        catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "유저 정보")
     @Operation(summary = "유저의 카테고리 별 레벨 데이터 받기")
     @PostMapping("/category-levels")
     public ApiResponse<Object> getUserCategoryLevels(@Valid @RequestBody RequestGetUserCategoryLevelsDto requestDto) {

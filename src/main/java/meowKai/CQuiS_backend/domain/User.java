@@ -40,6 +40,10 @@ public class User extends BaseEntity {
     @Builder.Default
     private List<QuizWrong> quizWrongs = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = ALL)
+    @Builder.Default
+    private List<QuizUserVotedown> quizUserVotedowns = new ArrayList<>();
+
     @OneToOne(mappedBy = "user", cascade = PERSIST)
     private LogData logData;
 

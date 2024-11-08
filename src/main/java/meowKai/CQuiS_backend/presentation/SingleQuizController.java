@@ -55,24 +55,11 @@ public class SingleQuizController {
     }
 
     @Tag(name = "싱글모드 퀴즈")
-    @Operation(summary = "퀴즈 설정 조건에 따른 주관식 + 객관식 문제 요청하기")
+    @Operation(summary = "퀴즈 설정 조건에 따른 주관식 + 객관식 문제 요청하기") // TODO: 이동희: 이건 타임어택용인가요?
     @PostMapping("/mix")
     public ApiResponse<Object> getMixQuizzesByConditions(@Valid @RequestBody RequestGetMixAnswerQuizzesDto requestDto) {
         try {
             ResponseGetMixAnswerQuizzesDto responseDto = quizService.getMixAnswerQuizzesByConditions(requestDto);
-            return ApiResponse.ofSuccess(responseDto);
-        }
-        catch (Exception e) {
-            return ApiResponse.ofFail(e.getMessage());
-        }
-    }
-
-    @Tag(name = "싱글모드 퀴즈")
-    @Operation(summary = "진행한 게임에 대한 통계 정보 저장")
-    @PostMapping("/statistics")
-    public ApiResponse<Object> saveStatisticsForGame(@Valid @RequestBody RequestSaveSingleGameStatisticsDto requestDto) {
-        try {
-            ResponseSaveSingleGameStatisticsDto responseDto = quizService.saveStatisticsForSingleGame(requestDto);
             return ApiResponse.ofSuccess(responseDto);
         }
         catch (Exception e) {

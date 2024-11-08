@@ -22,17 +22,18 @@ public class GetChoiceAnsQuizDto {
     private String choice4;
     private Integer answer;
 
-    public static GetChoiceAnsQuizDto createDto(Quiz foundQuiz, ChoiceAnsQuiz foundChoiceAnsQuiz) {
+    public static GetChoiceAnsQuizDto createDto(ChoiceAnsQuiz choiceAnsQuiz) {
+        Quiz mappedQuiz = choiceAnsQuiz.getQuiz();
         return GetChoiceAnsQuizDto.builder()
-                .categoryId(foundQuiz.getCategory().getId())
-                .quizId(foundQuiz.getId())
-                .categoryType(foundQuiz.getCategory().getCategory())
-                .name(foundQuiz.getName())
-                .choice1(foundChoiceAnsQuiz.getChoice1())
-                .choice2(foundChoiceAnsQuiz.getChoice2())
-                .choice3(foundChoiceAnsQuiz.getChoice3())
-                .choice4(foundChoiceAnsQuiz.getChoice4())
-                .answer(foundChoiceAnsQuiz.getAnswer())
+                .categoryId(mappedQuiz.getCategory().getId())
+                .quizId(mappedQuiz.getId())
+                .categoryType(mappedQuiz.getCategory().getCategory())
+                .name(mappedQuiz.getName())
+                .choice1(choiceAnsQuiz.getChoice1())
+                .choice2(choiceAnsQuiz.getChoice2())
+                .choice3(choiceAnsQuiz.getChoice3())
+                .choice4(choiceAnsQuiz.getChoice4())
+                .answer(choiceAnsQuiz.getAnswer())
                 .build();
     }
 }

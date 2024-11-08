@@ -25,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final LogDataRepository logDataRepository;
     private final QuizRepository quizRepository;
     private final QuizWrongRepository quizWrongRepository;
+    private final UserQuizLogRepository userQuizLogRepository;
 
     // 유저의 개인 정보(이메일, 유저네임)를 반환
     @Override
@@ -59,6 +60,38 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         log.info("유저 퀴즈 통계 정보 반환 완료: {}", responseDto);
+        return responseDto;
+    }
+
+    // 플레이한 싱글 게임 통계 정보 저장
+    @Override
+    @Transactional
+    public ResponseSaveSingleGameStatisticsDto saveStatisticsForSingleGame(RequestSaveSingleGameStatisticsDto requestDto) {
+        log.info("플레이한 싱글 게임 통계 정보 저장 요청 : {}", requestDto);
+
+        User foundUser = userRepository.findByUuid(requestDto.getUuid())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        UserStatistics foundUserStatistics = userStatisticsRepository.findByUser(foundUser)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저 통계 정보입니다."));
+
+        int solvedCount = requestDto.getQuizCount(); // 한 판에서 푼 전체 문제 수
+        int correctCount = requestDto.getCorrectCount(); // 한 판에서 맞춘 문제 수
+        int wrongCount = solvedCount - correctCount; // 한 판에서 틀린 문제 수
+
+        // 푼 문제 수 업데이트(기존 푼 문제 수 + 게임에서 푼 문제 수)
+        foundUserStatistics.updateSolvedCount(solvedCount);
+        // 틀린 문제 수 업데이트(기존 틀린 문제 수 + 게임에서 틀린 문제 수)
+        foundUserStatistics.updateWrongCount(wrongCount);
+        // 정답률 업데이트
+        foundUserStatistics.updateCorrectRate();
+
+        ResponseSaveSingleGameStatisticsDto responseDto = ResponseSaveSingleGameStatisticsDto.builder()
+                .updatedSolvedCount(foundUserStatistics.getSolvedCount())
+                .updatedWrongCount(foundUser.getUserStatistics().getWrongCount())
+                .updatedCorrectRate(foundUserStatistics.getCorrectRate())
+                .build();
+
+        log.info("플레이한 싱글 게임 통계 정보 저장 응답 : {}", responseDto);
         return responseDto;
     }
 
@@ -176,11 +209,11 @@ public class UserServiceImpl implements UserService {
                             switch (foundQuizType) {
                                 case SHORT -> {
                                     ShortAnsQuiz foundShortAnsQuiz = foundQuiz.getShortAnsQuiz();
-                                    return GetShortAnsQuizDto.createDto(foundQuiz, foundShortAnsQuiz);
+                                    return GetShortAnsQuizDto.createDto(foundShortAnsQuiz);
                                 }
                                 case CHOICE -> {
                                     ChoiceAnsQuiz foundChoiceAnsQuiz = foundQuiz.getChoiceAnsQuiz();
-                                    return GetChoiceAnsQuizDto.createDto(foundQuiz, foundChoiceAnsQuiz);
+                                    return GetChoiceAnsQuizDto.createDto(foundChoiceAnsQuiz);
                                 }
                                 default -> throw new IllegalArgumentException("해당 퀴즈 타입이 존재하지 않습니다: " + foundQuizType);
                             }
@@ -208,14 +241,15 @@ public class UserServiceImpl implements UserService {
         List<UserQuizLog> userQuizLogList = foundLogData.getUserQuizLogs();
 
         // 새로 추가할 로그 데이터
-        List<RequestSaveUserQuizLogDto.QuizLogData> inputQuizLog = requestDto.getQuizLogDataList();
+        List<RequestSaveUserQuizLogDto.QuizLogData> inputQuizLogs = requestDto.getQuizLogDataList();
 
-        inputQuizLog.forEach(
+        inputQuizLogs.forEach(
                 quizLogData -> {
                     UserQuizLog createdLog = UserQuizLog.createUserQuizLog(quizLogData, foundLogData);
+                    userQuizLogRepository.save(createdLog);
                     userQuizLogList.add(createdLog);
                 }
         );
-        log.info("유저 퀴즈 로그 저장 완료: {}", inputQuizLog);
+        log.info("유저 퀴즈 로그 저장 완료: {}", inputQuizLogs);
     }
 }

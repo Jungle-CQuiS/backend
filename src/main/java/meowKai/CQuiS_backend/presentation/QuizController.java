@@ -30,7 +30,7 @@ public class QuizController {
     }
 
     @Tag(name = "문제 평가하기")
-    @Operation(summary = "싱글 모드에서 문제 비추천 하기")
+    @Operation(summary = "문제 비추천 하기")
     @PostMapping("/downvote")
     public ApiResponse<Object> downvoteQuiz(@Valid @RequestBody RequestDownvoteDto requestDto) {
         try {
