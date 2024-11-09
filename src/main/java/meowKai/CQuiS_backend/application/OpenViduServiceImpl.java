@@ -64,7 +64,7 @@ public class OpenViduServiceImpl implements OpenViduService{
     }
 
     /**
-     * 세션 종료
+     * 세션 종료 - 방이 삭제될 때
      */
     @Override
     public void closeSession(String sessionId) {
@@ -77,5 +77,22 @@ public class OpenViduServiceImpl implements OpenViduService{
             log.error("세션 종료 실패", e);
             throw new RuntimeException("세션 종료 실패", e);
         }
+    }
+
+    /**
+     * 연결 종료 - 유저가 방에서 나갈 때
+     */
+    public void closeConnection(String sessionId, String userId) {
+        Session session = getSession(sessionId);
+        session.getConnections()
+                .stream()
+                .filter(conn -> conn.getServerData().equals(userId))
+                .forEach(conn -> {
+                    try {
+                        session.forceDisconnect(conn);
+                    } catch (Exception e) {
+                        log.error("연결 종료 실패: {}, {}",userId, e.getMessage());
+                    }
+                });
     }
 }
