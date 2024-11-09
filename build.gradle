@@ -71,6 +71,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'
 
+	//OAuth
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
 	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.0.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2' // Swagger
 
