@@ -39,6 +39,20 @@ jobs:
           echo "${{ secrets.APPLICATION_JWT_PROPERTIES }}" > ./src/main/resources/application-jwt.yml
           echo "${{ secrets.APPLICATION_OAUTH_PROPERTIES }}" > ./src/main/resources/application-oauth.yml
           echo "${{ secrets.APPLICATION_OPENVIDU_PROPERTIES }}" > ./src/main/resources/application-openvidu.yml
+
+          # test 환경 설정
+          mkdir -p ./src/test/resources
+          echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/test/resources/application.yml
+          echo "${{ secrets.APPLICATION_OPENVIDU_PROPERTIES }}" > ./src/test/resources/application-openvidu.yml
+          
+      - name: Debug - Test Configuration Check
+        run: |
+          echo "=== Test application.yml ==="
+          cat ./src/test/resources/application.yml || echo "File not found"
+          echo "=== Test application-openvidu.yml ==="
+          cat ./src/test/resources/application-openvidu.yml || echo "File not found"
+          echo "=== Directory structure ==="
+          ls -R ./src/test/resources/
           
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
