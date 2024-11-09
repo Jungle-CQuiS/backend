@@ -1,5 +1,6 @@
 package meowKai.CQuiS_backend.application;
 
+import io.openvidu.java.client.Session;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -11,9 +12,7 @@ import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
-import meowKai.CQuiS_backend.infrastructure.TeamRepository;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
-import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,10 +37,10 @@ public class GameRoomServiceImpl implements GameRoomService {
     private final GameRoomRepository gameRoomRepository;
     private final RoomUserRepository roomUserRepository;
     private final UserRepository userRepository;
-    private final TeamRepository teamRepository;
 
     private final GameRoomWebSocketServiceImpl gameRoomWebSocketService;
     private final QuizService quizService;
+    private final OpenViduService openViduService;
 
     private final ReentrantLock gameStartLock = new ReentrantLock(); // 게임 시작 시 팀 생성을 포함한 세팅이 한 번만 발생하도록 하기 위한 락
 
@@ -87,10 +86,14 @@ public class GameRoomServiceImpl implements GameRoomService {
     @Transactional
     public ResponseCreateMultiRoomDto createMultiRoom(RequestCreateMultiRoomDto requestDto) {
         log.info("멀티 게임 방 생성 - 멀티 게임 방 생성 요청: {}", requestDto);
+
+        Session session = openViduService.createSession();
+
         GameRoom createdRoom = GameRoom.createGameRoom(
                 requestDto.getName(),
                 requestDto.getMaxUser(),
-                requestDto.getPassword()
+                requestDto.getPassword(),
+                session.getSessionId()
         );
 
         gameRoomRepository.save(createdRoom);
@@ -326,9 +329,13 @@ public class GameRoomServiceImpl implements GameRoomService {
         if(joinUser.getRoomUser() == null) {
             throw new NoSuchElementException("입장 - 유저의 방 입장 정보가 없습니다.");
         }
+        String sessionId = joinUser.getRoomUser().getGameRoom().getSessionId();
+        String token = openViduService.createToken(sessionId, joinUser.getId().toString()); // openVide 토큰 생성
 
         ResponseJoinRoomDto responseDto = ResponseJoinRoomDto.builder()
                 .roomUserId(joinUser.getRoomUser().getId())
+                .sessionId(sessionId)
+                .token(token)
                 .build();
 
         log.info("입장 - 방 입장 결과: {}", responseDto);

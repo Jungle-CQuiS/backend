@@ -59,12 +59,15 @@ public class GameRoom extends BaseEntity {
     @Column
     private Integer quizCount;
 
+    // openVidu를 위한 방별 세션id
+    private String sessionId;
+
     /**
      * 엔티티 비즈니스 로직
      */
 
     // 방 생성
-    public static GameRoom createGameRoom(String name, Integer maxUsers, Integer password) {
+    public static GameRoom createGameRoom(String name, Integer maxUsers, Integer password, String sessionId) {
         return GameRoom.builder()
                 .name(name)
                 .currentUsers(0)
@@ -72,6 +75,7 @@ public class GameRoom extends BaseEntity {
                 .password(password)
                 .gameStatus(GameStatus.WAITING)
                 .quizCount(0)
+                .sessionId(sessionId)
                 .build();
     }
 
