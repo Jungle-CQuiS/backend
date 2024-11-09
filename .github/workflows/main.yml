@@ -39,8 +39,19 @@ jobs:
           echo "${{ secrets.APPLICATION_JWT_PROPERTIES }}" > ./src/main/resources/application-jwt.yml
           echo "${{ secrets.APPLICATION_OAUTH_PROPERTIES }}" > ./src/main/resources/application-oauth.yml
           echo "${{ secrets.APPLICATION_OPENVIDU_PROPERTIES }}" > ./src/main/resources/application-openvidu.yml
+
+      # 설정 파일 확인
+      - name: Debug - Check Configuration Files
+        run: |
+          echo "=== Directory Contents ==="
+          ls -la ./src/main/resources/
+          echo "=== application.yml content ==="
+          cat ./src/main/resources/application.yml
+          echo "=== application-openvidu.yml content ==="
+          cat ./src/main/resources/application-openvidu.yml
+          
       - name: 테스트 및 빌드하기
-        run: ./gradlew clean build
+        run: ./gradlew clean build --stacktrace --info
 
       - name: 빌드된 파일 이름 변경하기
         run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
