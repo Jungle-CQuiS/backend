@@ -69,8 +69,10 @@ public class OpenViduServiceImpl implements OpenViduService{
     @Override
     public void closeSession(String sessionId) {
         try {
-            Session session = getSession(sessionId);
-            session.close();
+            Session session = openVidu.getActiveSession(sessionId);
+            if(session != null) {
+                session.close();
+            }
         }  catch (OpenViduJavaClientException | OpenViduHttpException e) {
             log.error("세션 종료 실패", e);
             throw new RuntimeException("세션 종료 실패", e);
