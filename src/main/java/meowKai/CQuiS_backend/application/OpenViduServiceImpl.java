@@ -1,31 +1,23 @@
 package meowKai.CQuiS_backend.application;
 
 import io.openvidu.java.client.*;
-import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class OpenViduServiceImpl implements OpenViduService{
 
-    private OpenVidu openVidu;
-
-    @Value("${openvidu.url}")
-    private String OPENVIDU_URL;
-
-    @Value("${openvidu.secret}")
-    private String OPENVIDU_SECRET;
-
-    @PostConstruct
-    public void init() {
-        this.openVidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET);
-    }
+    private final OpenVidu openVidu;
 
     /**
      * 세션 생성
      */
+    @Override
     public Session createSession() {
         try {
             SessionProperties properties = new SessionProperties.Builder().build();
@@ -39,6 +31,7 @@ public class OpenViduServiceImpl implements OpenViduService{
     /**
      * 특정 방의 세션 가져오기
      */
+    @Override
     public Session getSession(String sessionId) {
         Session session = openVidu.getActiveSession(sessionId);
         if (session == null) {
@@ -51,6 +44,7 @@ public class OpenViduServiceImpl implements OpenViduService{
     /**
      * 토큰 생성 & 연결
      */
+    @Override
     public String createToken(String sessionId, String userId) {
         try {
             Session session = getSession(sessionId);
@@ -72,6 +66,7 @@ public class OpenViduServiceImpl implements OpenViduService{
     /**
      * 세션 종료
      */
+    @Override
     public void closeSession(String sessionId) {
         try {
             Session session = getSession(sessionId);
