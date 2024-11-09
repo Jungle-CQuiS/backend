@@ -40,19 +40,29 @@ jobs:
           echo "${{ secrets.APPLICATION_OAUTH_PROPERTIES }}" > ./src/main/resources/application-oauth.yml
           echo "${{ secrets.APPLICATION_OPENVIDU_PROPERTIES }}" > ./src/main/resources/application-openvidu.yml
 
-          # test 환경 설정
           mkdir -p ./src/test/resources
-          echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/test/resources/application.yml
-          echo "${{ secrets.APPLICATION_OPENVIDU_PROPERTIES }}" > ./src/test/resources/application-openvidu.yml
-          
-      - name: Debug - Test Configuration Check
+          cp ./src/main/resources/application.yml ./src/test/resources/
+          cp ./src/main/resources/application-openvidu.yml ./src/test/resources/
+
+      - name: YAML 구조 검증
         run: |
-          echo "=== Test application.yml ==="
-          cat ./src/test/resources/application.yml || echo "File not found"
-          echo "=== Test application-openvidu.yml ==="
-          cat ./src/test/resources/application-openvidu.yml || echo "File not found"
-          echo "=== Directory structure ==="
-          ls -R ./src/test/resources/
+          echo "=== YAML Structure Check ==="
+          python3 <<EOF
+          import yaml
+          try:
+              with open('./src/test/resources/application-openvidu.yml', 'r') as f:
+                  data = yaml.safe_load(f)
+                  print("Loaded YAML structure:")
+                  print(f"Top level keys: {list(data.keys() if data else [])}")
+                  if data and 'openvidu' in data:
+                      print("openvidu section exists")
+                      openvidu_data = data['openvidu']
+                      print(f"openvidu keys: {list(openvidu_data.keys() if openvidu_data else [])}")
+                  else:
+                      print("No openvidu section found!")
+          except Exception as e:
+              print(f"Error parsing YAML: {str(e)}")
+          EOF
           
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
