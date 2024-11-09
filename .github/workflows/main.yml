@@ -43,24 +43,21 @@ jobs:
           cp ./src/main/resources/application.yml ./src/test/resources/
           cp ./src/main/resources/application-openvidu.yml ./src/test/resources/
 
-      - name: YAML 구조 검증
+      - name: Check application.yml content
         run: |
-          echo "=== YAML Structure Check ==="
+          echo "=== application.yml profiles check ==="
           python3 <<EOF
           import yaml
           try:
-              with open('./src/test/resources/application-openvidu.yml', 'r') as f:
+              with open('./src/test/resources/application.yml', 'r') as f:
                   data = yaml.safe_load(f)
-                  print("Loaded YAML structure:")
-                  print(f"Top level keys: {list(data.keys() if data else [])}")
-                  if data and 'openvidu' in data:
-                      print("openvidu section exists")
-                      openvidu_data = data['openvidu']
-                      print(f"openvidu keys: {list(openvidu_data.keys() if openvidu_data else [])}")
+                  if 'spring' in data and 'profiles' in data['spring']:
+                      print("Spring profiles configuration found:")
+                      print(data['spring']['profiles'])
                   else:
-                      print("No openvidu section found!")
+                      print("No spring profiles configuration found")
           except Exception as e:
-              print(f"Error parsing YAML: {str(e)}")
+              print(f"Error: {str(e)}")
           EOF
           
       - name: 테스트 및 빌드하기
