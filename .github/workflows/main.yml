@@ -39,26 +39,6 @@ jobs:
           echo "${{ secrets.APPLICATION_JWT_PROPERTIES }}" > ./src/main/resources/application-jwt.yml
           echo "${{ secrets.APPLICATION_OAUTH_PROPERTIES }}" > ./src/main/resources/application-oauth.yml
           echo "${{ secrets.APPLICATION_OPENVIDU_PROPERTIES }}" > ./src/main/resources/application-openvidu.yml
-          mkdir -p ./src/test/resources
-          cp ./src/main/resources/application.yml ./src/test/resources/
-          cp ./src/main/resources/application-openvidu.yml ./src/test/resources/
-
-      - name: Check application.yml content
-        run: |
-          echo "=== application.yml profiles check ==="
-          python3 <<EOF
-          import yaml
-          try:
-              with open('./src/test/resources/application.yml', 'r') as f:
-                  data = yaml.safe_load(f)
-                  if 'spring' in data and 'profiles' in data['spring']:
-                      print("Spring profiles configuration found:")
-                      print(data['spring']['profiles'])
-                  else:
-                      print("No spring profiles configuration found")
-          except Exception as e:
-              print(f"Error: {str(e)}")
-          EOF
           
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
