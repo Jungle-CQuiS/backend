@@ -13,10 +13,10 @@ public class OpenViduServiceImpl implements OpenViduService{
     private OpenVidu openVidu;
 
     @Value("${openvidu.url}")
-    private String OPENVIDU_URL = "";
+    private String OPENVIDU_URL;
 
     @Value("${openvidu.secret}")
-    private String OPENVIDU_SECRET = "";
+    private String OPENVIDU_SECRET;
 
     @PostConstruct
     public void init() {
