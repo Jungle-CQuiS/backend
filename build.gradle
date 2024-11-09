@@ -44,7 +44,6 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	testImplementation 'io.projectreactor:reactor-test'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -85,6 +84,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation 'org.webjars:stomp-websocket:2.3.4'
 	implementation 'org.webjars:sockjs-client:1.5.1'
+
+	// openVidu
+	implementation group: 'io.openvidu', name: 'openvidu-java-client', version: '2.26.0'
 }
 
 dependencyManagement {
