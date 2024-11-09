@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -48,7 +49,7 @@ public class ProdSecurityConfig {
                 // CORS 설정
                 .cors(cors -> cors.configurationSource(prodCorsConfig.corsConfigurationSource()))
                 // JWT 사용하기 때문에 세션 상태 STATELESS로 설정
-                .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // TODO: https 프로토콜 요청만 허용하도록 나중에 바꿔야함.
                 // https 프로토콜 요청만 허용
 //                .requiresChannel(rcc -> rcc.anyRequest().requiresSecure())
@@ -57,8 +58,8 @@ public class ProdSecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // 로그 아웃 시 세션 무효화 및 로그인 페이지로 이동
-                .logout(logout -> logout.invalidateHttpSession(true)
-                )
+                .logout(logout -> logout.invalidateHttpSession(true))
+                .oauth2Login(Customizer.withDefaults())
                 // 인증 없이 접근 가능한 요청
                 // TODO: 개발 끝나면 swagger-ui 지우기
                 .authorizeHttpRequests(requests -> requests.requestMatchers(
