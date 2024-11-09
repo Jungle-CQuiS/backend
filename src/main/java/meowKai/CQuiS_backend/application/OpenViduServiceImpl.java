@@ -56,7 +56,9 @@ public class OpenViduServiceImpl implements OpenViduService{
                     .build();
 
             Connection connection = session.createConnection(properties);
-            return connection.getToken();
+            String fullToken = connection.getToken();
+
+            return fullToken.substring(fullToken.indexOf("token=") + 6);
         }  catch (OpenViduJavaClientException | OpenViduHttpException e) {
             log.error("연결 실패", e);
             throw new RuntimeException("연결 실패", e);
