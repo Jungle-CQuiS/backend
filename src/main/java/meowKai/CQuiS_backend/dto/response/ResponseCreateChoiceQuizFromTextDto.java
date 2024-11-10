@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 public class ResponseCreateChoiceQuizFromTextDto {
-    private List<String> categoryType;
+    private String categoryType;
     private String quizName;
     private String choice1;
     private String choice2;

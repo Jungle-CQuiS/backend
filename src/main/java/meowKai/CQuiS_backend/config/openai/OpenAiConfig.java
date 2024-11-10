@@ -20,10 +20,7 @@ public class OpenAiConfig {
                         "items": {
                             "type": "object",
                             "properties": {
-                                "categoryType": {
-                                    "type": "array",
-                                    "items": { "type": "string" }
-                                },
+                                "categoryType": { "type": "string" },
                                 "quizName": { "type": "string" },
                                 "koreanAnswer": { "type": "string" },
                                 "englishAnswer": { "type": "string" }
@@ -47,10 +44,7 @@ public class OpenAiConfig {
                         "items": {
                             "type": "object",
                             "properties": {
-                                "categoryType": {
-                                    "type": "array",
-                                    "items": { "type": "string" }
-                                },
+                                "categoryType": { "type": "string" },
                                 "quizName": { "type": "string" },
                                 "choice1": { "type": "string" },
                                 "choice2": { "type": "string" },
