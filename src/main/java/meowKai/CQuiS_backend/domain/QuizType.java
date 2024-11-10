@@ -7,8 +7,7 @@ import lombok.Getter;
 @Getter
 public enum QuizType {
     SHORT("주관식"),
-    CHOICE("객관식"),
-    MIX("혼합");
+    CHOICE("객관식");
 
     @JsonValue
     private final String koreanFieldName;

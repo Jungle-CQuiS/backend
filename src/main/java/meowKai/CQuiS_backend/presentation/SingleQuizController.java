@@ -94,7 +94,7 @@ public class SingleQuizController {
     @PostMapping("/my-quiz/mix")
     public ApiResponse<Object> getMyMixQuizzes(@Valid @RequestBody RequestGetMyQuizzesDto requestDto) {
         try {
-            ResponseGetMyQuizzesDto responseDto = quizService.getMyQuizzes(requestDto, QuizType.MIX);
+            ResponseGetMyQuizzesDto responseDto = quizService.getMyQuizzes(requestDto, null);
             return ApiResponse.ofSuccess(responseDto);
         } catch (Exception e) {
             return ApiResponse.ofFail(e.getMessage());

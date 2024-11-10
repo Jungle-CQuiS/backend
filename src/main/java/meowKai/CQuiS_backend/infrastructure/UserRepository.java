@@ -23,6 +23,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "LEFT JOIN FETCH q.category c " +
             "WHERE u.uuid = :uuid " +
             "AND c.id IN :categoryIds " +
-            "AND (q.type = :quizeType OR :quizType = 'MIX')")
+            "AND (q.type = :quizType OR :quizType IS NULL)")
     Optional<User> findByUuidWithCreatedQuizzes(UUID uuid, List<Long> categoryIds, QuizType quizType);
 }
