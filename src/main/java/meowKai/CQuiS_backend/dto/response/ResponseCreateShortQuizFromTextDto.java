@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @ToString
 public class ResponseCreateShortQuizFromTextDto {
-    private List<String> categoryType;
+    private String categoryType;
     private String quizName;
     private String koreanAnswer;
     private String englishAnswer;
