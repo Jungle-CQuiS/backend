@@ -20,7 +20,7 @@ public class OpenAiConfig {
                         "items": {
                             "type": "object",
                             "properties": {
-                                "type": { "type": "string" },
+                                "categoryType": { "type": "string" },
                                 "quizName": { "type": "string" },
                                 "koreanAnswer": { "type": "string" },
                                 "englishAnswer": { "type": "string" }
