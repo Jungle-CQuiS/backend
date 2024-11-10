@@ -37,7 +37,7 @@ jobs:
           echo "${{ secrets.APPLICATION_LOCAL_PROPERTIES }}" > ./src/main/resources/application-local.yml
           echo "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > ./src/main/resources/application-prod.yml
           echo "${{ secrets.APPLICATION_JWT_PROPERTIES }}" > ./src/main/resources/application-jwt.yml
-          echo "${{ secrets.APPLICATION_OAUTH_PROPERTIES }}" > ./src/main/resources/application-oauth.yml
+#          echo "${{ secrets.APPLICATION_OAUTH_PROPERTIES }}" > ./src/main/resources/application-oauth.yml
           echo "${{ secrets.APPLICATION_OPENVIDU_PROPERTIES }}" > ./src/main/resources/application-openvidu.yml
 
       - name: 테스트 및 빌드하기
