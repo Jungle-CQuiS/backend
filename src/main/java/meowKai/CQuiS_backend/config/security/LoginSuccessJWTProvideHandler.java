@@ -34,7 +34,11 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
 
         jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken, uuid, username);
         userRepository.findByEmail(email).ifPresent(
-                user -> jwtService.updateRefreshToken(email, refreshToken)
+                user -> {
+                    jwtService.updateRefreshToken(email, refreshToken);
+                    user.updateLastAccessed();
+                }
+
         );
 
         log.info("로그인에 성공했습니다. email: {}", email);
