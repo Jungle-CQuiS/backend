@@ -24,27 +24,36 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
 
-        // Security Scheme 설정
-        String jwtSchemeName = "JWT Authentication";
+        String jwtAccessTokenSchemeName = "JWT AccessToken Authentication";
+        // API 요청 헤더에 AccessToken 인증정보 포함
+        SecurityRequirement accessTokenRequirement = new SecurityRequirement()
+                .addList(jwtAccessTokenSchemeName);
+        // AccessToken Security Scheme 설정
+        SecurityScheme accessTokenScheme = new SecurityScheme()
+                .name(jwtAccessTokenSchemeName)
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("Bearer")
+                .bearerFormat("JWT");
 
-        // API 요청 헤더에 인증정보 포함
-        SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList(jwtSchemeName);
+        String jwtRefreshTokenSchemeName = "JWT RefreshToken Authentication";
+        SecurityRequirement refreshTokenRequirement = new SecurityRequirement()
+                .addList(jwtRefreshTokenSchemeName);
+        SecurityScheme refreshTokenScheme = new SecurityScheme()
+                .name(jwtRefreshTokenSchemeName)
+                .type(SecurityScheme.Type.HTTP)
+                .scheme("Bearer")
+                .bearerFormat("JWT");
 
         // Security Scheme 등록
         Components authComponents = new Components()
-                .addSecuritySchemes(jwtSchemeName, new SecurityScheme()
-                        .name(jwtSchemeName)
-                        .type(SecurityScheme.Type.HTTP)
-                        .scheme("Bearer")
-                        .bearerFormat("JWT")
-                );
+                .addSecuritySchemes(jwtAccessTokenSchemeName, accessTokenScheme)
+                .addSecuritySchemes(jwtRefreshTokenSchemeName, refreshTokenScheme);
 
         return new OpenAPI()
-                .components(new Components())
-                .info(apiInfo())
-                .addSecurityItem(securityRequirement)
                 .components(authComponents)
+                .info(apiInfo())
+                .addSecurityItem(accessTokenRequirement)
+                .addSecurityItem(refreshTokenRequirement)
                 .paths(loginPaths());
     }
 
@@ -92,4 +101,10 @@ public class SwaggerConfig {
 
         return paths;
     }
+//    .addSecuritySchemes(jwtRefreshTokenSchemeName, new SecurityScheme()
+//                        .name(jwtRefreshTokenSchemeName)
+//                        .type(SecurityScheme.Type.HTTP)
+//                        .scheme("Bearer")
+//                        .bearerFormat("JWT")
+//                )
 }

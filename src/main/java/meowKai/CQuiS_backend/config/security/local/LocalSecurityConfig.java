@@ -40,7 +40,7 @@ public class LocalSecurityConfig {
                 // CORS 설정
                 .cors(cors -> cors.configurationSource(localCorsConfig.corsConfigurationSource()))
                 // JWT 사용하기 때문에 세션 상태 STATELESS로 설정
-//                .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // csrf 비활성화
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

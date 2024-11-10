@@ -42,6 +42,8 @@ public class LoginSuccessJWTProvideHandler extends SimpleUrlAuthenticationSucces
         );
 
         log.info("로그인에 성공했습니다. email: {}", email);
+        log.info("AccessToken을 발급합니다. AccessToken: {}", accessToken);
+        log.info("RefreshToken을 발급합니다. RefreshToken: {}", refreshToken);
     }
 
     // Authentication 객체에서 email 추출

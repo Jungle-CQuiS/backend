@@ -29,7 +29,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     /**
      * 1. 리프레시 토큰이 있는 경우, 리프레시 토큰이 유효하면 액세스 토큰 재발급 후 필터를 거치지 않음
-     * 2. 리프레시 토큰이 없는 경우, 유저정보 저장 후에 필터를 계속 진행함
+     * 2. 리프레시 토큰이 없고 AccessToken만 있는 경우, 유저정보 저장 후에 필터를 계속 진행함
      */
     @Override
     protected void doFilterInternal(
@@ -67,16 +67,19 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
 
     private void checkAccessTokenAndAuthentication(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain
-    ) throws ServletException, IOException{
+    ) throws ServletException, IOException {
+        /**
+         * 추출한 액세스 토큰 유효성 검증
+         * 액세스 토큰이 유효한 경우
+         * 액세스 토큰에서 이메일 추출
+         * 추출한 이메일로 유저 정보 조회
+         * 유저 정보로 인증 정보 저장
+         */
         jwtService.extractAccessToken(request) // 액세스 토큰 추출
-                .filter(jwtService::isTokenValid) // 추출한 액세스 토큰 유효성 검증
-                .ifPresent( // 액세스 토큰이 유효한 경우
-                        accessToken -> jwtService.extractEmail(accessToken).ifPresent( // 액세스 토큰에서 이메일 추출
-                                email -> userRepository.findByEmail(email).ifPresent( // 추출한 이메일로 유저 정보 조회
-                                        user -> saveAuthentication(user) // 유저 정보로 인증 정보 저장
-                                )
-                        )
-                );
+                .filter(jwtService::isTokenValid)
+                .flatMap(jwtService::extractEmail)
+                .flatMap(userRepository::findByEmail)
+                .ifPresent(this::saveAuthentication);
 
         filterChain.doFilter(request, response);
     }
