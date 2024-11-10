@@ -272,7 +272,6 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         roomUserRepository.delete(foundRoomUser);
 
         if(shouldDeleteRoom) {
-            openViduService.closeSession(foundRoom.getSessionId());
             gameRoomRepository.delete(foundRoom);
             log.info("ws - 퇴장 - 방 삭제: {}", foundRoom.getId());
         } else {
