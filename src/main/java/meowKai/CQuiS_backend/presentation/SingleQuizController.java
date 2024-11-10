@@ -5,10 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import meowKai.CQuiS_backend.application.QuizService;
-import meowKai.CQuiS_backend.dto.request.RequestGetChoiceAnswerQuizzesDto;
-import meowKai.CQuiS_backend.dto.request.RequestGetMixAnswerQuizzesDto;
-import meowKai.CQuiS_backend.dto.request.RequestGetShortAnswerQuizzesDto;
-import meowKai.CQuiS_backend.dto.request.RequestSaveSingleGameStatisticsDto;
+import meowKai.CQuiS_backend.domain.QuizType;
+import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.global.base.ApiResponse;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +61,42 @@ public class SingleQuizController {
             return ApiResponse.ofSuccess(responseDto);
         }
         catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "싱글모드 퀴즈")
+    @Operation(summary = "카테고리 설정에 따라 내가 만든 문제 중 주관식 문제 요청하기")
+    @PostMapping("/my-quiz/short")
+    public ApiResponse<Object> getMyShortQuizzes(@Valid @RequestBody RequestGetMyQuizzesDto requestDto) {
+        try {
+            ResponseGetMyQuizzesDto responseDto = quizService.getMyQuizzes(requestDto, QuizType.SHORT);
+            return ApiResponse.ofSuccess(responseDto);
+        } catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "싱글모드 퀴즈")
+    @Operation(summary = "카테고리 설정에 따라 내가 만든 문제 중 객관식 문제 요청하기")
+    @PostMapping("/my-quiz/choice")
+    public ApiResponse<Object> getMyChoiceQuizzes(@Valid @RequestBody RequestGetMyQuizzesDto requestDto) {
+        try {
+            ResponseGetMyQuizzesDto responseDto = quizService.getMyQuizzes(requestDto, QuizType.CHOICE);
+            return ApiResponse.ofSuccess(responseDto);
+        } catch (Exception e) {
+            return ApiResponse.ofFail(e.getMessage());
+        }
+    }
+
+    @Tag(name = "싱글모드 퀴즈")
+    @Operation(summary = "카테고리 설정에 따라 내가 만든 문제 모두 요청하기")
+    @PostMapping("/my-quiz/mix")
+    public ApiResponse<Object> getMyMixQuizzes(@Valid @RequestBody RequestGetMyQuizzesDto requestDto) {
+        try {
+            ResponseGetMyQuizzesDto responseDto = quizService.getMyQuizzes(requestDto, QuizType.MIX);
+            return ApiResponse.ofSuccess(responseDto);
+        } catch (Exception e) {
             return ApiResponse.ofFail(e.getMessage());
         }
     }

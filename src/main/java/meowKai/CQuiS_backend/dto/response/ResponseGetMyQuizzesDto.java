@@ -9,7 +9,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ResponseGetMixAnswerQuizzesDto {
-
+public class ResponseGetMyQuizzesDto {
     private List<Object> quizList;
 }

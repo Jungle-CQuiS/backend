@@ -448,4 +448,27 @@ public class QuizServiceImpl implements QuizService {
         quizUserVotedownRepository.save(quizUserVotedown);
         log.info("문제 비추천하기 완료");
     }
+
+    @Override
+    public ResponseGetMyQuizzesDto getMyQuizzes(RequestGetMyQuizzesDto requestDto, QuizType quizType) {
+        log.info("내가 만든 문제 반환 요청 : {}", requestDto);
+
+        User foundUser = userRepository.findByUuidWithCreatedQuizzes(
+                requestDto.getUuid(),
+                requestDto.getCategoryIds(),
+                quizType)
+                .orElseThrow(() -> new NoSuchElementException("내가 만든 문제 반환 요청 - 존재하지 않는 유저입니다."));
+
+        ResponseGetMyQuizzesDto responseDto = ResponseGetMyQuizzesDto.builder()
+                .quizList(new ArrayList<>())
+                .build();
+
+        foundUser.getCreatedQuizzes().forEach(quiz -> responseDto.getQuizList().add(
+                quiz.getType() == QuizType.CHOICE
+                        ? GetRandomChoiceQuizDto.createDto(quiz.getChoiceAnsQuiz())
+                        : GetRandomShortQuizDto.createDto(quiz.getShortAnsQuiz())));
+
+        log.info("내가 만든 문제 반환 결과 : {}", responseDto);
+        return responseDto;
+    }
 }
