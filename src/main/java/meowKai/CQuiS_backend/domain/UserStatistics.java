@@ -61,7 +61,8 @@ public class UserStatistics extends BaseEntity {
 
     // 유저의 정답률 업데이트
     public void updateCorrectRate() {
-        this.correctRate = String.format("%.2f", (double)((this.solvedCount - this.wrongCount) / this.solvedCount * 100)).concat("%");
+        double rate = ((double)(this.solvedCount - this.wrongCount) / this.solvedCount) * 100;
+        this.correctRate = String.format("%.2f", rate).concat("%");
     }
 
     // 유저가 틀린 문제 수를 업데이트
