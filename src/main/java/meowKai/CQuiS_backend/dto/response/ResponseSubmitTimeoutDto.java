@@ -1,7 +1,7 @@
 package meowKai.CQuiS_backend.dto.response;
 
 import lombok.*;
-import meowKai.CQuiS_backend.dto.UserAnswer;
+import meowKai.CQuiS_backend.domain.QuizType;
 
 import java.util.List;
 
@@ -10,7 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ResponseSubmitTimeoutDto {
+public class ResponseSubmitTimeoutDto<T> {
 
-    private List<UserAnswer> answerList;
+    private QuizType quizType;
+    private List<T> answerList;
 }

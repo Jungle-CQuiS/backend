@@ -19,6 +19,6 @@ public interface GameRoomService {
     ResponseGiveHonorDto giveHonor(RequestGiveHonorDto requestGiveHonorDto); // 특정 유저에게 명예 주기
     ResponseGameStartDto gameStart(RequestGameStartDto requestGameStartDto); // 게임 시작 선공팀 설정
     ResponseGetUserInfoDto getUserInfo(Long roomUserId); // 게임 시작 직전 유저의 정보 조회
-    ResponseSubmitTimeoutDto submitTimeout(Long roomId); // 답안 제출 제한 시간 종료 알림을 받으면 제출된 답안을 모아 리스트 형식으로 반환
+    ResponseSubmitTimeoutDto<?> submitTimeout(Long roomId); // 답안 제출 제한 시간 종료 알림을 받으면 제출된 답안을 모아 리스트 형식으로 반환
     ResponseSearchMultiRoomByRoomNameDto searchMultiRoomByRoomName(String roomName, int start, int limit); // 방 이름으로 방 검색
 }

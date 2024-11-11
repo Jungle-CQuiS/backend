@@ -8,11 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.domain.*;
 import meowKai.CQuiS_backend.dto.MultiRoomDto;
 import meowKai.CQuiS_backend.dto.MultiRoomUserDto;
+import meowKai.CQuiS_backend.dto.UserAnswer;
+import meowKai.CQuiS_backend.dto.UserChoiceAnswerCollection;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
+import meowKai.CQuiS_backend.infrastructure.QuizRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
 import meowKai.CQuiS_backend.infrastructure.UserRepository;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +41,7 @@ public class GameRoomServiceImpl implements GameRoomService {
     private final GameRoomRepository gameRoomRepository;
     private final RoomUserRepository roomUserRepository;
     private final UserRepository userRepository;
+    private final QuizRepository quizRepository;
 
     private final GameRoomWebSocketServiceImpl gameRoomWebSocketService;
     private final QuizService quizService;
@@ -474,17 +479,68 @@ public class GameRoomServiceImpl implements GameRoomService {
 
     // 답안 제출 제한 시간 종료 알림을 받으면 제출된 답안을 모아 리스트 형식으로 반환
     @Override
-    public ResponseSubmitTimeoutDto submitTimeout(Long roomId) {
+    public ResponseSubmitTimeoutDto<?> submitTimeout(Long roomId) {
         log.info("답안 제출 제한 시간 종료 - roomId: {}", roomId);
 
         GameRoom foundRoom = gameRoomRepository.findById(roomId).orElseThrow(
                 () -> new NoSuchElementException("답안 제출 제한 시간 종료 - 존재하지 않는 방입니다."));
 
-        ResponseSubmitTimeoutDto responseDto = ResponseSubmitTimeoutDto.builder()
-                .answerList(gameRoomWebSocketService.getRoomAnswers(foundRoom.getId()))
+        Quiz foundQuiz = quizRepository.findById(foundRoom.getCurrentQuizId()).orElseThrow(
+                () -> new NoSuchElementException("답안 제출 제한 시간 종료 - 존재하지 않는 퀴즈입니다."));
+
+        List<UserAnswer> userAnswers = gameRoomWebSocketService.getRoomAnswers(foundRoom.getId());
+
+        if(foundQuiz.getType().equals(QuizType.SHORT)) {
+            return createShortAnswerResponse(userAnswers); // 주관식 퀴즈라면 답과 이유를 모아 반환
+        } else {
+            return createChoiceAnswerResponse(userAnswers); // 객관식이라면 답안 번호에 따라 모아서 반환
+
+        }
+    }
+
+    private static ResponseSubmitTimeoutDto<UserAnswer> createShortAnswerResponse(List<UserAnswer> userAnswers) {
+        ResponseSubmitTimeoutDto<UserAnswer> responseDto = ResponseSubmitTimeoutDto.<UserAnswer>builder()
+                .answerList(userAnswers)
+                .build();
+        log.info("제출된 답안 리스트(주관식): {}", responseDto);
+        return responseDto;
+    }
+
+    private static ResponseSubmitTimeoutDto<UserChoiceAnswerCollection> createChoiceAnswerResponse(List<UserAnswer> userAnswers) {
+        // 제출된 번호들로 구성된 리스트 생성
+        List<Integer> distinctChoices = userAnswers.stream()
+                .map(answer -> Integer.parseInt(answer.getAnswer()))
+                .distinct()
+                .sorted()
+                .toList();
+
+        // distinctChoices에 따른 answerList 생성
+        List<UserChoiceAnswerCollection> answerList = distinctChoices.stream()
+                .map(choice -> UserChoiceAnswerCollection.builder()
+                        .choice(choice)
+                        .reasonList(new ArrayList<>())
+                        .indexList(new ArrayList<>()).build())
+                .toList();
+
+        // answerList에 이유와 인덱스 삽입
+        for (int i = 0; i < userAnswers.size(); i++) {
+            UserAnswer answer = userAnswers.get(i);
+            int choice = Integer.parseInt(answer.getAnswer());
+
+            UserChoiceAnswerCollection collection = answerList.stream()
+                    .filter(col -> col.getChoice() == choice)
+                    .findFirst()
+                    .get();
+
+            collection.getReasonList().add(answer.getReason());
+            collection.getIndexList().add(i);
+        }
+
+        ResponseSubmitTimeoutDto<UserChoiceAnswerCollection> responseDto = ResponseSubmitTimeoutDto.<UserChoiceAnswerCollection>builder()
+                .answerList(answerList)
                 .build();
 
-        log.info("제출된 답안 리스트: {}", responseDto);
+        log.info("제출된 답안 리스트(객관식): {}", responseDto);
         return responseDto;
     }
 
