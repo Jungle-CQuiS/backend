@@ -10,5 +10,6 @@ import lombok.*;
 public class RequestSubmitPersonalDto {
     private Long roomUserId;
     private String answer;
+    private String reason;
     private Long roomId;
 }

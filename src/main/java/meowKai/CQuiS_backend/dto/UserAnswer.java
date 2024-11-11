@@ -11,4 +11,5 @@ public class UserAnswer {
 
     private Long roomUserId;
     private String answer;
+    private String reason;
 }
