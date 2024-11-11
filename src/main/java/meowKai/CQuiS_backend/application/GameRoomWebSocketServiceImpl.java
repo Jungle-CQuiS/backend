@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.domain.*;
 import meowKai.CQuiS_backend.dto.MultiRoomUserDto;
+import meowKai.CQuiS_backend.dto.SelectAnswerResult;
 import meowKai.CQuiS_backend.dto.SelectQuizResult;
 import meowKai.CQuiS_backend.dto.UserAnswer;
 import meowKai.CQuiS_backend.dto.request.*;
@@ -360,29 +361,26 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         return responseDto;
     }
 
-    // 수비 팀 리더가 선택을 바꿀 때마다 수비 팀 전원에게 전달
+    // 공격 팀 리더가 선택을 바꿀 때마다 공격 팀 전원에게 전달
     @Override
     public SelectQuizResult<ResponseSelectOptionDto> selectOption(RequestSelectQuizDto requestDto) {
-        log.info("ws - 수비 팀 리더 선택 변경 요청: {}", requestDto);
+        log.info("ws - 공격 팀 리더 선택 변경 요청: {}", requestDto);
 
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
-                () -> new NoSuchElementException("ws - 수비 팀 리더 선택 변경 - 존재하지 않는 방입니다."));
+                () -> new NoSuchElementException("ws - 공격 팀 리더 선택 변경 - 존재하지 않는 방입니다."));
 
-        // 수비팀 찾기 -> GameRoom 클래스의 메소드로 빼야할까?
-        RoomUserTeam defenseTeamColor = (foundRoom.getTeams().get(0).getTeamStatus() == TeamStatus.DEFENSE
-                ? foundRoom.getTeams().get(0) : foundRoom.getTeams().get(1))
-                .getTeamColor();
+        RoomUserTeam defenseTeamColor = foundRoom.getDefenseTeam().getTeamColor(); // 수비팀 찾기
 
         ResponseSelectOptionDto responseDto = ResponseSelectOptionDto.builder()
                 .responseStatus(requestDto.getResponseStatus())
                 .number(requestDto.getNumber())
                 .build();
 
-        log.info("ws - 수비 팀 리더 선택 변경 결과: {}", responseDto);
-        return new SelectQuizResult<ResponseSelectOptionDto>(responseDto, defenseTeamColor);
+        log.info("ws - 공격 팀 리더 선택 변경 결과: {}", responseDto);
+        return new SelectQuizResult<>(responseDto, defenseTeamColor);
     }
 
-    // 수비 팀 리더가 선택한 퀴즈를 수비 팀 전원에게 전달
+    // 공격 팀 리더가 선택한 퀴즈를 수비 팀 전원에게 전달
     @Override
     @Transactional
     public SelectQuizResult<ResponseSelectQuizDto> selectQuiz(RequestSelectQuizDto requestDto) {
@@ -391,10 +389,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
                 () -> new NoSuchElementException("ws - 퀴즈 선택 & 전달 - 존재하지 않는 방입니다."));
 
-        // 수비팀 찾기 -> GameRoom 클래스의 메소드로 빼야할까?
-        RoomUserTeam defenseTeamColor = (foundRoom.getTeams().get(0).getTeamStatus() == TeamStatus.DEFENSE
-                ? foundRoom.getTeams().get(0) : foundRoom.getTeams().get(1))
-                .getTeamColor();
+        RoomUserTeam defenseTeamColor = foundRoom.getDefenseTeam().getTeamColor(); // 수비팀 찾기
 
         foundRoom.saveCurrentQuizId(requestDto.getNumber()); // gameRoom에 currentQuizId 저장
         gameRoomRepository.save(foundRoom);
@@ -425,7 +420,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         log.info("ws - 퀴즈 선택 & 전달 결과: {}", responseDto);
 
-        return new SelectQuizResult<ResponseSelectQuizDto>(responseDto, defenseTeamColor);
+        return new SelectQuizResult<>(responseDto, defenseTeamColor);
     }
 
     // 수비 팀 팀원들이 제출한 답안을 roomId를 key로 저장
@@ -447,6 +442,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         }
     }
 
+
     // 수비팀 전체가 답안을 제출하면 알림을 보냄
     private void submitAll(Long roomId) {
 
@@ -464,10 +460,27 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         }
     }
 
-    // // 수비 팀 리더가 최종 답안을 제출, 채점 및 다음 문제를 위한 세팅, hp 변경 알림, 게임 종료 알림 수행
+    // 수비 팀 리더가 답안 선택을 바꿀 때 마다 알림을 전달
+    @Override
+    public SelectAnswerResult<ResponseSelectAnswerDto> selectAnswer(RequestSelectAnswerDto requestDto) {
+        log.info("ws - 수비 팀 리더 답안 선택 변경 요청: {}", requestDto);
+
+        GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
+                () -> new NoSuchElementException("ws - 수비 팀 리더 답안 선택 변경 - 존재하지 않는 방입니다."));
+
+        ResponseSelectAnswerDto responseDto = ResponseSelectAnswerDto.builder()
+                .responseStatus(requestDto.getResponseStatus())
+                .number(requestDto.getNumber())
+                .build();
+
+        log.info("ws - 수비 팀 리더 답안 선택 변경 결과: {}", responseDto);
+        return new SelectAnswerResult<>(responseDto);
+    }
+
+    // 수비 팀 리더가 최종 답안을 제출, 채점 및 다음 문제를 위한 세팅, hp 변경 알림, 게임 종료 알림 수행
     @Override
     @Transactional
-    public ResponseSubmitTeamDto submitTeam(RequestSubmitTeamDto requestDto) {
+    public SelectAnswerResult<ResponseSubmitTeamDto> submitTeam(RequestSelectAnswerDto requestDto) {
         log.info("ws - 최종 답안 제출 요청: {}", requestDto);
 
         // 최종 답안과 현재 퀴즈를 가져옴
@@ -508,7 +521,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         // 다음 문제를 위한 세팅 -> 진행된 문제 + 1, 공격 수비 변경
         foundRoom.addQuizCount();
         foundRoom.changeTeamStatus();
-        return responseDto;
+        return new SelectAnswerResult<>(responseDto);
     }
 
     // (SUB)게임 종료 조건을 체크

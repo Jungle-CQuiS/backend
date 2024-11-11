@@ -2,15 +2,13 @@ package meowKai.CQuiS_backend.presentation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import meowKai.CQuiS_backend.application.GameRoomService;
 import meowKai.CQuiS_backend.application.GameRoomWebSocketService;
 import meowKai.CQuiS_backend.domain.ResponseStatus;
+import meowKai.CQuiS_backend.dto.SelectAnswerResult;
 import meowKai.CQuiS_backend.dto.SelectQuizResult;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -105,7 +103,7 @@ public class MultiQuizWebSocketController {
         );
     }
 
-    // (PUB)수비팀 리더 문제 선택 - (SUB)수비팀 팀원 문제 전달
+    // (PUB)공격팀 리더 문제 선택(중간/최종) - (SUB)공격팀 팀원에게 변경 알림 or 수비팀 팀원 문제 전달
     @MessageMapping("/game/quiz-select")
     public void selectQuiz(RequestSelectQuizDto requestDto) {
 
@@ -126,21 +124,19 @@ public class MultiQuizWebSocketController {
         gameRoomWebSocketService.submitPersonal(requestDto);
     }
 
-    //(PUB)최종 제출 답안 선택 - (SUB)채점 및 세팅 + 게임 종료 조건 체크
+    //(PUB)수비팀 리더 제출 답안 선택(중간/최종) - (SUB)수비팀 팀원에게 변경 알림 or 채점 및 세팅 + 게임 종료 조건 체크
     @MessageMapping("/game/team-submit")
-    public void submitTeam(RequestSubmitTeamDto requestDto) {
+    public void submitTeam(RequestSelectAnswerDto requestDto) {
 
-        log.info("WebSocket controller - team submit request received");
-        try {
-            ResponseSubmitTeamDto responseDto = gameRoomWebSocketService.submitTeam(requestDto);
-            messagingTemplate.convertAndSend(
-                    "/topic/game/" + requestDto.getRoomId() + "/grading",
-                    responseDto
-            );
-            gameRoomWebSocketService.isGameover(requestDto.getRoomId());
-        } catch (Exception e) {
-            log.error("Error in submitTeam controller: ", e);
-            throw e;
-        }
+        SelectAnswerResult<?> result = requestDto.getResponseStatus().equals(ResponseStatus.DEF_QUIZ_SELECT)
+                ? gameRoomWebSocketService.selectAnswer(requestDto)
+                : gameRoomWebSocketService.submitTeam(requestDto);
+
+        String destination = "/topic/game/" + requestDto.getRoomId();
+        String optionalPath = requestDto.getResponseStatus().equals(ResponseStatus.DEF_QUIZ_SELECT)
+                ? "/select/option" : "/grading";
+
+        messagingTemplate.convertAndSend(destination + optionalPath, result.responseDto());
+        gameRoomWebSocketService.isGameover(requestDto.getRoomId());
     }
 }
