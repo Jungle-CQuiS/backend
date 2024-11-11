@@ -500,6 +500,7 @@ public class GameRoomServiceImpl implements GameRoomService {
 
     private static ResponseSubmitTimeoutDto<UserAnswer> createShortAnswerResponse(List<UserAnswer> userAnswers) {
         ResponseSubmitTimeoutDto<UserAnswer> responseDto = ResponseSubmitTimeoutDto.<UserAnswer>builder()
+                .quizType(QuizType.SHORT)
                 .answerList(userAnswers)
                 .build();
         log.info("제출된 답안 리스트(주관식): {}", responseDto);
@@ -537,6 +538,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         }
 
         ResponseSubmitTimeoutDto<UserChoiceAnswerCollection> responseDto = ResponseSubmitTimeoutDto.<UserChoiceAnswerCollection>builder()
+                .quizType(QuizType.CHOICE)
                 .answerList(answerList)
                 .build();
 
