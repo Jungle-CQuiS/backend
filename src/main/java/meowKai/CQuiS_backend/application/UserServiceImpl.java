@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import meowKai.CQuiS_backend.domain.*;
 import meowKai.CQuiS_backend.dto.GetChoiceAnsQuizDto;
 import meowKai.CQuiS_backend.dto.GetShortAnsQuizDto;
+import meowKai.CQuiS_backend.dto.GetWrongChoiceAnsQuizDto;
+import meowKai.CQuiS_backend.dto.GetWrongShortAnsQuizDto;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
 import meowKai.CQuiS_backend.infrastructure.*;
@@ -208,10 +210,10 @@ public class UserServiceImpl implements UserService {
                             QuizType foundQuizType = foundQuiz.getType();
                             switch (foundQuizType) {
                                 case SHORT -> {
-                                    return GetShortAnsQuizDto.createDto(foundQuiz);
+                                    return GetWrongShortAnsQuizDto.createDto(foundQuiz);
                                 }
                                 case CHOICE -> {
-                                    return GetChoiceAnsQuizDto.createDto(foundQuiz);
+                                    return GetWrongChoiceAnsQuizDto.createDto(foundQuiz);
                                 }
                                 default -> throw new IllegalArgumentException("해당 퀴즈 타입이 존재하지 않습니다: " + foundQuizType);
                             }
