@@ -208,12 +208,10 @@ public class UserServiceImpl implements UserService {
                             QuizType foundQuizType = foundQuiz.getType();
                             switch (foundQuizType) {
                                 case SHORT -> {
-                                    ShortAnsQuiz foundShortAnsQuiz = foundQuiz.getShortAnsQuiz();
-                                    return GetShortAnsQuizDto.createDto(foundShortAnsQuiz);
+                                    return GetShortAnsQuizDto.createDto(foundQuiz);
                                 }
                                 case CHOICE -> {
-                                    ChoiceAnsQuiz foundChoiceAnsQuiz = foundQuiz.getChoiceAnsQuiz();
-                                    return GetChoiceAnsQuizDto.createDto(foundChoiceAnsQuiz);
+                                    return GetChoiceAnsQuizDto.createDto(foundQuiz);
                                 }
                                 default -> throw new IllegalArgumentException("해당 퀴즈 타입이 존재하지 않습니다: " + foundQuizType);
                             }

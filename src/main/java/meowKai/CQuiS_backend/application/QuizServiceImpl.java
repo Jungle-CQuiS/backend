@@ -185,7 +185,7 @@ public class QuizServiceImpl implements QuizService {
             // 카테고리에 해당하는 문제 갯수보다 요청한 문제의 수가 더 많으면 카테고리의 모든 문제를 가져옴
             if (count >= quizzesFitConditions.size()) {
                 quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
-                        GetShortAnsQuizDto.createDto(quiz.getShortAnsQuiz())));
+                        GetShortAnsQuizDto.createDto(quiz)));
             } else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
                 Collections.shuffle(quizzesFitConditions);
@@ -196,7 +196,7 @@ public class QuizServiceImpl implements QuizService {
 
                 for (Quiz quiz : randomQuizzes) {
                     responseDto.getQuizList().add(
-                            GetShortAnsQuizDto.createDto(quiz.getShortAnsQuiz()));
+                            GetShortAnsQuizDto.createDto(quiz));
                 }
             }
         });
@@ -263,7 +263,7 @@ public class QuizServiceImpl implements QuizService {
             if (count >= quizzesFitConditions.size()) {
 
                 quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
-                        GetChoiceAnsQuizDto.createDto(quiz.getChoiceAnsQuiz())));
+                        GetChoiceAnsQuizDto.createDto(quiz)));
             } else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
                 Collections.shuffle(quizzesFitConditions);
@@ -274,7 +274,7 @@ public class QuizServiceImpl implements QuizService {
 
                 for (Quiz quiz : randomQuizzes) {
                     responseDto.getQuizList().add(
-                            GetChoiceAnsQuizDto.createDto(quiz.getChoiceAnsQuiz()));
+                            GetChoiceAnsQuizDto.createDto(quiz));
                 }
             }
         });
@@ -335,8 +335,8 @@ public class QuizServiceImpl implements QuizService {
             if (count >= quizzesFitConditions.size()) {
                 quizzesFitConditions.forEach(quiz -> responseDto.getQuizList().add(
                         quiz.getType() == QuizType.CHOICE
-                                ? GetRandomChoiceQuizDto.createDto(quiz.getChoiceAnsQuiz())
-                                : GetRandomShortQuizDto.createDto(quiz.getShortAnsQuiz())
+                                ? GetRandomChoiceQuizDto.createDto(quiz)
+                                : GetRandomShortQuizDto.createDto(quiz)
                 ));
             } else {
                 // 문제를 랜덤하게 섞어서 count만큼 가져옴
@@ -349,8 +349,8 @@ public class QuizServiceImpl implements QuizService {
                 for (Quiz quiz : randomQuizzes) {
                     responseDto.getQuizList().add(
                             quiz.getType() == QuizType.CHOICE
-                                    ? GetRandomChoiceQuizDto.createDto(quiz.getChoiceAnsQuiz())
-                                    : GetRandomShortQuizDto.createDto(quiz.getShortAnsQuiz())
+                                    ? GetRandomChoiceQuizDto.createDto(quiz)
+                                    : GetRandomShortQuizDto.createDto(quiz)
                     );
                 }
             }
@@ -416,9 +416,9 @@ public class QuizServiceImpl implements QuizService {
             for (Quiz randomQuiz : randomQuizzes) {
 
                 if (randomQuiz.getType() == QuizType.CHOICE) {
-                    quizzes.add(GetChoiceAnsQuizDto.createDto(randomQuiz.getChoiceAnsQuiz()));
+                    quizzes.add(GetChoiceAnsQuizDto.createDto(randomQuiz));
                 } else {
-                    quizzes.add(GetShortAnsQuizDto.createDto(randomQuiz.getShortAnsQuiz()));
+                    quizzes.add(GetShortAnsQuizDto.createDto(randomQuiz));
                 }
             }
         }
@@ -465,8 +465,8 @@ public class QuizServiceImpl implements QuizService {
 
         foundUser.getCreatedQuizzes().forEach(quiz -> responseDto.getQuizList().add(
                 quiz.getType() == QuizType.CHOICE
-                        ? GetRandomChoiceQuizDto.createDto(quiz.getChoiceAnsQuiz())
-                        : GetRandomShortQuizDto.createDto(quiz.getShortAnsQuiz())));
+                        ? GetRandomChoiceQuizDto.createDto(quiz)
+                        : GetRandomShortQuizDto.createDto(quiz)));
 
         log.info("내가 만든 문제 반환 결과 : {}", responseDto);
         return responseDto;

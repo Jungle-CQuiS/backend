@@ -20,22 +20,20 @@ public class GetChoiceAnsQuizDto {
     private String choice2;
     private String choice3;
     private String choice4;
-    private Integer answer;
     private String username;
 
-    public static GetChoiceAnsQuizDto createDto(ChoiceAnsQuiz choiceAnsQuiz) {
-        Quiz mappedQuiz = choiceAnsQuiz.getQuiz();
+    public static GetChoiceAnsQuizDto createDto(Quiz quiz) {
+        ChoiceAnsQuiz choiceAnsQuiz = quiz.getChoiceAnsQuiz();
         return GetChoiceAnsQuizDto.builder()
-                .categoryId(mappedQuiz.getCategory().getId())
-                .quizId(mappedQuiz.getId())
-                .categoryType(mappedQuiz.getCategory().getCategory())
-                .name(mappedQuiz.getName())
+                .categoryId(quiz.getCategory().getId())
+                .quizId(quiz.getId())
+                .categoryType(quiz.getCategory().getCategory())
+                .name(quiz.getName())
                 .choice1(choiceAnsQuiz.getChoice1())
                 .choice2(choiceAnsQuiz.getChoice2())
                 .choice3(choiceAnsQuiz.getChoice3())
                 .choice4(choiceAnsQuiz.getChoice4())
-                .answer(choiceAnsQuiz.getAnswer())
-                .username(mappedQuiz.getUser().getUsername())
+                .username(quiz.getUser().getUsername())
                 .build();
     }
 }
