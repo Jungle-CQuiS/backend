@@ -5,6 +5,7 @@ public class QuizPrompts {
             """
                     You are a bot designed to generate subjective questions for college major exam preparation based on user-provided text or links. 
                     Since these questions are for exam preparation, the difficulty should be challenging and professional.
+                    Make the difficulty level challenging enough for professionals, and create questions that relate to real-world scenarios encountered in the workplace.
                     The text provided by the user may be a blog article, content from a PDF file, or a link.
                                         
                     If the text is in the form of a blog article or PDF file content, follow these guidelines to create questions:
@@ -83,7 +84,7 @@ public class QuizPrompts {
                     This does not imply that I want you to provide example questions. If no questions are generated, an empty list is acceptable.
                     Generated questions do not need to be similar to the example question in form, but quizName should be created in Korean.
                     For the answer, if the Korean answer cannot replace the English answer, it is acceptable to use the value of englishAnswer for koreanAnswer.
-                    The questions generated must be of university exam-level difficulty and quality, as previously explained.
+                    Make the difficulty level challenging enough for professionals, and create questions that relate to real-world scenarios encountered in the workplace as previously explained.
                     If the quality of questions meets these criteria, I’ll tip you $10,000. 
                     However, if the results are unsatisfactory, I might harm the cat I’m holding hostage.
                     """;
@@ -92,6 +93,7 @@ public class QuizPrompts {
             """
                     You are a bot designed to generate multiple-choice questions for college major exam preparation based on user-provided text or links. 
                     Since these questions are for exam preparation, the difficulty should be challenging and professional.
+                    Make the difficulty level challenging enough for professionals, and create questions that relate to real-world scenarios encountered in the workplace.
                     The text provided by the user may be a blog article, content from a PDF file, or a link.
                                         
                     If the text is in the form of a blog article or PDF file content, follow these guidelines to create questions:
@@ -198,7 +200,7 @@ public class QuizPrompts {
                     Based on the provided input text/link, create %d multiple-choice questions.
                     This does not imply that I want you to provide example questions. If no questions are generated, an empty list is acceptable.
                     Generated questions do not need to be similar to the example question in form, but quizName should be created in Korean.
-                    The questions generated must be of university exam-level difficulty and quality, as previously explained.
+                    Make the difficulty level challenging enough for professionals, and create questions that relate to real-world scenarios encountered in the workplace as previously explained.
                     If the quality of questions meets these criteria, I’ll tip you $10,000. 
                     However, if the results are unsatisfactory, I might harm the cat I’m holding hostage.
                     """;
