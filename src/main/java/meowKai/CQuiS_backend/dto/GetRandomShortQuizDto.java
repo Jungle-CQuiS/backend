@@ -18,21 +18,17 @@ public class GetRandomShortQuizDto {
     private Long categoryId;
     private CategoryType categoryType;
     private String name;
-    private String shortKoreanAnswer;
-    private String shortEnglishAnswer;
     private String username;
 
-    public static GetRandomShortQuizDto createDto(ShortAnsQuiz shortAnsQuiz) {
-        Quiz mappedQuiz = shortAnsQuiz.getQuiz();
+    public static GetRandomShortQuizDto createDto(Quiz quiz) {
+        ShortAnsQuiz shortAnsQuiz = quiz.getShortAnsQuiz();
         return GetRandomShortQuizDto.builder()
-                .quizId(mappedQuiz.getId())
+                .quizId(quiz.getId())
                 .quizType(QuizType.SHORT)
-                .categoryId(mappedQuiz.getCategory().getId())
-                .categoryType(mappedQuiz.getCategory().getCategory())
+                .categoryId(quiz.getCategory().getId())
+                .categoryType(quiz.getCategory().getCategory())
                 .name(shortAnsQuiz.getQuiz().getName())
-                .shortKoreanAnswer(shortAnsQuiz.getKoreanAnswer())
-                .shortEnglishAnswer(shortAnsQuiz.getEnglishAnswer())
-                .username(mappedQuiz.getUser().getUsername())
+                .username(quiz.getUser().getUsername())
                 .build();
     }
 }

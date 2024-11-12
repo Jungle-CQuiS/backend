@@ -22,23 +22,21 @@ public class GetRandomChoiceQuizDto {
     private String choice2;
     private String choice3;
     private String choice4;
-    private Integer choiceAnswer;
     private String username;
 
-    public static GetRandomChoiceQuizDto createDto(ChoiceAnsQuiz choiceAnsQuiz) {
-        Quiz mappedQuiz = choiceAnsQuiz.getQuiz();
+    public static GetRandomChoiceQuizDto createDto(Quiz quiz) {
+        ChoiceAnsQuiz choiceAnsQuiz = quiz.getChoiceAnsQuiz();
         return GetRandomChoiceQuizDto.builder()
-                .quizId(mappedQuiz.getId())
+                .quizId(quiz.getId())
                 .quizType(QuizType.CHOICE)
-                .categoryId(mappedQuiz.getCategory().getId())
-                .categoryType(mappedQuiz.getCategory().getCategory())
-                .name(mappedQuiz.getName())
+                .categoryId(quiz.getCategory().getId())
+                .categoryType(quiz.getCategory().getCategory())
+                .name(quiz.getName())
                 .choice1(choiceAnsQuiz.getChoice1())
                 .choice2(choiceAnsQuiz.getChoice2())
                 .choice3(choiceAnsQuiz.getChoice3())
                 .choice4(choiceAnsQuiz.getChoice4())
-                .choiceAnswer(choiceAnsQuiz.getAnswer())
-                .username(mappedQuiz.getUser().getUsername())
+                .username(quiz.getUser().getUsername())
                 .build();
     }
 }

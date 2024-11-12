@@ -16,20 +16,15 @@ public class GetShortAnsQuizDto {
     private Long quizId;
     private CategoryType categoryType;
     private String name;
-    private String englishAnswer;
-    private String koreanAnswer;
     private String username;
 
-    public static GetShortAnsQuizDto createDto(ShortAnsQuiz shortAnsQuiz) {
-        Quiz mappedQuiz = shortAnsQuiz.getQuiz();
+    public static GetShortAnsQuizDto createDto(Quiz quiz) {
         return GetShortAnsQuizDto.builder()
-                .categoryId(mappedQuiz.getCategory().getId())
-                .quizId(mappedQuiz.getId())
-                .categoryType(mappedQuiz.getCategory().getCategory())
-                .name(mappedQuiz.getName())
-                .englishAnswer(shortAnsQuiz.getEnglishAnswer())
-                .koreanAnswer(shortAnsQuiz.getKoreanAnswer())
-                .username(mappedQuiz.getUser().getUsername())
+                .categoryId(quiz.getCategory().getId())
+                .quizId(quiz.getId())
+                .categoryType(quiz.getCategory().getCategory())
+                .name(quiz.getName())
+                .username(quiz.getUser().getUsername())
                 .build();
     }
 }
