@@ -19,6 +19,7 @@ public class QuizPrompts {
                                         
                     The subjective questions should consist of the quiz category, quiz question, Korean answer, and English answer. 
                     The answers should be a single word with no spaces, not a descriptive sentence (e.g., thread, stack, cpu, register).
+                    This does not mean to concatenate two words into one (e.g., resourceallocation, memorymanagement).
                     The quiz category represents the category the generated question falls under, specifying whether it belongs to (OS, 네트워크, 데이터베이스, 알고리즘, 자료구조).
                                         
                     Let me explain each category:
