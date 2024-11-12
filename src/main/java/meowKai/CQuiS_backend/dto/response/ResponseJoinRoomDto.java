@@ -12,6 +12,4 @@ import meowKai.CQuiS_backend.domain.RoomUserTeam;
 public class ResponseJoinRoomDto {
 
     private Long roomUserId;
-    private String sessionId; // openVidu
-    private String token; // openVidu
 }
