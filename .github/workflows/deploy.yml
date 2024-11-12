@@ -44,7 +44,7 @@ jobs:
       - name: 빌드된 파일 이름 변경하기
         run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
 
-      - name: SCP로 메인서버 EC2에 빌드된 파일 전송하기
+      - name: SCP로 메인 서버 EC2에 빌드된 파일 전송하기
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }} # EC2 인스턴스의 호스트 IP
@@ -54,7 +54,7 @@ jobs:
           target: /home/ubuntu/backend/tobe
 
       # connect to ec2 instance
-      - name: SSH로 메인서버 EC2에 접속하기
+      - name: SSH로 메인 서버 EC2에 접속하기
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -69,7 +69,7 @@ jobs:
             nohup java -jar project.jar > ./output.log 2>&1 &
             rm -rf /home/ubuntu/backend/tobe
 
-      - name: SCP로 테스트서버 EC2에 빌드된 파일 전송하기
+      - name: SCP로 테스트 서버 EC2에 빌드된 파일 전송하기
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST_TEST }}
@@ -79,7 +79,7 @@ jobs:
           target: /home/ubuntu/backend/tobe
 
       # connect to ec2 instance
-      - name: SSH로 테스트서버 EC2에 접속하기
+      - name: SSH로 테스트 서버 EC2에 접속하기
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST_TEST }}
