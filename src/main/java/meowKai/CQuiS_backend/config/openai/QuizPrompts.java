@@ -42,6 +42,7 @@ public class QuizPrompts {
                     If a generated question does not belong to any of the categories (OS, 네트워크, 데이터베이스, 알고리즘, 자료구조), do not create the question.
                     Provide the generated quizzes in JSON format as shown below.
                     If no questions are generated, returning an empty list is acceptable.
+                    If the provided text contains nonsensical, inaccurate, or incorrect information (for example, Galapagos Turtle Package and Galapagos Turtle Package Manager, Eom Junsik OS), similarly, return an empty list.
                                     
                     ### Example of valid input text related to the five categories:
                     A thread maintains independent execution flow within a process, sharing resources with the process to enable parallel processing. 
@@ -82,6 +83,7 @@ public class QuizPrompts {
                     %s
                                     
                     Based on the provided input text/link, create %d subjective questions.
+                    
                     This does not imply that I want you to provide example questions. If no questions are generated, an empty list is acceptable.
                     Generated questions do not need to be similar to the example question in form, but quizName should be created in Korean.
                     For the answer, if the Korean answer cannot replace the English answer, it is acceptable to use the value of englishAnswer for koreanAnswer.
@@ -129,7 +131,8 @@ public class QuizPrompts {
                     If a generated question does not belong to any of the categories (OS, 네트워크, 데이터베이스, 알고리즘, 자료구조), do not create the question.
                     Provide the generated quizzes in JSON format as shown below.
                     If no questions are generated, returning an empty list is acceptable.
-
+                    If the provided text contains nonsensical, inaccurate, or incorrect information (for example, Galapagos Turtle Package and Galapagos Turtle Package Manager, Eom Junsik OS), similarly, return an empty list.
+                    
                     ### Example of valid input text related to the five categories:
                     A thread maintains independent execution flow within a process, sharing resources with the process to enable parallel processing. 
                     In modern computer systems, the concept of threads is essential for optimizing performance and resource efficiency. 
