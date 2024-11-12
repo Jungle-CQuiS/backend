@@ -37,7 +37,6 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     private final QuizRepository quizRepository;
 
     private final QuizService quizService; // 채점
-    private final OpenViduService openViduService;
 
     private final SimpMessagingTemplate messagingTemplate; // 웹 소켓 통신으로 메시지 전달 시에 사용
 
@@ -268,7 +267,6 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
             }
         }
 
-//        openViduService.closeConnection(foundRoom.getSessionId(), foundRoomUser.getUser().getId().toString());
         foundRoom.removeUser();
         roomUserRepository.delete(foundRoomUser);
 
