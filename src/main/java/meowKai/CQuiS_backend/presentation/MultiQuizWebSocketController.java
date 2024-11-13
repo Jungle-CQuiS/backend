@@ -139,4 +139,14 @@ public class MultiQuizWebSocketController {
         messagingTemplate.convertAndSend(destination + optionalPath, result.responseDto());
         gameRoomWebSocketService.isGameover(requestDto.getRoomId());
     }
+
+    //(PUB)이모티콘 입력 - (SUB)팀원들에게 전달
+    @MessageMapping("/game/emoji")
+    public void transferEmoji(RequestTransferEmojiDto requestDto) {
+        ResponseTransferEmojiDto responseDto = gameRoomWebSocketService.transferEmoji(requestDto);
+        messagingTemplate.convertAndSend(
+                "/topic/game/" + requestDto.getRoomId() + "/" + requestDto.getTeamColor().toString().toLowerCase(),
+                responseDto
+        );
+    }
 }

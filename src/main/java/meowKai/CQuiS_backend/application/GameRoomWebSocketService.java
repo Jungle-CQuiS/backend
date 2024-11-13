@@ -20,4 +20,5 @@ public interface GameRoomWebSocketService {
     SelectAnswerResult<ResponseSelectAnswerDto> selectAnswer(RequestSelectAnswerDto requestDto); // 수비 팀 리더가 답안 선택을 바꿀 때 마다 알림을 전달
     SelectAnswerResult<ResponseSubmitTeamDto> submitTeam(RequestSelectAnswerDto requestDto); // 수비 팀 리더가 최종 답안을 제출, 채점 및 다음 문제를 위한 세팅, hp 변경 알림, 게임 종료 알림 수행
     Boolean isGameover(Long roomId); // 게임 종료 조건을 체크
+    ResponseTransferEmojiDto transferEmoji(RequestTransferEmojiDto requestTransferEmojiDto); // 클릭한 이모티콘을 팀원들에게 전달
 }
