@@ -13,6 +13,6 @@ public class RequestTransferEmojiDto {
 
     private RoomUserTeam teamColor;
     private EmojiType emojiType;
-    private Long RoomUserId;
-    private Long RoomId;
+    private Long roomUserId;
+    private Long roomId;
 }
