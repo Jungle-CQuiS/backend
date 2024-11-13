@@ -37,7 +37,6 @@ jobs:
           echo "${{ secrets.APPLICATION_LOCAL_PROPERTIES }}" > ./src/main/resources/application-local.yml
           echo "${{ secrets.APPLICATION_PROD_PROPERTIES }}" > ./src/main/resources/application-prod.yml
           echo "${{ secrets.APPLICATION_JWT_PROPERTIES }}" > ./src/main/resources/application-jwt.yml
-          echo "${{ secrets.APPLICATION_OPENVIDU_PROPERTIES }}" > ./src/main/resources/application-openvidu.yml
 
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
@@ -45,21 +44,46 @@ jobs:
       - name: 빌드된 파일 이름 변경하기
         run: mv ./build/libs/*SNAPSHOT.jar ./project.jar
 
-      - name: SCP로 EC2에 빌드된 파일 전송하기
+      - name: SCP로 메인 서버 EC2에 빌드된 파일 전송하기
         uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }} # EC2 인스턴스의 호스트 IP
+          username: ${{ secrets.EC2_USERNAME }} # Ubuntu 사용자 이름
+          key: ${{ secrets.EC2_PRIVATE_KEY }} # EC2 인스턴스 pem 키
+          source: project.jar
+          target: /home/ubuntu/backend/tobe
+
+      # connect to ec2 instance
+      - name: SSH로 메인 서버 EC2에 접속하기
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            rm -rf /home/ubuntu/backend/current
+            mkdir /home/ubuntu/backend/current
+            cp /home/ubuntu/backend/tobe/project.jar /home/ubuntu/backend/current/project.jar
+            cd /home/ubuntu/backend/current
+            sudo fuser -k -n tcp 8080 || true
+            nohup java -jar project.jar > ./output.log 2>&1 &
+            rm -rf /home/ubuntu/backend/tobe
+
+      - name: SCP로 테스트 서버 EC2에 빌드된 파일 전송하기
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST_TEST }}
+          username: ${{ secrets.EC2_USERNAME_TEST }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: project.jar
           target: /home/ubuntu/backend/tobe
 
       # connect to ec2 instance
-      - name: SSH로 EC2에 접속하기
+      - name: SSH로 테스트 서버 EC2에 접속하기
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
+          host: ${{ secrets.EC2_HOST_TEST }}
+          username: ${{ secrets.EC2_USERNAME_TEST }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
             rm -rf /home/ubuntu/backend/current
