@@ -582,7 +582,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         ResponseTransferEmojiDto responseDto = ResponseTransferEmojiDto.builder()
                 .responseStatus(ResponseStatus.EMOJI_SELECT)
                 .emojiType(requestDto.getEmojiType())
-                .RoomUserId(requestDto.getRoomUserId())
+                .roomUserId(requestDto.getRoomUserId())
                 .build();
 
         log.info("ws - 이모티콘 전달 결과: {}", responseDto);
