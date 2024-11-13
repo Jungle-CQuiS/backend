@@ -13,5 +13,5 @@ public class ResponseTransferEmojiDto {
 
     private ResponseStatus responseStatus;
     private EmojiType emojiType;
-    private Long RoomUserId;
+    private Long roomUserId;
 }
