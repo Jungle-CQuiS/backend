@@ -576,6 +576,20 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         return (isDefenseTeamDead || isMaxQuizReached);
     }
 
+    // 클릭한 이모티콘을 팀원들에게 전달
+    @Override
+    public ResponseTransferEmojiDto transferEmoji(RequestTransferEmojiDto requestDto) {
+        log.info("ws - 이모티콘 전달 요청: {}", requestDto);
+
+        ResponseTransferEmojiDto responseDto = ResponseTransferEmojiDto.builder()
+                .emojiType(requestDto.getEmojiType())
+                .RoomUserId(requestDto.getRoomUserId())
+                .build();
+
+        log.info("ws - 이모티콘 전달 결과: {}", responseDto);
+        return responseDto;
+    }
+
     /**
      * GameRoom을 인자로 넘겨주면 해당 방에 있는
      * 각 유저의 정보를 바탕으로 MultiRoomUserDto를 생성한 뒤
