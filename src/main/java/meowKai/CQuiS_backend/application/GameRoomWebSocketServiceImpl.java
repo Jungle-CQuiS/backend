@@ -723,6 +723,6 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     }
     public void initializeUserBucket(Long roomId, Long roomUserId) {
         roomBuckets.get(roomId).computeIfAbsent(roomUserId,
-                k -> new Bucket(10, 2));
+                k -> new Bucket(20, 4));
     }
 }
