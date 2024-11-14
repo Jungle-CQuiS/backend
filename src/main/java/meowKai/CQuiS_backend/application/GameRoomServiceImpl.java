@@ -98,6 +98,8 @@ public class GameRoomServiceImpl implements GameRoomService {
 
         gameRoomRepository.save(createdRoom);
 
+        gameRoomWebSocketService.initializeRoomBucket(createdRoom.getId());
+
         ResponseCreateMultiRoomDto responseDto = ResponseCreateMultiRoomDto.builder()
                 .roomId(createdRoom.getId())
                 .build();
@@ -414,6 +416,8 @@ public class GameRoomServiceImpl implements GameRoomService {
                 () -> new NoSuchElementException("멀티 게임 시작 - 존재하지 않는 방입니다.")); // fetch 조인 사용하여 GameRoom을 조회할 때 Team도 함께 가져옴
 
         Team firstOffenseTeam = null;
+
+        gameRoomWebSocketService.initializeUserBucket(foundRoom.getId(), requestDto.getRoomUserId()); //
 
         try {
             gameStartLock.lock(); // 락을 획득할 때까지 대기

@@ -11,6 +11,7 @@ import meowKai.CQuiS_backend.dto.SelectQuizResult;
 import meowKai.CQuiS_backend.dto.UserAnswer;
 import meowKai.CQuiS_backend.dto.request.*;
 import meowKai.CQuiS_backend.dto.response.*;
+import meowKai.CQuiS_backend.exception.RateLimitExceededException;
 import meowKai.CQuiS_backend.infrastructure.GameRoomRepository;
 import meowKai.CQuiS_backend.infrastructure.QuizRepository;
 import meowKai.CQuiS_backend.infrastructure.RoomUserRepository;
@@ -41,6 +42,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     private final SimpMessagingTemplate messagingTemplate; // 웹 소켓 통신으로 메시지 전달 시에 사용
 
     private final Map<Long, List<UserAnswer>> roomAnswers = new ConcurrentHashMap<>(); // 방 단위로 유저가 보내는 답안을 관리, roomId를 key로 사용
+    private final Map<Long, ConcurrentHashMap<Long, Bucket>> roomBuckets = new ConcurrentHashMap<>(); // 방, 유저 단위로 유저가 보내는 요청을 제한하기 위한 Bucket을 관리
 
     @Override
     @Transactional
@@ -272,6 +274,7 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
         if(shouldDeleteRoom) {
             gameRoomRepository.delete(foundRoom);
+            roomBuckets.remove(foundRoom.getId()); // 방이 삭제되면 bucket을 관리하지 않음
             log.info("ws - 퇴장 - 방 삭제: {}", foundRoom.getId());
         } else {
             gameRoomRepository.save(foundRoom);
@@ -582,6 +585,12 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
     public ResponseTransferEmojiDto transferEmoji(RequestTransferEmojiDto requestDto) {
         log.info("ws - 이모티콘 전달 요청: {}", requestDto);
 
+        Bucket foundBucket = roomBuckets.get(requestDto.getRoomId()).get(requestDto.getRoomUserId());
+        if(!foundBucket.tryConsume()) {
+            log.info("ws - 이모티콘 전달 - Too many requests");
+            throw new RateLimitExceededException("Too many requests"); // bucket에 token이 없을 때 요청이 들어오면 에러를 반환
+        }
+
         ResponseTransferEmojiDto responseDto = ResponseTransferEmojiDto.builder()
                 .responseStatus(ResponseStatus.EMOJI_SELECT)
                 .emojiType(requestDto.getEmojiType())
@@ -708,5 +717,12 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
 
     public List<UserAnswer> getRoomAnswers(Long roomId) {
         return roomAnswers.getOrDefault(roomId, new ArrayList<>());
+    } // TODO: map을 외부로 직접 반환하지 않도록 수정해보기
+    public void initializeRoomBucket(Long roomId) {
+        roomBuckets.put(roomId, new ConcurrentHashMap<>());
+    }
+    public void initializeUserBucket(Long roomId, Long roomUserId) {
+        roomBuckets.get(roomId).computeIfAbsent(roomUserId,
+                k -> new Bucket(10, 2));
     }
 }
