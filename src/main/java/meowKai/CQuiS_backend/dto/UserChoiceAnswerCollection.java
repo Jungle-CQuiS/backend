@@ -13,4 +13,5 @@ public class UserChoiceAnswerCollection {
     private Integer choice;
     private List<String> reasonList;
     private List<Integer> indexList;
+    private List<String> usernameList;
 }

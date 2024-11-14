@@ -10,6 +10,7 @@ import lombok.*;
 public class UserAnswer {
 
     private Long roomUserId;
+    private String username;
     private String answer;
     private String reason;
 }
