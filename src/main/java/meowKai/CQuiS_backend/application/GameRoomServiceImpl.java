@@ -489,7 +489,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         }
     }
 
-    private static ResponseSubmitTimeoutDto<UserAnswer> createShortAnswerResponse(List<UserAnswer> userAnswers) {
+    private ResponseSubmitTimeoutDto<UserAnswer> createShortAnswerResponse(List<UserAnswer> userAnswers) {
         ResponseSubmitTimeoutDto<UserAnswer> responseDto = ResponseSubmitTimeoutDto.<UserAnswer>builder()
                 .quizType(QuizType.SHORT)
                 .answerList(userAnswers)
@@ -498,7 +498,7 @@ public class GameRoomServiceImpl implements GameRoomService {
         return responseDto;
     }
 
-    private static ResponseSubmitTimeoutDto<UserChoiceAnswerCollection> createChoiceAnswerResponse(List<UserAnswer> userAnswers) {
+    private ResponseSubmitTimeoutDto<UserChoiceAnswerCollection> createChoiceAnswerResponse(List<UserAnswer> userAnswers) {
         // 제출된 번호들로 구성된 리스트 생성
         List<Integer> distinctChoices = userAnswers.stream()
                 .map(answer -> Integer.parseInt(answer.getAnswer()))
@@ -517,6 +517,10 @@ public class GameRoomServiceImpl implements GameRoomService {
         // answerList에 이유와 인덱스 삽입
         for (int i = 0; i < userAnswers.size(); i++) {
             UserAnswer answer = userAnswers.get(i);
+
+            RoomUser foundRoomUser = roomUserRepository.findByIdWithUser(answer.getRoomUserId()).orElseThrow(
+                    () -> new NoSuchElementException("객관식 답안 리스트 생성 - 유저의 방 입장 정보가 없습니다."));
+
             int choice = Integer.parseInt(answer.getAnswer());
 
             UserChoiceAnswerCollection collection = answerList.stream()
@@ -526,6 +530,7 @@ public class GameRoomServiceImpl implements GameRoomService {
 
             collection.getReasonList().add(answer.getReason());
             collection.getIndexList().add(i);
+            collection.getUsernameList().add(foundRoomUser.getUser().getUsername());
         }
 
         ResponseSubmitTimeoutDto<UserChoiceAnswerCollection> responseDto = ResponseSubmitTimeoutDto.<UserChoiceAnswerCollection>builder()

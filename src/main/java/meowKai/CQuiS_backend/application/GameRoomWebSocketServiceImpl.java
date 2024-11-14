@@ -429,9 +429,12 @@ public class GameRoomWebSocketServiceImpl implements GameRoomWebSocketService{
         GameRoom foundRoom = gameRoomRepository.findById(requestDto.getRoomId()).orElseThrow(
                 () -> new NoSuchElementException("ws - 수비팀 답안 제출 - 존재하지 않는 방입니다."));
 
+        RoomUser foundRoomUser = roomUserRepository.findByIdWithUser(requestDto.getRoomUserId()).orElseThrow(
+                () -> new NoSuchElementException("ws - 수비팀 답안 제출 - 유저의 방 입장 정보가 없습니다."));
+
         roomAnswers.computeIfAbsent(foundRoom.getId(),
                 k -> Collections.synchronizedList(new ArrayList<>()))   // roomAnswers에 roomId가 없는 경우 동기화된 리스트를 새로 만듦
-                .add(new UserAnswer(requestDto.getRoomUserId(), requestDto.getAnswer(), requestDto.getReason()));
+                .add(new UserAnswer(requestDto.getRoomUserId(), foundRoomUser.getUser().getUsername(), requestDto.getAnswer(), requestDto.getReason()));
 
         log.info("ws - 수비팀 답안 제출 - 답안 리스트: {}", roomAnswers.get(foundRoom.getId()));
         log.info("ws - 수비팀 답안 제출 - 제출된 답안의 수: {}, 수비팀 유저 수: {}", roomAnswers.get(foundRoom.getId()).size(), foundRoom.getDefenseTeamUserCount());
