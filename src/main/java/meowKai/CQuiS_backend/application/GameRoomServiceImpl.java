@@ -511,6 +511,7 @@ public class GameRoomServiceImpl implements GameRoomService {
                 .map(choice -> UserChoiceAnswerCollection.builder()
                         .choice(choice)
                         .reasonList(new ArrayList<>())
+                        .usernameList(new ArrayList<>())
                         .indexList(new ArrayList<>()).build())
                 .toList();
 
