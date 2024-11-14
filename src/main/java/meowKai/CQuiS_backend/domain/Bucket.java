@@ -34,10 +34,11 @@ public class Bucket {
         return newValue < previousValue;
     }
 
-    // token을 사용하려 시도하면 lazy하게 token을 update함
     private void refillTokens() {
-        long secondsDiff = Duration.between(this.lastUsedTime, LocalDateTime.now()).getSeconds();
-        Integer tokensToAdd = (int) (secondsDiff * tokensPerSeconds);
+        long milliSecondsDiff = Duration.between(this.lastUsedTime, LocalDateTime.now()).toMillis();
+        double secondsDiff = milliSecondsDiff / 1000.0;
+
+        int tokensToAdd = (int) (secondsDiff * tokensPerSeconds);
 
         tokens.updateAndGet(current
                 -> Math.min(current + tokensToAdd, maxTokens));
