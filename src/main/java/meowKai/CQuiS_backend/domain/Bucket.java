@@ -28,9 +28,10 @@ public class Bucket {
     // token 사용 시도
     public boolean tryConsume() {
         refillTokens();
-        return tokens.updateAndGet(current
-                -> current > 0 ? current - 1 : current
-        ) != tokens.get();
+        int previousValue = tokens.get();
+        int newValue = tokens.updateAndGet(current
+                -> current > 0 ? current - 1 : current);
+        return newValue < previousValue;
     }
 
     // token을 사용하려 시도하면 lazy하게 token을 update함
