@@ -11,5 +11,6 @@ import meowKai.CQuiS_backend.domain.GameStatus;
 public class RequestGameStartDto {
 
     private Long roomId;
+    private Long roomUserId;
     private GameStatus gameStatus;
 }
