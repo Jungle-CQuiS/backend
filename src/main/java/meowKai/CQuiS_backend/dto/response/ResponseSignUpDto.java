@@ -1,5 +1,6 @@
 package meowKai.CQuiS_backend.dto.response;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import meowKai.CQuiS_backend.domain.User;
 
@@ -12,8 +13,11 @@ import java.util.UUID;
 @Getter
 public class ResponseSignUpDto {
 
+    @NotNull
     private String email;
+    @NotNull
     private String username;
+    @NotNull
     private UUID uuid;
 
     public static ResponseSignUpDto createDto(User user) {

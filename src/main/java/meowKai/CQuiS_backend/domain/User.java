@@ -1,6 +1,7 @@
 package meowKai.CQuiS_backend.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import meowKai.CQuiS_backend.global.base.BaseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,10 +58,12 @@ public class User extends BaseEntity {
 
     // 유저의 email
     @Column
+    @NotNull
     private String email;
 
     // 유저의 닉네임(username)
     @Column
+    @NotNull
     private String username;
 
     // 유저의 마지막 접속시간
@@ -69,12 +72,15 @@ public class User extends BaseEntity {
 
     // 유저의 비밀번호
     @Column
+    @NotNull
     private String password;
 
     // 유저의 uuid
     @Column
+    @NotNull
     private UUID uuid;
 
+    // 유저의 refersh token
     @Column(length = 1000)
     private String refreshToken;
 

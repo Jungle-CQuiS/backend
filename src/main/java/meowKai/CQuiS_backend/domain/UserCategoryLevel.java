@@ -1,6 +1,7 @@
 package meowKai.CQuiS_backend.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import meowKai.CQuiS_backend.global.base.BaseEntity;
 
@@ -31,10 +32,12 @@ public class UserCategoryLevel extends BaseEntity {
 
     // 레벨
     @Column
+    @NotNull
     private Integer level;
 
     // 맞춘 문제 수
     @Column
+    @NotNull
     private Integer correctCount;
 
     /**
@@ -50,14 +53,17 @@ public class UserCategoryLevel extends BaseEntity {
                 .build();
     }
 
-    public void updateLevel(int level) {
-        this.level = level;
+    // 유저의 레벨 업데이트
+    public void updateLevel(int levelToAdd) {
+        this.level += levelToAdd;
     }
 
     // 맞춘 문제 수 업데이트(업데이트 하면서 레벨도 같이 업데이트)
-    public void updateCorrectCount(int correctCount) {
-        this.correctCount += correctCount;
-        updateLevel(correctCount % 20);
+    public void updateCorrectCount(int correctCountToAdd) {
+        int previousCorrect = this.correctCount;
+        this.correctCount += correctCountToAdd;
+        int levelToAdd = ((previousCorrect % 20) + correctCountToAdd) / 20;
+        updateLevel(levelToAdd);
     }
 
 

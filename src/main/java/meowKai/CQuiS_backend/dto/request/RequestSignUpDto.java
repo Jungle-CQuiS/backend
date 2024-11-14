@@ -1,5 +1,6 @@
 package meowKai.CQuiS_backend.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Builder
@@ -9,8 +10,10 @@ import lombok.*;
 @ToString
 public class RequestSignUpDto {
 
-    // TODO: NOT NULL 추가해주기.
+    @NotNull
     private String email;
+    @NotNull
     private String username;
+    @NotNull
     private String password;
 }

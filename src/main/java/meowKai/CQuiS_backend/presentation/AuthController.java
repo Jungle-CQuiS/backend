@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final AuthService authService;
-    private final UserRepository userRepository; // TODO: 테스트용 지우기!
 
     @Tag(name = "보안")
     @Operation(summary = "회원가입")
