@@ -63,14 +63,14 @@ public class QuizServiceImpl implements QuizService {
                 double[] weights = {0.2125, 0.0, 0.4375, 0.2125, 0.1375};
                 similarity = SimilarityCalculator.comprehensiveSimilarity(correctAnswer, userInput, weights);
             } else {
-                double[] weights = {0.125, 0.35, 0.35, 0.125, 0.05};
+                double[] weights = {0.25, 0.1, 0.35, 0.25, 0.05};
                 similarity = SimilarityCalculator.comprehensiveSimilarity(correctAnswer, userInput, weights);
             }
         }
 
         String answer = getAnswer(foundQuiz, isChoice);
 
-        ResponseGradeDto responseDto = similarity >= 0.9 ?
+        ResponseGradeDto responseDto = similarity >= 0.8 ?
                 ResponseGradeDto.builder()
                         .isCorrect(true)
                         .answer(answer)
