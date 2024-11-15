@@ -45,6 +45,9 @@ public class QuizServiceImpl implements QuizService {
 
         boolean isChoice = foundQuiz.getType().equals(QuizType.CHOICE); // 퀴즈가 객관식인지
         boolean isEnglish = userInput.matches("[a-zA-Z]+"); // 영어로만 이루어져 있는지
+        if(isEnglish) {
+            userInput = userInput.toLowerCase();
+        }
         boolean isTrans = KoreanAnalyzer.isTransliteration(userInput); // 음차 표기인지
 
         String correctAnswer = getCorrectAnswer(foundQuiz, isEnglish);
