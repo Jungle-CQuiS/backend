@@ -67,14 +67,22 @@ public class KoreanAnalyzer {
 
         // 3. 모음 조합 검사
         String fullDecomposed = decompose(word);
-        for (int i = 0; i < fullDecomposed.length() - 1; i++) {
-            for (String vowelComb : VOWEL_COMBINATIONS) {
-                if (i + vowelComb.length() <= fullDecomposed.length()) {    // 길이 체크
-                    String substr = fullDecomposed.substring(i, i + vowelComb.length());
-                    if (substr.equals(vowelComb)) {
-                        return true;
-                    }
-                }
+        StringBuilder vowelsOnly = new StringBuilder();
+
+        // 모음만 추출
+        for (int i = 0; i < fullDecomposed.length(); i++) {
+            char c = fullDecomposed.charAt(i);
+            if (JUNGSUNG.indexOf(c) != -1) {
+                vowelsOnly.append(c);
+            }
+        }
+
+        // 연속된 모음 조합 검사
+        String vowelStr = vowelsOnly.toString();
+        for (int i = 0; i < vowelStr.length() - 1; i++) {
+            String pair = vowelStr.substring(i, i + 2);
+            if (VOWEL_COMBINATIONS.contains(pair)) {
+                return true;
             }
         }
 
